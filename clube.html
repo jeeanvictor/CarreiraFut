@@ -1659,15 +1659,15 @@ Object.assign(PALETAS_CLUBES, {
         textoCard: "#111111"
     },
 
-    "Bahia": {
-        principal: "#005baa",
-        secundaria: "#ffffff",
-        escura: "#001f55",
-        fundo1: "#001f55",
-        fundo2: "#d71920",
-        card: "#ffffff",
-        textoCard: "#001f55"
-    },
+"Bahia": {
+    principal: "#0046ad",
+    secundaria: "#d71920",
+    escura: "#001a4d",
+    fundo1: "#001a4d",
+    fundo2: "#0046ad",
+    card: "#ffffff",
+    textoCard: "#001a4d"
+},
 
     "Chapecoense": {
         principal: "#007a3d",
@@ -3422,16 +3422,26 @@ function corrigirNomeLiga(nome) {
 function corrigirNomeClube(nome) {
     if (!nome) return "";
 
-    const mapa = {
-        "sao paulo": "São Paulo",
-        "são paulo": "São Paulo",
-        "atletico-mg": "Atlético-MG",
-        "atlético-mg": "Atlético-MG",
-        "athletico pr": "Athletico-PR",
-        "athletico-pr": "Athletico-PR",
-        "bragantino": "RB Bragantino",
-        "rb bragantino": "RB Bragantino"
-    };
+const mapa = {
+    "sao paulo": "São Paulo",
+    "são paulo": "São Paulo",
+
+    "bahia": "Bahia",
+    "ec bahia": "Bahia",
+    "e.c. bahia": "Bahia",
+    "esporte clube bahia": "Bahia",
+
+    "atletico-mg": "Atlético-MG",
+    "atlético-mg": "Atlético-MG",
+    "atletico mg": "Atlético-MG",
+    "atlético mg": "Atlético-MG",
+
+    "athletico pr": "Athletico-PR",
+    "athletico-pr": "Athletico-PR",
+
+    "bragantino": "RB Bragantino",
+    "rb bragantino": "RB Bragantino"
+};
 
     const chave = nome.trim().toLowerCase();
 
