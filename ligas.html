@@ -321,6 +321,19 @@ body {
     border: 3px solid rgba(8,41,20,0.18);
 }
 
+.escudo.com-imagem {
+    background: #ffffff;
+    text-shadow: none;
+    overflow: hidden;
+}
+
+.escudo img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    display: block;
+}
+    
 .nome-time {
     font-size: 12px;
     line-height: 1.12;
@@ -538,10 +551,6 @@ body {
 
             <div id="gridTimes" class="grid-times"></div>
 
-            <p class="aviso">
-                Observação: os escudos acima são provisórios. Depois podemos substituir cada sigla por uma imagem dentro da pasta
-                <strong>assets/times/</strong>. Os clubes marcados como <strong>Configurado</strong> já possuem elenco jogável.
-            </p>
 
         </section>
 
@@ -660,6 +669,59 @@ const TIMES_POR_LIGA = {
     ]
 };
 
+const ESCUDOS_TIMES = {
+    "Athletico-PR": "assets/times/atlparanaense.png",
+    "Atlético-MG": "assets/times/atlmineiro.png",
+    "Bahia": "assets/times/bahia.png",
+    "Botafogo": "assets/times/botafogo.png",
+    "Chapecoense": "assets/times/chapecoense.png",
+    "Corinthians": "assets/times/corinthians.png",
+    "Coritiba": "assets/times/coritiba.png",
+    "Cruzeiro": "assets/times/cruzeiro.png",
+    "Flamengo": "assets/times/flamengo.png",
+    "Fluminense": "assets/times/fluminense.png",
+    "Grêmio": "assets/times/gremio.png",
+    "Internacional": "assets/times/internacional.png",
+    "Mirassol": "assets/times/mirassol.png",
+    "Palmeiras": "assets/times/palmeiras.png",
+    "RB Bragantino": "assets/times/rbbragantino.png",
+    "Remo": "assets/times/remo.png",
+    "Santos": "assets/times/santos.png",
+    "São Paulo": "assets/times/saopaulo.png",
+    "Vasco da Gama": "assets/times/vasco.png",
+    "Vitória": "assets/times/vitoria.png"
+};
+
+function obterCaminhoEscudoTime(nomeTime) {
+    return ESCUDOS_TIMES[nomeTime] || "";
+}
+
+function aplicarEscudoTime(elemento, time) {
+    const caminho = obterCaminhoEscudoTime(time.nome);
+
+    elemento.innerHTML = "";
+    elemento.classList.remove("com-imagem");
+
+    if (!caminho) {
+        elemento.textContent = time.sigla;
+        return;
+    }
+
+    elemento.classList.add("com-imagem");
+
+    const img = document.createElement("img");
+    img.src = caminho;
+    img.alt = "Escudo do " + time.nome;
+
+    img.onerror = function() {
+        elemento.classList.remove("com-imagem");
+        elemento.innerHTML = "";
+        elemento.textContent = time.sigla;
+    };
+
+    elemento.appendChild(img);
+}
+    
 const CLUBES_CONFIGURADOS = new Set([
     "Premier League::Arsenal",
     "Premier League::Manchester City",
@@ -777,10 +839,12 @@ function renderizarTimes(nomeLiga) {
         botao.className = configurado ? "card-time configurado" : "card-time nao-configurado";
 
         botao.innerHTML = `
-            <div class="escudo">${time.sigla}</div>
+            <div class="escudo"></div>
             <div class="nome-time">${time.nome}</div>
             <div class="tag-time">${configurado ? "Configurado" : "Em breve"}</div>
         `;
+
+        aplicarEscudoTime(botao.querySelector(".escudo"), time);
 
         botao.addEventListener("click", function() {
             selecionarTime(nomeLiga, time.nome);
@@ -790,6 +854,8 @@ function renderizarTimes(nomeLiga) {
     });
 }
 
+
+    
 function voltarLigas() {
     estado.ligaAtual = null;
     document.getElementById("telaTimes").style.display = "none";
