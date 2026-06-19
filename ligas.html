@@ -303,23 +303,7 @@ body {
 }
 
 .escudo {
-    width: 62px;
-    height: 62px;
-    margin: 0 auto 12px;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at center, rgba(255,255,255,0.28) 0 26%, transparent 27%),
-        linear-gradient(135deg, var(--verde-medio), var(--verde-limao));
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 17px;
-    font-weight: 900;
-    text-shadow: 2px 2px 0 #082914;
-    box-shadow: 4px 4px 0 #082914;
-    border: 3px solid rgba(8,41,20,0.18);
-}
+
 
 .escudo.com-imagem {
     width: 79px;
@@ -629,52 +613,52 @@ const LIGAS = [
 
 const TIMES_POR_LIGA = {
     "Premier League": [
-        { nome: "Arsenal", sigla: "ARS" },
-        { nome: "Aston Villa", sigla: "AVL" },
-        { nome: "Bournemouth", sigla: "BOU" },
-        { nome: "Brentford", sigla: "BRE" },
-        { nome: "Brighton", sigla: "BHA" },
-        { nome: "Burnley", sigla: "BUR" },
-        { nome: "Chelsea", sigla: "CHE" },
-        { nome: "Crystal Palace", sigla: "CRY" },
-        { nome: "Everton", sigla: "EVE" },
-        { nome: "Fulham", sigla: "FUL" },
-        { nome: "Leeds United", sigla: "LEE" },
-        { nome: "Liverpool", sigla: "LIV" },
-        { nome: "Manchester City", sigla: "MCI" },
-        { nome: "Manchester United", sigla: "MUN" },
-        { nome: "Newcastle United", sigla: "NEW" },
-        { nome: "Nottingham Forest", sigla: "NFO" },
-        { nome: "Sunderland", sigla: "SUN" },
-        { nome: "Tottenham", sigla: "TOT" },
-        { nome: "West Ham", sigla: "WHU" },
-        { nome: "Wolverhampton", sigla: "WOL" }
+        { nome: "Arsenal", sigla: "ARS", escudo: "arsenal.png" },
+        { nome: "Aston Villa", sigla: "AVL", escudo: "astonvilla.png" },
+        { nome: "Bournemouth", sigla: "BOU", escudo: "bournemouth.png" },
+        { nome: "Brentford", sigla: "BRE", escudo: "brentford.png" },
+        { nome: "Brighton", sigla: "BHA", escudo: "brighton.png" },
+        { nome: "Chelsea", sigla: "CHE", escudo: "chelsea.png" },
+        { nome: "Coventry City", sigla: "COV", escudo: "coventry.png" },
+        { nome: "Crystal Palace", sigla: "CRY", escudo: "crystalpalace.png" },
+        { nome: "Everton", sigla: "EVE", escudo: "everton.png" },
+        { nome: "Fulham", sigla: "FUL", escudo: "fulham.png" },
+        { nome: "Hull City", sigla: "HUL", escudo: "hull_city.png" },
+        { nome: "Ipswich Town", sigla: "IPS", escudo: "ipswich_town.png" },
+        { nome: "Leeds United", sigla: "LEE", escudo: "leeds.png" },
+        { nome: "Liverpool", sigla: "LIV", escudo: "liverpool.png" },
+        { nome: "Manchester City", sigla: "MCI", escudo: "manchestercity.png" },
+        { nome: "Manchester United", sigla: "MUN", escudo: "manchesterunited.png" },
+        { nome: "Newcastle United", sigla: "NEW", escudo: "newcastle.png" },
+        { nome: "Nottingham Forest", sigla: "NFO", escudo: "nottingham_forest.png" },
+        { nome: "Sunderland", sigla: "SUN", escudo: "sunderland.png" },
+        { nome: "Tottenham", sigla: "TOT", escudo: "tottenham.png" }
     ],
 
     "Campeonato Brasileiro": [
-        { nome: "Athletico-PR", sigla: "CAP" },
-        { nome: "Atlético-MG", sigla: "CAM" },
-        { nome: "Bahia", sigla: "BAH" },
-        { nome: "Botafogo", sigla: "BOT" },
-        { nome: "Chapecoense", sigla: "CHA" },
-        { nome: "Corinthians", sigla: "COR" },
-        { nome: "Coritiba", sigla: "CFC" },
-        { nome: "Cruzeiro", sigla: "CRU" },
-        { nome: "Flamengo", sigla: "FLA" },
-        { nome: "Fluminense", sigla: "FLU" },
-        { nome: "Grêmio", sigla: "GRE" },
-        { nome: "Internacional", sigla: "INT" },
-        { nome: "Mirassol", sigla: "MIR" },
-        { nome: "Palmeiras", sigla: "PAL" },
-        { nome: "RB Bragantino", sigla: "RBB" },
-        { nome: "Remo", sigla: "REM" },
-        { nome: "Santos", sigla: "SAN" },
-        { nome: "São Paulo", sigla: "SPF" },
-        { nome: "Vasco da Gama", sigla: "VAS" },
-        { nome: "Vitória", sigla: "VIT" }
+        { nome: "Athletico-PR", sigla: "CAP", escudo: "atlparanaense.png" },
+        { nome: "Atlético-MG", sigla: "CAM", escudo: "atlmineiro" },
+        { nome: "Bahia", sigla: "BAH", escudo: "bahia.png" },
+        { nome: "Botafogo", sigla: "BOT", escudo: "botafogo.png" },
+        { nome: "Chapecoense", sigla: "CHA", escudo: "chapecoense.png" },
+        { nome: "Corinthians", sigla: "COR", escudo: "corinthians.png" },
+        { nome: "Coritiba", sigla: "CFC", escudo: "coritiba.png" },
+        { nome: "Cruzeiro", sigla: "CRU", escudo: "cruzeiro.png" },
+        { nome: "Flamengo", sigla: "FLA", escudo: "flamengo.png" },
+        { nome: "Fluminense", sigla: "FLU", escudo: "fluminense.png" },
+        { nome: "Grêmio", sigla: "GRE", escudo: "gremio.png" },
+        { nome: "Internacional", sigla: "INT", escudo: "internacional.png" },
+        { nome: "Mirassol", sigla: "MIR", escudo: "mirassol.png" },
+        { nome: "Palmeiras", sigla: "PAL", escudo: "palmeiras.png" },
+        { nome: "RB Bragantino", sigla: "RBB", escudo: "rbbragantino.png" },
+        { nome: "Remo", sigla: "REM", escudo: "remo.png" },
+        { nome: "Santos", sigla: "SAN", escudo: "santos.png" },
+        { nome: "São Paulo", sigla: "SPF", escudo: "saopaulo.png" },
+        { nome: "Vasco da Gama", sigla: "VAS", escudo: "vasco.png" },
+        { nome: "Vitória", sigla: "VIT", escudo: "vitoria.png" }
     ]
 };
-
+    
 const ESCUDOS_TIMES = {
     "Athletico-PR": "assets/times/atlparanaense.png",
     "Atlético-MG": "assets/times/atlmineiro.png",
@@ -698,6 +682,13 @@ const ESCUDOS_TIMES = {
     "Vitória": "assets/times/vitoria.png"
 };
 
+function obterCaminhoEscudo(time) {
+    if (time.escudo) {
+        return "assets/times/" + time.escudo;
+    }
+    return "";
+}
+    
 function obterCaminhoEscudoTime(nomeTime) {
     return ESCUDOS_TIMES[nomeTime] || "";
 }
@@ -839,18 +830,23 @@ function renderizarTimes(nomeLiga) {
 
     times.forEach(function(time) {
         const configurado = clubeEstaConfigurado(nomeLiga, time.nome);
+        const caminhoEscudo = obterCaminhoEscudo(time);
 
         const botao = document.createElement("button");
         botao.type = "button";
         botao.className = configurado ? "card-time configurado" : "card-time nao-configurado";
 
         botao.innerHTML = `
-            <div class="escudo"></div>
+            <div class="escudo">
+                ${
+                    caminhoEscudo
+                        ? `<img src="${caminhoEscudo}" alt="Escudo do ${time.nome}" class="img-escudo">`
+                        : `<span class="sigla-escudo">${time.sigla}</span>`
+                }
+            </div>
             <div class="nome-time">${time.nome}</div>
             <div class="tag-time">${configurado ? "Configurado" : "Em breve"}</div>
         `;
-
-        aplicarEscudoTime(botao.querySelector(".escudo"), time);
 
         botao.addEventListener("click", function() {
             selecionarTime(nomeLiga, time.nome);
