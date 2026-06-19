@@ -604,12 +604,12 @@ const LIGAS = [
         descricao: "Selecione o clube brasileiro que você vai comandar na sua carreira."
     },
     {
-        nome: "La Liga",
-        sigla: "LL",
-        ativa: false,
-        status: "Em breve",
-        descricao: "A La Liga será configurada depois."
-    },
+    nome: "La Liga",
+    sigla: "LL",
+    ativa: true,
+    status: "Escolher clubes",
+    descricao: "Selecione o clube espanhol que você vai comandar na sua carreira."
+},
     {
         nome: "Premier League",
         sigla: "PL",
@@ -618,11 +618,11 @@ const LIGAS = [
         descricao: "Selecione o clube inglês que você vai comandar na sua carreira."
     },
     {
-        nome: "Serie A",
-        sigla: "SA",
-        ativa: false,
-        status: "Em breve",
-        descricao: "A Serie A será configurada depois."
+    nome: "Serie A",
+    sigla: "SA",
+    ativa: true,
+    status: "Escolher clubes",
+    descricao: "Selecione o clube italiano que você vai comandar na sua carreira."
     }
 ];
 
@@ -650,6 +650,52 @@ const TIMES_POR_LIGA = {
         { nome: "Tottenham", sigla: "TOT", escudo: "tottenham.png" }
     ],
 
+"Serie A": [
+    { nome: "Atalanta", sigla: "ATA" },
+    { nome: "Bologna", sigla: "BOL" },
+    { nome: "Cagliari", sigla: "CAG" },
+    { nome: "Como", sigla: "COM" },
+    { nome: "Fiorentina", sigla: "FIO" },
+    { nome: "Frosinone", sigla: "FRO" },
+    { nome: "Genoa", sigla: "GEN" },
+    { nome: "Inter", sigla: "INT" },
+    { nome: "Juventus", sigla: "JUV" },
+    { nome: "Lazio", sigla: "LAZ" },
+    { nome: "Lecce", sigla: "LEC" },
+    { nome: "Milan", sigla: "MIL" },
+    { nome: "Monza", sigla: "MON" },
+    { nome: "Napoli", sigla: "NAP" },
+    { nome: "Parma", sigla: "PAR" },
+    { nome: "Roma", sigla: "ROM" },
+    { nome: "Sassuolo", sigla: "SAS" },
+    { nome: "Torino", sigla: "TOR" },
+    { nome: "Udinese", sigla: "UDI" },
+    { nome: "Venezia", sigla: "VEN" }
+],
+
+"La Liga": [
+    { nome: "Alavés", sigla: "ALA" },
+    { nome: "Almería", sigla: "ALM" },
+    { nome: "Athletic Bilbao", sigla: "ATH" },
+    { nome: "Atlético de Madrid", sigla: "ATM" },
+    { nome: "Barcelona", sigla: "BAR" },
+    { nome: "Betis", sigla: "BET" },
+    { nome: "Celta de Vigo", sigla: "CEL" },
+    { nome: "Elche", sigla: "ELC" },
+    { nome: "Espanyol", sigla: "ESP" },
+    { nome: "Getafe", sigla: "GET" },
+    { nome: "Deportivo La Coruña", sigla: "DEP" },
+    { nome: "Levante", sigla: "LEV" },
+    { nome: "Osasuna", sigla: "OSA" },
+    { nome: "Racing Santander", sigla: "RAC" },
+    { nome: "Rayo Vallecano", sigla: "RAY" },
+    { nome: "Real Madrid", sigla: "RMA" },
+    { nome: "Real Sociedad", sigla: "RSO" },
+    { nome: "Sevilla", sigla: "SEV" },
+    { nome: "Valencia", sigla: "VAL" },
+    { nome: "Villarreal", sigla: "VIL" }
+],
+        
     "Campeonato Brasileiro": [
         { nome: "Athletico-PR", sigla: "CAP", escudo: "atlparanaense.png" },
         { nome: "Atlético-MG", sigla: "CAM", escudo: "atlmineiro.png" },
