@@ -3930,6 +3930,7 @@ let intervaloSimulacao = null;
 let jogadorMercadoSelecionado = null;
 let jogadorSaidaSelecionado = null;
 const SOM_GOL = "assets/times/gol.mp3";
+const SOM_GOL_DELES = "assets/times/goldeles.mp3";
 const SOM_JUIZ = "assets/times/juiz.mp3";
 
 function tocarSomArquivo(caminho, volume) {
@@ -3947,6 +3948,10 @@ function tocarSomArquivo(caminho, volume) {
 
 function tocarSomGol() {
     tocarSomArquivo(SOM_GOL, 0.85);
+}
+
+function tocarSomGolAdversario() {
+    tocarSomArquivo(SOM_GOL_DELES, 0.82);
 }
 
 function tocarSomJuiz() {
@@ -6059,16 +6064,16 @@ function gerarEventoMinuto() {
         stats.impedimentos++;
         adicionarEvento(jogadorDeLinha.nome + " estava impedido.", "normal");
 
-    } else if (r < 0.79) {
+    } else if (r < 0.85) {
         stats.faltas++;
         adicionarEvento("Falta cometida por " + jogadorGeral.nome + ".", "normal");
 
-    } else if (r < 0.89) {
+    } else if (r < 0.875) {
         stats.faltas++;
         stats.amarelos++;
         adicionarEvento("Cartão amarelo para " + jogadorGeral.nome + ".", "cartao");
 
-    } else if (r < 0.905) {
+    } else if (r < 0.89) {
         stats.penaltis++;
         stats.chutes++;
         stats.chutesGol++;
@@ -6307,6 +6312,8 @@ function marcarGol(lado, jogador) {
     const usuarioNoLado = lado === "casa" ? partida.usuarioCasa : !partida.usuarioCasa;
 
     if (usuarioNoLado) {
+        tocarSomGol();
+
         const jogadorDoElenco = buscarJogador(obterElencoUsuario(), jogador.id);
 
         if (jogadorDoElenco) {
@@ -6322,6 +6329,8 @@ function marcarGol(lado, jogador) {
         ) {
             partida.idsSubstitutosQueFizeramGol.push(jogador.id);
         }
+    } else {
+        tocarSomGolAdversario();
     }
 
     registrarGolDetalhado(lado, jogador);
@@ -6340,15 +6349,11 @@ function aplicarImpactoVermelho(lado) {
 }
 
 function adicionarEvento(texto, tipo) {
-    if (tipo === "gol") {
-        tocarSomGol();
-    }
-
     const textoNormalizado = (texto || "").toLowerCase();
 
     if (
-        tipo === "cartao" ||
-        tipo === "vermelho" ||
+        textoNormalizado.includes("cartão amarelo") ||
+        textoNormalizado.includes("cartão vermelho") ||
         textoNormalizado.startsWith("pênalti") ||
         textoNormalizado.startsWith("penalti")
     ) {
