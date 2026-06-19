@@ -2924,7 +2924,6 @@ function montarCalendario(liga, clubeUsuario, disputaContinental) {
     const rodadasLiga = gerarRodadasLiga(clubes);
     const calendario = [];
     const dataInicio = new Date(obterDataInicioLiga(liga) + "T12:00:00");
-    let numeroJogoContinental = 0;
 
     rodadasLiga.forEach(function(rodada, index) {
         const numeroRodadaLiga = index + 1;
@@ -2940,38 +2939,13 @@ function montarCalendario(liga, clubeUsuario, disputaContinental) {
             jogado: false,
             cancelado: false
         });
-
-        if (
-            disputaContinental &&
-            numeroRodadaLiga >= 6 &&
-            (numeroRodadaLiga === 6 || (numeroRodadaLiga - 6) % 3 === 0)
-        ) {
-            numeroJogoContinental++;
-
-            const dataContinental = new Date(dataLiga);
-            dataContinental.setDate(dataLiga.getDate() + 3);
-
-            const adversario = sortearAdversarioContinental(liga, numeroJogoContinental, clubeUsuario);
-            const clubeEmCasa = Math.random() >= 0.5;
-
-            calendario.push({
-                tipo: "continental",
-                competicao: obterNomeContinental(liga),
-                rodada: numeroJogoContinental,
-                data: dataContinental.toISOString(),
-                jogos: [
-                    {
-                        casa: clubeEmCasa ? clubeUsuario : adversario,
-                        fora: clubeEmCasa ? adversario : clubeUsuario,
-                        golsCasa: null,
-                        golsFora: null
-                    }
-                ],
-                jogado: false,
-                cancelado: false
-            });
-        }
     });
+
+    if (disputaContinental) {
+        criarEventosContinental(liga, clubeUsuario, dataInicio).forEach(function(evento) {
+            calendario.push(evento);
+        });
+    }
 
     criarEventosCopaBrasil(liga, clubeUsuario, dataInicio).forEach(function(evento) {
         calendario.push(evento);
@@ -2984,6 +2958,123 @@ function montarCalendario(liga, clubeUsuario, disputaContinental) {
     return calendario;
 }
 
+function criarEventosContinental(liga, clubeUsuario, dataInicio) {
+    if (liga === LIGA_BRASILEIRAO) {
+        return criarEventosLibertadoresGrupo(clubeUsuario, dataInicio);
+    }
+
+    return criarEventosChampionsSimples(liga, clubeUsuario, dataInicio);
+}
+
+function criarEventosChampionsSimples(liga, clubeUsuario, dataInicio) {
+    const eventos = [];
+    const rodadasLiga = [6, 9, 12, 15, 18, 21];
+
+    rodadasLiga.forEach(function(rodadaLiga, index) {
+        const dataContinental = new Date(dataInicio);
+        dataContinental.setDate(dataInicio.getDate() + ((rodadaLiga - 1) * 7) + 3);
+
+        const adversario = sortearAdversarioContinental(liga, index + 1, clubeUsuario);
+        const clubeEmCasa = Math.random() >= 0.5;
+
+        eventos.push({
+            tipo: "continental",
+            competicao: obterNomeContinental(liga),
+            rodada: index + 1,
+            data: dataContinental.toISOString(),
+            jogos: [
+                {
+                    casa: clubeEmCasa ? clubeUsuario : adversario,
+                    fora: clubeEmCasa ? adversario : clubeUsuario,
+                    golsCasa: null,
+                    golsFora: null
+                }
+            ],
+            jogado: false,
+            cancelado: false
+        });
+    });
+
+    return eventos;
+}
+
+function criarEventosLibertadoresGrupo(clubeUsuario, dataInicio) {
+    const grupo = criarGrupoLibertadores(clubeUsuario);
+    const times = grupo.clubes;
+    const adversarios = times.filter(function(clube) {
+        return clube !== clubeUsuario;
+    });
+
+    const rodadasLiga = [6, 9, 12, 15, 18, 21];
+    const eventos = [];
+
+    adversarios.forEach(function(adversario, index) {
+        const rodadaIda = index;
+        const rodadaVolta = index + 3;
+
+        const usuarioCasaIda = Math.random() >= 0.5;
+
+        [rodadaIda, rodadaVolta].forEach(function(indiceRodada, ordem) {
+            const dataContinental = new Date(dataInicio);
+            dataContinental.setDate(dataInicio.getDate() + ((rodadasLiga[indiceRodada] - 1) * 7) + 3);
+
+            const usuarioCasa = ordem === 0 ? usuarioCasaIda : !usuarioCasaIda;
+
+            const outroJogo = criarOutroJogoGrupoLibertadores(times, clubeUsuario, adversario);
+
+            eventos.push({
+                tipo: "continental",
+                competicao: obterNomeContinental(LIGA_BRASILEIRAO),
+                rodada: indiceRodada + 1,
+                grupoContinental: grupo.nome,
+                clubesGrupo: times.slice(),
+                data: dataContinental.toISOString(),
+                jogos: [
+                    {
+                        casa: usuarioCasa ? clubeUsuario : adversario,
+                        fora: usuarioCasa ? adversario : clubeUsuario,
+                        golsCasa: null,
+                        golsFora: null
+                    },
+                    outroJogo
+                ],
+                jogado: false,
+                cancelado: false
+            });
+        });
+    });
+
+    eventos.sort(function(a, b) {
+        return new Date(a.data) - new Date(b.data);
+    });
+
+    return eventos;
+}
+
+function criarOutroJogoGrupoLibertadores(times, clubeUsuario, adversarioUsuario) {
+    const outros = times.filter(function(clube) {
+        return clube !== clubeUsuario && clube !== adversarioUsuario;
+    });
+
+    if (outros.length < 2) {
+        return {
+            casa: "River Plate",
+            fora: "Boca Juniors",
+            golsCasa: null,
+            golsFora: null
+        };
+    }
+
+    const casaPrimeiro = Math.random() >= 0.5;
+
+    return {
+        casa: casaPrimeiro ? outros[0] : outros[1],
+        fora: casaPrimeiro ? outros[1] : outros[0],
+        golsCasa: null,
+        golsFora: null
+    };
+}
+    
 function gerarRodadasLiga(clubesOriginais) {
     let clubes = embaralhar(clubesOriginais);
     const totalClubes = clubes.length;
@@ -4244,6 +4335,7 @@ function iniciarPartida() {
         titularesAdv: titularesAdv,
         reservasAdv: reservasAdv,
         eventos: [],
+        golsDetalhados: [],
         statsCasa: criarStats(),
         statsFora: criarStats(),
         jogadoresSubstituidos: [],
@@ -5151,26 +5243,27 @@ function finalizarPartida() {
             atualizarTabela(jogo.casa, jogo.fora, jogo.golsCasa, jogo.golsFora);
         });
     } else if (evento.tipo === "continental") {
-        atualizarContinental(jogoUsuario);
+        atualizarContinental(evento, jogoUsuario);
     } else if (evento.tipo === "copa_brasil") {
         atualizarCopaBrasil(evento, jogoUsuario);
     }
 
     evento.jogado = true;
     save.proximoJogo++;
+
     registrarResultado(evento, jogoUsuario);
-atualizarCansacoJogadoresAposPartida();
-processarProgressaoJogadores(jogoUsuario);
-processarMercadoAposRodada();
+    atualizarCansacoJogadoresAposPartida();
+    processarProgressaoJogadores(jogoUsuario);
+    processarMercadoAposRodada();
 
-reduzirLesoesExistentesAposRodada();
-sortearLesaoAposPartida();
+    reduzirLesoesExistentesAposRodada();
+    sortearLesaoAposPartida();
 
-limparBoostsTemporariosUsados();
-aplicarBoostsSubstitutosAposPartida();
+    limparBoostsTemporariosUsados();
+    aplicarBoostsSubstitutosAposPartida();
 
-ajustarConfianca();
-salvar();
+    ajustarConfianca();
+    salvar();
 
     renderizarTelaFim(evento, jogoUsuario);
 }
@@ -5270,7 +5363,20 @@ function voltarAoPainelDepoisDoJogo() {
     window.scrollTo(0, 0);
 }
 
-function atualizarContinental(jogo) {
+function atualizarContinental(evento, jogoUsuario) {
+    garantirContinentalStats();
+
+    if (!save.continentalStats) return;
+
+    if (save.liga === LIGA_BRASILEIRAO) {
+        atualizarContinentalLibertadores(evento, jogoUsuario);
+        return;
+    }
+
+    atualizarContinentalSimples(jogoUsuario);
+}
+
+function atualizarContinentalSimples(jogo) {
     const golsClube = jogo.casa === save.clube ? jogo.golsCasa : jogo.golsFora;
     const golsAdv = jogo.casa === save.clube ? jogo.golsFora : jogo.golsCasa;
 
@@ -5287,6 +5393,109 @@ function atualizarContinental(jogo) {
     } else {
         save.continentalStats.derrotas++;
     }
+}
+
+function atualizarContinentalLibertadores(evento, jogoUsuario) {
+    garantirContinentalStats();
+
+    const stats = save.continentalStats;
+
+    if (!stats.tabelaGrupo) {
+        stats.tabelaGrupo = criarTabelaInicial(stats.clubesGrupo);
+    }
+
+    evento.jogos.forEach(function(jogo) {
+        if (jogo.casa === jogoUsuario.casa && jogo.fora === jogoUsuario.fora) {
+            jogo.golsCasa = partida.golsCasa;
+            jogo.golsFora = partida.golsFora;
+        } else {
+            const resultado = simularPlacarRapido(jogo.casa, jogo.fora);
+            jogo.golsCasa = resultado.golsCasa;
+            jogo.golsFora = resultado.golsFora;
+        }
+
+        atualizarTabelaContinentalGrupo(jogo.casa, jogo.fora, jogo.golsCasa, jogo.golsFora);
+    });
+
+    const golsClube = jogoUsuario.casa === save.clube ? jogoUsuario.golsCasa : jogoUsuario.golsFora;
+    const golsAdv = jogoUsuario.casa === save.clube ? jogoUsuario.golsFora : jogoUsuario.golsCasa;
+
+    stats.jogos++;
+    stats.gp += golsClube;
+    stats.gc += golsAdv;
+
+    if (golsClube > golsAdv) {
+        stats.vitorias++;
+        stats.pontos += 3;
+    } else if (golsClube === golsAdv) {
+        stats.empates++;
+        stats.pontos += 1;
+    } else {
+        stats.derrotas++;
+    }
+}
+
+function atualizarTabelaContinentalGrupo(casa, fora, golsCasa, golsFora) {
+    garantirContinentalStats();
+
+    const tabela = save.continentalStats.tabelaGrupo;
+
+    if (!tabela[casa]) tabela[casa] = criarLinhaTabela(casa);
+    if (!tabela[fora]) tabela[fora] = criarLinhaTabela(fora);
+
+    const timeCasa = tabela[casa];
+    const timeFora = tabela[fora];
+
+    timeCasa.jogos++;
+    timeFora.jogos++;
+
+    timeCasa.gp += golsCasa;
+    timeCasa.gc += golsFora;
+    timeFora.gp += golsFora;
+    timeFora.gc += golsCasa;
+
+    timeCasa.sg = timeCasa.gp - timeCasa.gc;
+    timeFora.sg = timeFora.gp - timeFora.gc;
+
+    if (golsCasa > golsFora) {
+        timeCasa.vitorias++;
+        timeCasa.pontos += 3;
+        timeFora.derrotas++;
+    } else if (golsCasa < golsFora) {
+        timeFora.vitorias++;
+        timeFora.pontos += 3;
+        timeCasa.derrotas++;
+    } else {
+        timeCasa.empates++;
+        timeFora.empates++;
+        timeCasa.pontos++;
+        timeFora.pontos++;
+    }
+}
+
+function obterTabelaContinentalOrdenada() {
+    garantirContinentalStats();
+
+    if (!save.continentalStats || !save.continentalStats.tabelaGrupo) {
+        return [];
+    }
+
+    return Object.values(save.continentalStats.tabelaGrupo).sort(function(a, b) {
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+        if (b.sg !== a.sg) return b.sg - a.sg;
+        if (b.gp !== a.gp) return b.gp - a.gp;
+        return a.nome.localeCompare(b.nome);
+    });
+}
+
+function obterPosicaoContinentalUsuario() {
+    const tabela = obterTabelaContinentalOrdenada();
+
+    const posicao = tabela.findIndex(function(time) {
+        return time.nome === save.clube;
+    }) + 1;
+
+    return posicao || "-";
 }
 
 function simularPlacarRapido(casa, fora) {
@@ -7100,6 +7309,18 @@ function renderizarEstatisticasCompeticoes() {
             save.competicaoContinental,
             obterStatusContinental()
         ));
+
+        if (
+            save.liga === LIGA_BRASILEIRAO &&
+            save.continentalStats &&
+            save.continentalStats.clubesGrupo &&
+            save.continentalStats.clubesGrupo.length > 0
+        ) {
+            box.appendChild(criarItemEstatistica(
+                "Grupo da Libertadores",
+                save.continentalStats.grupo + ": " + save.continentalStats.clubesGrupo.join(", ")
+            ));
+        }
     } else {
         box.appendChild(criarItemEstatistica(
             "Competição continental",
@@ -7134,33 +7355,59 @@ function obterRotuloPosicaoLiga(posicao) {
 }
 
 function obterStatusContinental() {
+    if (!save.disputaContinental) {
+        return "Não disputou";
+    }
+
     if (!save.continentalStats || save.continentalStats.jogos === 0) {
+        if (save.liga === LIGA_BRASILEIRAO && save.continentalStats && save.continentalStats.grupo) {
+            return save.continentalStats.grupo + " · ainda não estreou";
+        }
+
         return "Ainda não estreou";
+    }
+
+    if (save.liga === LIGA_BRASILEIRAO) {
+        const posicao = obterPosicaoContinentalUsuario();
+        const temporadaFinalizada = temporadaEncerrada();
+
+        let texto =
+            save.continentalStats.grupo +
+            " · " +
+            posicao +
+            "º colocado · " +
+            save.continentalStats.pontos +
+            " pts · " +
+            save.continentalStats.jogos +
+            " jogo(s)";
+
+        if (temporadaFinalizada) {
+            if (posicao === 1 || posicao === 2) {
+                texto += " · Classificado";
+            } else {
+                texto += " · Eliminado na fase de grupos";
+            }
+        }
+
+        return texto;
     }
 
     const pontos = save.continentalStats.pontos;
     let colocacao = "4º colocado do grupo";
 
-    if (pontos >= 12) {
+    if (pontos >= 13) {
         colocacao = "1º colocado do grupo";
-    } else if (pontos >= 9) {
+    } else if (pontos >= 10) {
         colocacao = "2º colocado do grupo";
-    } else if (pontos >= 6) {
+    } else if (pontos >= 7) {
         colocacao = "3º colocado do grupo";
     }
 
-    return (
-        colocacao +
-        " · " +
-        pontos +
-        " ponto(s) · " +
-        save.continentalStats.vitorias +
-        "V, " +
-        save.continentalStats.empates +
-        "E, " +
-        save.continentalStats.derrotas +
-        "D"
-    );
+    if (!temporadaEncerrada()) {
+        return colocacao + " no momento · " + pontos + " pts";
+    }
+
+    return colocacao + " · " + pontos + " pts";
 }
 
 function renderizarEstatisticasArtilharia() {
@@ -7357,6 +7604,47 @@ function temporadaEncerrada() {
     });
 }
 
+function envelhecerTodosJogadores() {
+    const controle = new Set();
+
+    function envelhecerLista(lista, clubeOrigem) {
+        if (!Array.isArray(lista)) return;
+
+        lista.forEach(function(jogador, index) {
+            if (!jogador) return;
+
+            const chave = jogador.id
+                ? "id:" + jogador.id
+                : "nome:" + clubeOrigem + ":" + jogador.nome + ":" + index;
+
+            if (controle.has(chave)) return;
+
+            controle.add(chave);
+
+            jogador.idade = (jogador.idade || 25) + 1;
+        });
+    }
+
+    envelhecerLista(save.elenco, save.clube);
+
+    if (save.elencosClubes) {
+        Object.keys(save.elencosClubes).forEach(function(clube) {
+            envelhecerLista(save.elencosClubes[clube], clube);
+        });
+    }
+}
+
+function resetarDadosJogadoresNovaTemporada() {
+    obterElencoUsuario().forEach(function(jogador) {
+        jogador.gols = 0;
+        jogador.energia = 100;
+        jogador.statusMercado = "";
+        jogador.jogosSemSubstituicao = 0;
+        jogador.bonusTemporarioProximoJogo = 0;
+        jogador.lesaoJogos = 0;
+    });
+}
+    
 function iniciarNovaTemporada() {
     const confirmar = confirm("Iniciar nova temporada mantendo elenco, orçamento e jogadores evoluídos?");
 
@@ -7365,6 +7653,8 @@ function iniciarNovaTemporada() {
     if (typeof processarRetornoEmprestimosFimTemporada === "function") {
         processarRetornoEmprestimosFimTemporada();
     }
+
+    envelhecerTodosJogadores();
 
     const liga = save.liga;
     const clube = save.clube;
@@ -7386,26 +7676,10 @@ function iniciarNovaTemporada() {
         ultimoBonusOrcamento: 0
     };
 
-    save.continentalStats = {
-        jogos: 0,
-        vitorias: 0,
-        empates: 0,
-        derrotas: 0,
-        gp: 0,
-        gc: 0,
-        pontos: 0
-    };
-
+    save.continentalStats = criarContinentalStats(liga, clube, disputaContinental);
     save.copaBrasilStats = criarCopaBrasilStats(liga);
 
-    obterElencoUsuario().forEach(function(jogador) {
-        jogador.gols = 0;
-        jogador.energia = 100;
-        jogador.statusMercado = "";
-        jogador.jogosSemSubstituicao = 0;
-        jogador.bonusTemporarioProximoJogo = 0;
-        jogador.lesaoJogos = 0;
-    });
+    resetarDadosJogadoresNovaTemporada();
 
     garantirDadosTransferencias();
 
@@ -7420,7 +7694,7 @@ function iniciarNovaTemporada() {
     salvar();
     renderizarTudo();
 
-    alert("Nova temporada iniciada!");
+    alert("Nova temporada iniciada! Todos os jogadores envelheceram 1 ano.");
     window.scrollTo(0, 0);
 }
 
