@@ -1101,7 +1101,26 @@ tr.destaque {
         z-index: 2;
     }
 }
-    
+.escudo-grande.com-imagem,
+.mini-escudo.com-imagem {
+    background: #ffffff;
+    text-shadow: none;
+    overflow: hidden;
+}
+
+.escudo-grande img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    display: block;
+}
+
+.mini-escudo img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    display: block;
+}
 </style>
 </head>
 
@@ -1612,6 +1631,29 @@ const SIGLAS_CLUBES = {
     "Olimpia": "OLI",
     "Colo-Colo": "COL",
     "Atlético Nacional": "ATN"
+};
+
+    const ESCUDOS_CLUBES = {
+    "Athletico-PR": "assets/times/atlparanaense.png",
+    "Atlético-MG": "assets/times/atlmineiro.png",
+    "Bahia": "assets/times/bahia.png",
+    "Botafogo": "assets/times/botafogo.png",
+    "Chapecoense": "assets/times/chapecoense.png",
+    "Corinthians": "assets/times/corinthians.png",
+    "Coritiba": "assets/times/coritiba.png",
+    "Cruzeiro": "assets/times/cruzeiro.png",
+    "Flamengo": "assets/times/flamengo.png",
+    "Fluminense": "assets/times/fluminense.png",
+    "Grêmio": "assets/times/gremio.png",
+    "Internacional": "assets/times/internacional.png",
+    "Mirassol": "assets/times/mirassol.png",
+    "Palmeiras": "assets/times/palmeiras.png",
+    "RB Bragantino": "assets/times/rbbragantino.png",
+    "Remo": "assets/times/remo.png",
+    "Santos": "assets/times/santos.png",
+    "São Paulo": "assets/times/saopaulo.png",
+    "Vasco da Gama": "assets/times/vasco.png",
+    "Vitória": "assets/times/vitoria.png"
 };
 
 const PALETAS_CLUBES = {
@@ -2287,6 +2329,43 @@ const JOGADORES_EXTRAS_MERCADO = [
     { clube: "Vitória", p: "A", nome: "Marinho", funcao: "Ponta", f: 76, idade: 36 },
 ];
 
+function obterCaminhoEscudo(clube) {
+    return ESCUDOS_CLUBES[clube] || "";
+}
+
+function obterSiglaClube(clube) {
+    return SIGLAS_CLUBES[clube] || clube.substring(0, 3).toUpperCase();
+}
+
+function aplicarEscudoNoElemento(elemento, clube) {
+    if (!elemento) return;
+
+    const caminho = obterCaminhoEscudo(clube);
+    const sigla = obterSiglaClube(clube);
+
+    elemento.innerHTML = "";
+    elemento.classList.remove("com-imagem");
+
+    if (!caminho) {
+        elemento.textContent = sigla;
+        return;
+    }
+
+    elemento.classList.add("com-imagem");
+
+    const img = document.createElement("img");
+    img.src = caminho;
+    img.alt = "Escudo do " + clube;
+
+    img.onerror = function() {
+        elemento.classList.remove("com-imagem");
+        elemento.innerHTML = "";
+        elemento.textContent = sigla;
+    };
+
+    elemento.appendChild(img);
+}
+    
 function ehJogadorPerna(nome) {
     return NOMES_JOGADOR_PERNA.some(function(nomePerna) {
         return nome.toLowerCase() === nomePerna.toLowerCase();
@@ -4528,7 +4607,11 @@ function renderizarTudo() {
 
 function renderizarTopo() {
     document.getElementById("nomeClube").textContent = save.clube;
-    document.getElementById("escudoClube").textContent = save.sigla;
+
+    aplicarEscudoNoElemento(
+        document.getElementById("escudoClube"),
+        save.clube
+    );
 
     const posicao = obterTabelaOrdenada().findIndex(function(time) {
         return time.nome === save.clube;
@@ -5581,8 +5664,16 @@ function obterTextoGolsDaPartida() {
 function renderizarTelaPartida() {
     document.getElementById("nomeCasa").textContent = partida.casa;
     document.getElementById("nomeFora").textContent = partida.fora;
-    document.getElementById("escudoCasa").textContent = SIGLAS_CLUBES[partida.casa] || partida.casa.substring(0, 3).toUpperCase();
-    document.getElementById("escudoFora").textContent = SIGLAS_CLUBES[partida.fora] || partida.fora.substring(0, 3).toUpperCase();
+
+    aplicarEscudoNoElemento(
+        document.getElementById("escudoCasa"),
+        partida.casa
+    );
+
+    aplicarEscudoNoElemento(
+        document.getElementById("escudoFora"),
+        partida.fora
+    );
 
     document.getElementById("placarPartida").textContent = partida.golsCasa + " - " + partida.golsFora;
     document.getElementById("minutoPartida").textContent = partida.minuto + "'";
