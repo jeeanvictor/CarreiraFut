@@ -1188,18 +1188,18 @@ tr.destaque {
                         <div class="tabela-scroll" style="margin-top: 14px;">
                             <table>
                                 <thead>
-                                    <tr>
-                                        <th>P</th>
-                                        <th>Nome</th>
-                                        <th>Função</th>
-                                        <th>F</th>
-                                        <th>Energia</th>
-                                        <th>Salário</th>
-                                        <th>Passe</th>
-                                        <th>G</th>
-                                        <th>Idade</th>
-<th>Ação</th>
-                                        
+                                <tr>
+                                    <th>#</th>
+                                    <th>Time</th>
+                                    <th>PTS</th>
+                                    <th>J</th>
+                                    <th>V</th>
+                                    <th>E</th>
+                                    <th>D</th>
+                                    <th>GP</th>
+                                    <th>GC</th>
+                                    <th>SG</th>
+                                    <th>Ação</th>    
                                     </tr>
                                 </thead>
                                 <tbody id="corpoElenco"></tbody>
@@ -3861,6 +3861,7 @@ function renderizarTabela() {
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td>${time.nome}</td>
+            <td><strong>${time.pontos}</strong></td>
             <td>${time.jogos}</td>
             <td>${time.vitorias}</td>
             <td>${time.empates}</td>
@@ -3868,7 +3869,6 @@ function renderizarTabela() {
             <td>${time.gp}</td>
             <td>${time.gc}</td>
             <td>${time.sg}</td>
-            <td><strong>${time.pontos}</strong></td>
         `;
 
         corpo.appendChild(tr);
@@ -4592,8 +4592,10 @@ function sortearFinalizadorDoLado(lado) {
 
     return jogadoresDeLinha[0];
 }
-function marcarGol(lado, jogadorInfo) {
-    const nomeJogador = typeof jogadorInfo === "string" ? jogadorInfo : jogadorInfo.nome;
+function marcarGol(lado, jogador) {
+    if (!jogador) {
+        jogador = sortearFinalizadorDoLado(lado);
+    }
 
     if (lado === "casa") {
         partida.golsCasa++;
@@ -4601,40 +4603,29 @@ function marcarGol(lado, jogadorInfo) {
         partida.golsFora++;
     }
 
-    const usuarioNoLado = ladoEhUsuario(lado);
+    const usuarioNoLado = lado === "casa" ? partida.usuarioCasa : !partida.usuarioCasa;
 
     if (usuarioNoLado) {
-        let jogadorDoSave = null;
+        const jogadorDoElenco = buscarJogador(obterElencoUsuario(), jogador.id);
 
-        if (typeof jogadorInfo === "object" && jogadorInfo.id) {
-            jogadorDoSave = buscarJogador(obterElencoUsuario(), jogadorInfo.id);
+        if (jogadorDoElenco) {
+            jogadorDoElenco.gols = (jogadorDoElenco.gols || 0) + 1;
+            jogador = jogadorDoElenco;
         }
 
-        if (!jogadorDoSave) {
-            jogadorDoSave = obterElencoUsuario().find(function(jogador) {
-                return jogador.nome === nomeJogador;
-            });
-        }
-
-        if (jogadorDoSave) {
-            jogadorDoSave.gols = (jogadorDoSave.gols || 0) + 1;
-
-            if (
-                partida.substitutosQueEntraram &&
-                partida.substitutosQueEntraram.includes(jogadorDoSave.id)
-            ) {
-                if (!partida.idsSubstitutosQueFizeramGol) {
-                    partida.idsSubstitutosQueFizeramGol = [];
-                }
-
-                if (!partida.idsSubstitutosQueFizeramGol.includes(jogadorDoSave.id)) {
-                    partida.idsSubstitutosQueFizeramGol.push(jogadorDoSave.id);
-                }
-            }
+        if (
+            partida.substitutosQueEntraram &&
+            partida.substitutosQueEntraram.includes(jogador.id) &&
+            partida.idsSubstitutosQueFizeramGol &&
+            !partida.idsSubstitutosQueFizeramGol.includes(jogador.id)
+        ) {
+            partida.idsSubstitutosQueFizeramGol.push(jogador.id);
         }
     }
 
-    adicionarEvento("GOOOL! " + nomeJogador + " balança a rede!", "gol");
+    registrarGolDetalhado(lado, jogador);
+
+    adicionarEvento("GOOOL! " + jogador.nome + " balança a rede!", "gol");
 }
 
 function aplicarImpactoVermelho(lado) {
@@ -4659,6 +4650,72 @@ function adicionarEvento(texto, tipo) {
     }
 }
 
+function garantirGolsDetalhadosPartida() {
+    if (!partida.golsDetalhados) {
+        partida.golsDetalhados = [];
+    }
+}
+
+function registrarGolDetalhado(lado, jogador) {
+    garantirGolsDetalhadosPartida();
+
+    partida.golsDetalhados.push({
+        minuto: partida.minuto,
+        lado: lado,
+        time: lado === "casa" ? partida.casa : partida.fora,
+        jogadorId: jogador.id || null,
+        jogadorNome: jogador.nome,
+        posicao: jogador.p || "",
+        usuario: lado === "casa" ? partida.usuarioCasa : !partida.usuarioCasa
+    });
+}
+
+function contarGolsJogadorNaPartida(jogador, lado) {
+    if (!partida || !partida.golsDetalhados) return 0;
+
+    return partida.golsDetalhados.filter(function(gol) {
+        if (lado && gol.lado !== lado) return false;
+
+        if (jogador.id && gol.jogadorId) {
+            return jogador.id === gol.jogadorId;
+        }
+
+        return gol.jogadorNome === jogador.nome;
+    }).length;
+}
+
+function obterBolasGolJogador(jogador, lado) {
+    const total = contarGolsJogadorNaPartida(jogador, lado);
+
+    if (total <= 0) return "";
+
+    return " " + "⚽".repeat(total);
+}
+
+function obterTextoGolsDaPartida() {
+    if (!partida || !partida.golsDetalhados || partida.golsDetalhados.length === 0) {
+        return "Sem gols";
+    }
+
+    const golsCasa = partida.golsDetalhados.filter(function(gol) {
+        return gol.lado === "casa";
+    });
+
+    const golsFora = partida.golsDetalhados.filter(function(gol) {
+        return gol.lado === "fora";
+    });
+
+    function formatarLista(lista) {
+        if (lista.length === 0) return "Nenhum";
+
+        return lista.map(function(gol) {
+            return gol.jogadorNome + " " + gol.minuto + "'";
+        }).join(", ");
+    }
+
+    return partida.casa + ": " + formatarLista(golsCasa) + " | " + partida.fora + ": " + formatarLista(golsFora);
+}
+        
 function renderizarTelaPartida() {
     document.getElementById("nomeCasa").textContent = partida.casa;
     document.getElementById("nomeFora").textContent = partida.fora;
@@ -4698,8 +4755,9 @@ function renderizarListaPartida(lado) {
         const bonus = usuarioNoLado ? (jogador.bonusTemporarioProximoJogo || 0) : 0;
         const overall = jogador.f + bonus;
         const textoBonus = bonus > 0 ? " +" + bonus : "";
+        const bolasGol = obterBolasGolJogador(jogador, lado);
 
-        div.innerHTML = `<span>${jogador.p} ${jogador.nome}</span><span>${overall}${textoBonus}</span>`;
+        div.innerHTML = `<span>${jogador.p} ${jogador.nome}${bolasGol}</span><span>${overall}${textoBonus}</span>`;
         elemento.appendChild(div);
     });
 }
@@ -5063,62 +5121,45 @@ function renderizarTelaFim(evento, jogo) {
         dataBR(evento.data) + " · " +
         obterRotuloEvento(evento);
 
-if (
-    partida.idsSubstitutosQueFizeramGol &&
-    partida.idsSubstitutosQueFizeramGol.length > 0
-) {
-    const nomesBoost = partida.idsSubstitutosQueFizeramGol
-        .map(function(idJogador) {
-            const jogador = buscarJogador(obterElencoUsuario(), idJogador);
-            return jogador ? jogador.nome : null;
-        })
-        .filter(Boolean)
-        .join(", ");
-
-    if (nomesBoost) {
-        textoResumoFim += " · Confiança: " + nomesBoost + " ganha +3 no próximo jogo";
+    if (save.ultimaLesao) {
+        textoResumoFim +=
+            " · Lesão: " +
+            save.ultimaLesao.jogador +
+            " (" +
+            save.ultimaLesao.tipo +
+            ", " +
+            save.ultimaLesao.jogos +
+            " jogo(s) fora)";
     }
-}
-
-if (save.ultimaLesao) {
-    textoResumoFim +=
-        " · Lesão: " +
-        save.ultimaLesao.jogador +
-        " teve lesão " +
-        save.ultimaLesao.tipo +
-        " e ficará " +
-        save.ultimaLesao.jogos +
-        " jogo(s) fora";
-}
 
     if (
         save.progressao &&
         save.progressao.ultimasEvolucoes &&
         save.progressao.ultimasEvolucoes.length > 0
     ) {
-        const nomesEvoluidos = save.progressao.ultimasEvolucoes
+        textoResumoFim += " · Evoluções: ";
+
+        textoResumoFim += save.progressao.ultimasEvolucoes
             .slice(0, 6)
-            .map(function(evolucao) {
-                return evolucao.jogador + " +" + evolucao.ganho;
+            .map(function(item) {
+                return item.nome + " +" + item.ganho;
             })
             .join(", ");
-
-        textoResumoFim += " · Evolução: " + nomesEvoluidos;
 
         if (save.progressao.ultimasEvolucoes.length > 6) {
             textoResumoFim += " e mais " + (save.progressao.ultimasEvolucoes.length - 6);
         }
     }
-if (
-    save.progressao &&
-    save.progressao.ultimoBonusOrcamento &&
-    save.progressao.ultimoBonusOrcamento > 0
-) {
-    textoResumoFim +=
-        " · Bônus de orçamento: +" +
-        formatarDinheiro(save.progressao.ultimoBonusOrcamento, save.moeda);
-}
 
+    if (
+        save.progressao &&
+        save.progressao.ultimoBonusOrcamento &&
+        save.progressao.ultimoBonusOrcamento > 0
+    ) {
+        textoResumoFim +=
+            " · Bônus de orçamento: +" +
+            formatarDinheiro(save.progressao.ultimoBonusOrcamento, save.moeda);
+    }
 
     document.getElementById("resumoFim").textContent = textoResumoFim;
 
@@ -5127,6 +5168,8 @@ if (
     const box = document.getElementById("estatisticasFim");
 
     box.innerHTML = "";
+
+    adicionarStat(box, obterTextoGolsDaPartida(), "Gols", "");
     adicionarStat(box, statsCasa.chutes, "Chutes", statsFora.chutes);
     adicionarStat(box, statsCasa.chutesGol, "Chutes a gol", statsFora.chutesGol);
     adicionarStat(box, statsCasa.escanteios, "Escanteios", statsFora.escanteios);
@@ -5140,7 +5183,13 @@ if (
 function adicionarStat(container, casa, label, fora) {
     const div = document.createElement("div");
     div.className = "stat-linha";
-    div.innerHTML = `<div>${casa}</div><div>${label}</div><div>${fora}</div>`;
+
+    if (fora === "") {
+        div.innerHTML = `<div style="grid-column: 1 / 4; text-align:left;">${label}: ${casa}</div>`;
+    } else {
+        div.innerHTML = `<div>${casa}</div><div>${label}</div><div>${fora}</div>`;
+    }
+
     container.appendChild(div);
 }
 
@@ -5287,7 +5336,12 @@ function registrarResultado(evento, jogo) {
         casa: jogo.casa,
         fora: jogo.fora,
         golsCasa: jogo.golsCasa,
-        golsFora: jogo.golsFora
+        golsFora: jogo.golsFora,
+        golsDetalhados: partida && partida.golsDetalhados
+            ? partida.golsDetalhados.map(function(gol) {
+                return Object.assign({}, gol);
+            })
+            : []
     };
 
     save.resultados.unshift(registro);
@@ -6999,6 +7053,10 @@ function obterPosicaoLigaUsuario() {
 }
 
 function obterRotuloPosicaoLiga(posicao) {
+    if (!temporadaEncerrada()) {
+        return posicao + "º colocado no momento";
+    }
+
     if (posicao === 1) return "Campeão";
     if (posicao === 2) return "Vice-campeão";
     if (posicao === 3) return "Terceiro colocado";
