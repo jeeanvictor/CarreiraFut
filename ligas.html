@@ -827,15 +827,13 @@ function confirmarContinental(disputarContinental) {
     if (!clubeEstaConfigurado(selecao.liga, selecao.time)) {
         alert(
             selecao.time + " ainda não está configurado.\n\n" +
-            "Clubes já liberados na Premier League:\n" +
-            "Arsenal, Aston Villa, Bournemouth, Chelsea, Crystal Palace, Liverpool, Manchester City, Manchester United, Newcastle United, Nottingham Forest e Tottenham."
+            "Escolha um clube marcado como Configurado para iniciar a carreira."
         );
         return;
     }
 
     iniciarCarreira(selecao.liga, selecao.time, disputarContinental);
 }
-
 function fecharModalContinental() {
     document.getElementById("modalContinental").classList.remove("ativo");
 }
