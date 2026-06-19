@@ -168,17 +168,18 @@ body {
 
 .grid-ligas {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
     margin-top: 42px;
 }
 
 .card-liga {
-    min-height: 230px;
+    min-height: 210px;
     border: none;
-    border-radius: 18px;
-    padding: 22px 16px;
-    background: var(--card-claro);
+    border-radius: 28px;
+    padding: 22px 14px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(232,247,218,0.96));
     color: var(--texto-card);
     box-shadow: 8px 8px 0 var(--sombra);
     cursor: pointer;
@@ -189,20 +190,20 @@ body {
 
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 
 .card-liga::after {
     content: "";
     position: absolute;
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     left: 50%;
-    bottom: -70px;
+    bottom: -78px;
     transform: translateX(-50%);
     border-radius: 50%;
-    background: rgba(11,93,42,0.14);
+    background: rgba(11,93,42,0.12);
 }
 
 .card-liga:hover {
@@ -225,21 +226,34 @@ body {
 }
 
 .icone-liga {
-    width: 102px;
-    height: 102px;
-    border-radius: 18px;
-    background: rgba(255,255,255,0.82);
+    width: 104px;
+    height: 104px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.72);
     color: var(--verde-medio);
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 23px;
     font-weight: 900;
-    box-shadow: 4px 4px 0 #082914;
-    margin: 0 auto 22px;
+    box-shadow: none;
+    margin: 0 auto 18px;
     position: relative;
     z-index: 2;
-    overflow: hidden;
+    overflow: visible;
+}
+
+.icone-liga.com-logo {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.icone-liga.com-logo img {
+    width: 125%;
+    height: 125%;
+    object-fit: contain;
+    display: block;
 }
 
 .icone-liga.com-logo {
@@ -258,7 +272,7 @@ body {
 
 .nome-liga {
     width: 100%;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 900;
     line-height: 1.05;
     text-transform: uppercase;
@@ -268,13 +282,16 @@ body {
 }
 
 .status-liga {
-    width: 100%;
-    margin-top: 14px;
-    font-size: 12px;
+    display: inline-block;
+    margin-top: 13px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--verde-medio);
+    color: var(--verde-limao);
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(8,41,20,0.62);
     position: relative;
     z-index: 2;
     text-align: center;
@@ -505,9 +522,36 @@ body {
         font-size: 18px;
     }
 
-    .grid-ligas {
-        grid-template-columns: 1fr;
-    }
+.grid-ligas {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.card-liga {
+    min-height: 170px;
+    border-radius: 22px;
+    padding: 18px 10px;
+}
+
+.icone-liga {
+    width: 78px;
+    height: 78px;
+    margin-bottom: 14px;
+}
+
+.icone-liga.com-logo img {
+    width: 132%;
+    height: 132%;
+}
+
+.nome-liga {
+    font-size: 15px;
+}
+
+.status-liga {
+    font-size: 9px;
+    padding: 6px 8px;
+}
 
     .barra-times {
         flex-direction: column;
