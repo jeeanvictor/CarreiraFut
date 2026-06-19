@@ -1528,11 +1528,13 @@ const CLUBES_PREMIER = [
     "Bournemouth",
     "Brentford",
     "Brighton",
-    "Burnley",
     "Chelsea",
+    "Coventry City",
     "Crystal Palace",
     "Everton",
     "Fulham",
+    "Hull City",
+    "Ipswich Town",
     "Leeds United",
     "Liverpool",
     "Manchester City",
@@ -1540,9 +1542,7 @@ const CLUBES_PREMIER = [
     "Newcastle United",
     "Nottingham Forest",
     "Sunderland",
-    "Tottenham",
-    "West Ham",
-    "Wolverhampton"
+    "Tottenham"
 ];
 
 const CLUBES_BRASILEIRAO = [
@@ -1589,7 +1589,9 @@ const SIGLAS_CLUBES = {
     "Tottenham": "TOT",
     "West Ham": "WHU",
     "Wolverhampton": "WOL",
-
+    "Coventry City": "COV",
+    "Hull City": "HUL",
+    "Ipswich Town": "IPS",
     "Athletico-PR": "CAP",
     "Atlético-MG": "CAM",
     "Bahia": "BAH",
@@ -1635,7 +1637,28 @@ const SIGLAS_CLUBES = {
     "Atlético Nacional": "ATN"
 };
 
-    const ESCUDOS_CLUBES = {
+const ESCUDOS_CLUBES = {
+    "Arsenal": "assets/times/arsenal.png",
+    "Aston Villa": "assets/times/astonvilla.png",
+    "Bournemouth": "assets/times/bournemouth.png",
+    "Brentford": "assets/times/brentford.png",
+    "Brighton": "assets/times/brighton.png",
+    "Chelsea": "assets/times/chelsea.png",
+    "Coventry City": "assets/times/coventry.png",
+    "Crystal Palace": "assets/times/crystalpalace.png",
+    "Everton": "assets/times/everton.png",
+    "Fulham": "assets/times/fulham.png",
+    "Hull City": "assets/times/hull_city.png",
+    "Ipswich Town": "assets/times/ipswich_town.png",
+    "Leeds United": "assets/times/leeds.png",
+    "Liverpool": "assets/times/liverpool.png",
+    "Manchester City": "assets/times/manchestercity.png",
+    "Manchester United": "assets/times/manchesterunited.png",
+    "Newcastle United": "assets/times/newcastle.png",
+    "Nottingham Forest": "assets/times/nottingham_forest.png",
+    "Sunderland": "assets/times/sunderland.png",
+    "Tottenham": "assets/times/tottenham.png",
+
     "Athletico-PR": "assets/times/atlparanaense.png",
     "Atlético-MG": "assets/times/atlmineiro.png",
     "Bahia": "assets/times/bahia.png",
@@ -1657,7 +1680,6 @@ const SIGLAS_CLUBES = {
     "Vasco da Gama": "assets/times/vasco.png",
     "Vitória": "assets/times/vitoria.png"
 };
-
 const PALETAS_CLUBES = {
     "Arsenal": { principal: "#d71920", secundaria: "#f2f5f7", escura: "#2b0608", fundo1: "#5a0b0f", fundo2: "#d71920", card: "#ffffff", textoCard: "#2b0608" },
     "Chelsea": { principal: "#034694", secundaria: "#ffffff", escura: "#011f45", fundo1: "#011f45", fundo2: "#034694", card: "#ffffff", textoCard: "#011f45" },
@@ -1873,8 +1895,13 @@ Object.assign(FORCAS, {
     "RB Bragantino": 78,
     "Remo": 73,
     "Vasco da Gama": 82,
-    "Vitória": 74
+    "Vitória": 74,
+    "Coventry City": 72,
+    "Hull City": 71,
+    "Ipswich Town": 72
 });
+
+
     
 const ORCAMENTOS_CLUBES = {
     /* PREMIER LEAGUE - £ */
@@ -2261,6 +2288,26 @@ Object.assign(ORCAMENTOS_CLUBES, {
         moeda: "R$",
         caixa: 100,
         transferencias: 62
+    }
+});
+
+Object.assign(ORCAMENTOS_CLUBES, {
+    "Coventry City": {
+        moeda: "£",
+        caixa: 48,
+        transferencias: 30
+    },
+
+    "Hull City": {
+        moeda: "£",
+        caixa: 45,
+        transferencias: 28
+    },
+
+    "Ipswich Town": {
+        moeda: "£",
+        caixa: 52,
+        transferencias: 34
     }
 });
     
