@@ -1080,6 +1080,27 @@ tr.destaque {
     pointer-events: none;
     text-transform: uppercase;
 }
+
+@media (min-width: 900px) {
+    .layout-desktop > section:not(.painel-clube) {
+        min-width: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .painel-clube {
+        z-index: 1;
+    }
+
+    .layout-desktop > #aba-estatisticas {
+        grid-column: 2;
+        grid-row: 1;
+        margin-top: 66px;
+        min-width: 0;
+        position: relative;
+        z-index: 2;
+    }
+}
     
 </style>
 </head>
