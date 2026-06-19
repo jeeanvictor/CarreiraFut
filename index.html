@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Carreira Fut</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        linear-gradient(rgba(5, 45, 22, 0.88), rgba(7, 75, 35, 0.94)),
+        repeating-linear-gradient(
+            90deg,
+            #0b5d2a 0px,
+            #0b5d2a 80px,
+            #0f6f34 80px,
+            #0f6f34 160px
+        );
+    color: #f7ffe9;
+    overflow: hidden;
+}
+
+.home {
+    width: 100%;
+    min-height: 100vh;
+    padding: 42px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.home::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right, transparent 49.5%, rgba(255,255,255,0.10) 50%, transparent 50.5%),
+        radial-gradient(circle at center, transparent 0 90px, rgba(255,255,255,0.12) 92px, transparent 94px);
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.home::after {
+    content: "";
+    position: absolute;
+    width: 430px;
+    height: 430px;
+    border-radius: 50%;
+    background: rgba(178, 255, 89, 0.12);
+    top: -140px;
+    right: -170px;
+    filter: blur(4px);
+}
+
+.content {
+    position: relative;
+    z-index: 2;
+}
+
+.topo {
+    font-size: 13px;
+    letter-spacing: 5px;
+    font-weight: 800;
+    color: #d9ffc2;
+    text-transform: uppercase;
+}
+
+.logo-jogo {
+    margin-top: 42px;
+}
+
+.logo-jogo .carreira {
+    display: block;
+    font-size: 72px;
+    line-height: 0.86;
+    font-weight: 900;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-shadow: 7px 7px 0 #082914;
+}
+
+.logo-jogo .fut {
+    display: block;
+    margin-top: 6px;
+    font-size: 96px;
+    line-height: 0.86;
+    font-weight: 900;
+    color: #b7ff3c;
+    text-transform: uppercase;
+    text-shadow: 8px 8px 0 #082914;
+}
+
+.selo {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 10px 16px;
+    border: 2px solid rgba(247,255,233,0.35);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #d9ffc2;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.16);
+}
+
+.titulo {
+    margin-top: 46px;
+    font-size: 42px;
+    line-height: 0.98;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 4px 4px 0 #0d351c;
+}
+
+.descricao {
+    margin-top: 34px;
+    max-width: 430px;
+    font-size: 21px;
+    line-height: 1.45;
+    color: #d8e8d1;
+    font-weight: 500;
+}
+
+.botao-area {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 24px;
+}
+
+.btn-iniciar,
+.btn-continuar {
+    width: 100%;
+    max-width: 420px;
+    border: none;
+    font-size: 26px;
+    font-weight: 900;
+    padding: 24px 26px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    box-shadow: 8px 8px 0 #071d0e;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.btn-iniciar {
+    background: #b7ff3c;
+    color: #082914;
+}
+
+.btn-continuar {
+    display: none;
+    background: #ffffff;
+    color: #082914;
+    margin-bottom: 16px;
+}
+
+.btn-iniciar:active,
+.btn-continuar:active {
+    transform: translate(5px, 5px);
+    box-shadow: 3px 3px 0 #071d0e;
+}
+
+.bola {
+    position: absolute;
+    right: 24px;
+    bottom: 150px;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: inset -10px -10px 0 #d6d6d6;
+    opacity: 0.16;
+    z-index: 1;
+}
+
+.numero-fundo {
+    position: absolute;
+    top: 122px;
+    right: 18px;
+    font-size: 110px;
+    line-height: 1;
+    font-weight: 900;
+    color: rgba(255,255,255,0.06);
+    text-shadow: 5px 5px 0 rgba(0,0,0,0.12);
+    z-index: 1;
+    pointer-events: none;
+}
+
+@media (max-width: 420px) {
+    .home {
+        padding: 36px 22px;
+    }
+
+    .logo-jogo .carreira {
+        font-size: 58px;
+    }
+
+    .logo-jogo .fut {
+        font-size: 80px;
+    }
+
+    .titulo {
+        font-size: 36px;
+    }
+
+    .descricao {
+        font-size: 19px;
+    }
+
+    .btn-iniciar,
+    .btn-continuar {
+        font-size: 23px;
+        padding: 21px 22px;
+    }
+
+    .numero-fundo {
+        font-size: 84px;
+        top: 118px;
+        right: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<section class="home">
+
+    <div class="numero-fundo">90'</div>
+
+    <div class="content">
+        <div class="topo">Temporada 2026 · Futebol Manager</div>
+
+        <div class="logo-jogo">
+            <span class="carreira">Carreira</span>
+            <span class="fut">Fut</span>
+        </div>
+
+        <div class="selo">Premier · Serie A · Brasileirão</div>
+
+        <h1 class="titulo">
+            Assuma um clube.<br>
+            Monte seu elenco.<br>
+            Conquiste o mundo.
+        </h1>
+
+        <p class="descricao">
+            Escolha uma liga, entre no mercado, escale seu time e dispute títulos nacionais,
+            Libertadores e Champions League.<br><br>
+        </p>
+    </div>
+
+    <div class="bola"></div>
+
+    <div class="botao-area">
+        <button id="btnContinuar" class="btn-continuar" onclick="continuarCarreira()">
+            Continuar carreira
+        </button>
+
+        <button class="btn-iniciar" onclick="iniciarJogo()">
+            Iniciar carreira →
+        </button>
+    </div>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    verificarSaveExistente();
+});
+
+function verificarSaveExistente() {
+    const textoSave = localStorage.getItem("saveCarreiraFut");
+    const btnContinuar = document.getElementById("btnContinuar");
+
+    if (!btnContinuar) return;
+
+    if (!textoSave) {
+        btnContinuar.style.display = "none";
+        return;
+    }
+
+    try {
+        const save = JSON.parse(textoSave);
+
+        if (save && save.clube && save.liga) {
+            btnContinuar.style.display = "block";
+            btnContinuar.textContent = "Continuar: " + save.clube;
+        } else {
+            btnContinuar.style.display = "none";
+        }
+    } catch (erro) {
+        btnContinuar.style.display = "none";
+    }
+}
+
+function continuarCarreira() {
+    const textoSave = localStorage.getItem("saveCarreiraFut");
+
+    if (!textoSave) {
+        alert("Nenhuma carreira salva encontrada.");
+        verificarSaveExistente();
+        return;
+    }
+
+    window.location.href = "clube.html";
+}
+
+function iniciarJogo() {
+    const textoSave = localStorage.getItem("saveCarreiraFut");
+
+    if (textoSave) {
+        const confirmar = confirm(
+            "Você já tem uma carreira salva. Se iniciar uma nova carreira e escolher outro clube, o save atual pode ser substituído. Deseja continuar?"
+        );
+
+        if (!confirmar) return;
+    }
+
+    window.location.href = "ligas.html";
+}
+</script>
+
+</body>
+</html>
