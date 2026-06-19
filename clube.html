@@ -2773,29 +2773,22 @@ function aplicarPaletaDoClube(nomeClube) {
     root.style.setProperty("--sombra-forte", paleta.escura);
 }
 
-function criarNovoSave(ligaForcada, clubeForcado) {
-    const clube = corrigirNomeClube(clubeForcado || localStorage.getItem("timeSelecionado") || "Arsenal");
-    const ligaInferida = inferirLigaPorClube(clube);
-    const liga = ligaInferida || corrigirNomeLiga(ligaForcada || localStorage.getItem("ligaSelecionada") || LIGA_PREMIER);
-    const disputaContinental = localStorage.getItem("disputaContinental") === "sim";
-
-    localStorage.setItem("ligaSelecionada", liga);
-    localStorage.setItem("timeSelecionado", clube);
-
-    const clubesDaLiga = obterClubesDaLiga(liga, clube);
-    const tabela = criarTabelaInicial(clubesDaLiga);
+function criarNovoSave(liga, clube, disputaContinental) {
+    const clubes = obterClubesDaLiga(liga, clube);
+    const tabela = criarTabelaInicial(clubes);
     const calendario = montarCalendario(liga, clube, disputaContinental);
-    const orcamentoInicial = obterOrcamentoInicial(liga, clube);
 
-    return {
+    const orcamento = obterOrcamentoInicial(liga, clube);
+
+    const novoSave = {
         versao: VERSAO_SAVE,
         liga: liga,
         clube: clube,
         sigla: SIGLAS_CLUBES[clube] || clube.substring(0, 3).toUpperCase(),
-        moeda: orcamentoInicial.moeda,
-dinheiro: formatarDinheiro(orcamentoInicial.caixa, orcamentoInicial.moeda),
-orcamentoTransferencias: orcamentoInicial.transferencias,
-orcamentoInicial: orcamentoInicial.transferencias,
+        moeda: orcamento.moeda,
+        dinheiro: formatarDinheiro(orcamento.transferencias, orcamento.moeda),
+        orcamentoTransferencias: orcamento.transferencias,
+        orcamentoInicial: orcamento.transferencias,
         formacao: "4-3-3",
         disputaContinental: disputaContinental,
         competicaoContinental: obterNomeContinental(liga),
@@ -2803,25 +2796,20 @@ orcamentoInicial: orcamentoInicial.transferencias,
         tabela: tabela,
         calendario: calendario,
         resultados: [],
+        historicoResultados: [],
         elenco: clonarElencoInicial(clube),
         progressao: {
-    jogosTemporada: 0,
-    vitoriasSeguidas: 0,
-    vitoriasTemporada: 0,
-    ultimasEvolucoes: [],
-    ultimoBonusOrcamento: 0
-},
-        continentalStats: {
-            jogos: 0,
-            vitorias: 0,
-            empates: 0,
-            derrotas: 0,
-            gp: 0,
-            gc: 0,
-            pontos: 0
+            jogosTemporada: 0,
+            vitoriasSeguidas: 0,
+            vitoriasTemporada: 0,
+            ultimasEvolucoes: [],
+            ultimoBonusOrcamento: 0
         },
+        continentalStats: criarContinentalStats(liga, clube, disputaContinental),
         copaBrasilStats: criarCopaBrasilStats(liga)
     };
+
+    return novoSave;
 }
 
 function obterClubesDaLiga(liga, clubeUsuario) {
@@ -2844,6 +2832,73 @@ function obterNomeContinental(liga) {
     return "UEFA Champions League";
 }
 
+    function criarContinentalStats(liga, clubeUsuario, disputaContinental) {
+    const stats = {
+        ativa: Boolean(disputaContinental),
+        jogos: 0,
+        vitorias: 0,
+        empates: 0,
+        derrotas: 0,
+        gp: 0,
+        gc: 0,
+        pontos: 0,
+        grupo: "",
+        clubesGrupo: [],
+        tabelaGrupo: null
+    };
+
+    if (!disputaContinental) {
+        return stats;
+    }
+
+    if (liga === LIGA_BRASILEIRAO) {
+        const grupo = criarGrupoLibertadores(clubeUsuario);
+
+        stats.grupo = grupo.nome;
+        stats.clubesGrupo = grupo.clubes;
+        stats.tabelaGrupo = criarTabelaInicial(grupo.clubes);
+    }
+
+    return stats;
+}
+
+function criarGrupoLibertadores(clubeUsuario) {
+    const nomesGrupos = ["Grupo A", "Grupo B", "Grupo C", "Grupo D", "Grupo E", "Grupo F", "Grupo G", "Grupo H"];
+    const nomeGrupo = nomesGrupos[Math.floor(Math.random() * nomesGrupos.length)];
+
+    const candidatos = ADVERSARIOS_LIBERTADORES.filter(function(clube) {
+        return clube !== clubeUsuario;
+    });
+
+    const embaralhados = embaralhar(candidatos);
+
+    return {
+        nome: nomeGrupo,
+        clubes: [clubeUsuario].concat(embaralhados.slice(0, 3))
+    };
+}
+
+function garantirContinentalStats() {
+    if (!save.disputaContinental) return;
+
+    if (!save.continentalStats) {
+        save.continentalStats = criarContinentalStats(save.liga, save.clube, save.disputaContinental);
+    }
+
+    if (save.liga === LIGA_BRASILEIRAO) {
+        if (!save.continentalStats.grupo || !save.continentalStats.clubesGrupo || save.continentalStats.clubesGrupo.length < 4) {
+            const grupo = criarGrupoLibertadores(save.clube);
+
+            save.continentalStats.grupo = grupo.nome;
+            save.continentalStats.clubesGrupo = grupo.clubes;
+            save.continentalStats.tabelaGrupo = criarTabelaInicial(grupo.clubes);
+        }
+
+        if (!save.continentalStats.tabelaGrupo) {
+            save.continentalStats.tabelaGrupo = criarTabelaInicial(save.continentalStats.clubesGrupo);
+        }
+    }
+}
 function criarTabelaInicial(clubes) {
     const tabela = {};
 
@@ -3590,13 +3645,24 @@ function obterStatusCopaBrasil() {
     }
 
     const stats = save.copaBrasilStats;
+    const temporadaFinalizada = temporadaEncerrada();
 
-    if (stats.campeao) return "Campeão";
-    if (stats.vice) return "Vice-campeão";
-    if (stats.eliminado) return stats.status || "Eliminado";
+    if (temporadaFinalizada) {
+        if (stats.campeao) return "Campeão";
+        if (stats.vice) return "Vice-campeão";
+        if (stats.eliminado) return stats.status || "Eliminado";
+    }
 
     if (stats.jogos === 0) {
         return "Ainda não estreou";
+    }
+
+    if (stats.eliminado) {
+        return "Campanha encerrada · " + (stats.faseAtual || stats.status || "fase atual");
+    }
+
+    if (stats.campeao || stats.vice) {
+        return "Final concluída · aguardando fim da temporada";
     }
 
     return (
