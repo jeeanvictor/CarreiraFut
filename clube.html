@@ -849,7 +849,7 @@ tr.destaque {
     }
 
     .controles-partida {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .estatisticas-grid {
@@ -1128,7 +1128,7 @@ tr.destaque {
 .filtros-mercado {
     margin-top: 12px;
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr 1fr auto;
     gap: 10px;
     align-items: end;
 }
@@ -1419,6 +1419,18 @@ tr.destaque {
         </select>
     </div>
 
+    <div class="filtro-mercado">
+    <label for="filtroCaracteristicaMercado">Característica</label>
+    <select id="filtroCaracteristicaMercado" onchange="renderizarMercado()">
+        <option value="todos">Todas as características</option>
+        <option value="craque">Craque</option>
+        <option value="armador">Armador</option>
+        <option value="centroavante">Centroavante</option>
+        <option value="promessa">Promessa</option>
+        <option value="sub23">Sub-23</option>
+    </select>
+</div>
+
     <div class="grupo-filtros-liga-clube">
         <div class="filtro-mercado">
             <label for="filtroLigaMercado">Liga</label>
@@ -1607,12 +1619,12 @@ tr.destaque {
                 </aside>
             </div>
 
-            <div class="controles-partida">
-                <button id="btnPausar" class="btn-partida sec" onclick="alternarPausa()">Pausar</button>
-                <button id="btnSubstituir" class="btn-partida sec" onclick="abrirModalSubstituicao()">Substituições</button>
-                <button id="btnSegundoTempo" class="btn-partida" onclick="comecarSegundoTempo()" style="display:none;">Começar o 2º tempo</button>
-            </div>
-
+           <div class="controles-partida">
+    <button id="btnPausar" class="btn-partida sec" onclick="alternarPausa()">Pausar</button>
+    <button id="btnVelocidadePartida" class="btn-partida sec" onclick="alternarVelocidadePartida()">Velocidade: Normal</button>
+    <button id="btnSubstituir" class="btn-partida sec" onclick="abrirModalSubstituicao()">Substituições</button>
+    <button id="btnSegundoTempo" class="btn-partida" onclick="comecarSegundoTempo()" style="display:none;">Começar o 2º tempo</button>
+</div>
             <div id="statusPartida" class="status-partida">
                 Partida em andamento.
             </div>
@@ -3917,7 +3929,30 @@ let partida = null;
 let intervaloSimulacao = null;
 let jogadorMercadoSelecionado = null;
 let jogadorSaidaSelecionado = null;
+const SOM_GOL = "assets/times/gol.mp3";
+const SOM_JUIZ = "assets/times/juiz.mp3";
 
+function tocarSomArquivo(caminho, volume) {
+    try {
+        const audio = new Audio(caminho);
+        audio.volume = typeof volume === "number" ? volume : 0.8;
+
+        const tentativa = audio.play();
+
+        if (tentativa && typeof tentativa.catch === "function") {
+            tentativa.catch(function() {});
+        }
+    } catch (erro) {}
+}
+
+function tocarSomGol() {
+    tocarSomArquivo(SOM_GOL, 0.85);
+}
+
+function tocarSomJuiz() {
+    tocarSomArquivo(SOM_JUIZ, 0.75);
+}
+    
 iniciarPagina();
 
 function corrigirEstruturaAbaEstatisticas() {
@@ -4111,6 +4146,36 @@ function jogadorPassaFiltroClubeMercado(jogador, filtroClube) {
     return jogador.clube === filtroClube;
 }
 
+    function jogadorPassaFiltroCaracteristicaMercado(jogador, filtroCaracteristica) {
+    if (!filtroCaracteristica || filtroCaracteristica === "todos") return true;
+
+    const funcao = (jogador.funcao || "").toLowerCase();
+    const idade = jogador.idade || 25;
+    const overall = jogador.f || 0;
+
+    if (filtroCaracteristica === "craque") {
+        return funcao.includes("craque") || overall >= 85;
+    }
+
+    if (filtroCaracteristica === "armador") {
+        return funcao.includes("armador");
+    }
+
+    if (filtroCaracteristica === "centroavante") {
+        return funcao.includes("centroavante");
+    }
+
+    if (filtroCaracteristica === "promessa") {
+        return funcao.includes("promessa") || idade <= 20;
+    }
+
+    if (filtroCaracteristica === "sub23") {
+        return idade <= 23;
+    }
+
+    return true;
+}
+
 function obterClubesDisponiveisParaFiltroMercado(jogadores, filtroLiga) {
     let lista = jogadores.slice();
 
@@ -4162,11 +4227,13 @@ function atualizarFiltroClubesMercado() {
 
 function limparFiltrosMercado() {
     const posicao = document.getElementById("filtroPosicaoMercado");
+    const caracteristica = document.getElementById("filtroCaracteristicaMercado");
     const liga = document.getElementById("filtroLigaMercado");
     const clube = document.getElementById("filtroClubeMercado");
     const busca = document.getElementById("campoBuscaMercado");
 
     if (posicao) posicao.value = "todos";
+    if (caracteristica) caracteristica.value = "todos";
     if (liga) liga.value = "todos";
     if (clube) clube.value = "todos";
     if (busca) busca.value = "";
@@ -5545,8 +5612,8 @@ function abrirEscalacao() {
         reservas: []
     };
 
-    autoEscalar();
-
+renderizarEscalacao();
+    
     document.getElementById("seloEscalacao").textContent = evento.competicao;
     document.getElementById("descricaoEscalacao").textContent =
         save.clube + " joga " + mando + " contra " + adversario + ". Escolha 11 titulares e 8 reservas.";
@@ -5683,10 +5750,6 @@ function alternarJogadorEscalacao(id) {
 
     if (titulares.includes(id)) {
         contextoEscalacao.titulares = titulares.filter(item => item !== id);
-
-        if (contextoEscalacao.reservas.length < 8) {
-            contextoEscalacao.reservas.push(id);
-        }
     } else if (reservas.includes(id)) {
         contextoEscalacao.reservas = reservas.filter(item => item !== id);
     } else {
@@ -5698,6 +5761,21 @@ function alternarJogadorEscalacao(id) {
             alert("Você já escolheu 11 titulares e 8 reservas.");
         }
     }
+
+    contextoEscalacao.titulares = ordenarJogadoresVisual(
+        contextoEscalacao.titulares
+            .map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
+            .filter(Boolean)
+    ).map(jogador => jogador.id);
+
+    contextoEscalacao.reservas = ordenarJogadoresVisual(
+        contextoEscalacao.reservas
+            .map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
+            .filter(Boolean)
+    ).map(jogador => jogador.id);
+
+    renderizarEscalacao();
+}
 
     contextoEscalacao.titulares = ordenarJogadoresVisual(
         contextoEscalacao.titulares.map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
@@ -5756,6 +5834,7 @@ function iniciarPartida() {
         pausada: false,
         intervalo: false,
         finalizada: false,
+        velocidadeSimulacao: "normal",
         golsCasa: 0,
         golsFora: 0,
         substituicoesUsuario: 0,
@@ -5795,9 +5874,15 @@ pedidoSubstituicaoFeito: false
     document.getElementById("telaEscalacao").classList.remove("ativa");
     document.getElementById("telaPartida").classList.add("ativa");
 
-    renderizarTelaPartida();
-    adicionarEvento("Apita o árbitro. Bola rolando!", "neutro");
-    iniciarLoopPartida();
+    const btnVelocidade = document.getElementById("btnVelocidadePartida");
+
+if (btnVelocidade) {
+    btnVelocidade.textContent = "Velocidade: Normal";
+}
+
+renderizarTelaPartida();
+adicionarEvento("Apita o árbitro. Bola rolando!", "neutro");
+iniciarLoopPartida();
 }
 
 function criarStats() {
@@ -5814,6 +5899,34 @@ function criarStats() {
     };
 }
 
+function obterIntervaloSimulacao() {
+    if (!partida || partida.velocidadeSimulacao === "normal") {
+        return 450;
+    }
+
+    return 160;
+}
+
+function alternarVelocidadePartida() {
+    if (!partida || partida.finalizada) return;
+
+    partida.velocidadeSimulacao =
+        partida.velocidadeSimulacao === "rapida" ? "normal" : "rapida";
+
+    const botao = document.getElementById("btnVelocidadePartida");
+
+    if (botao) {
+        botao.textContent =
+            partida.velocidadeSimulacao === "rapida"
+                ? "Velocidade: Rápida"
+                : "Velocidade: Normal";
+    }
+
+    if (!partida.pausada && !partida.intervalo && !partida.modalSubstituicaoAberto) {
+        iniciarLoopPartida();
+    }
+}
+    
 function iniciarLoopPartida() {
     clearInterval(intervaloSimulacao);
 
@@ -5838,7 +5951,7 @@ function iniciarLoopPartida() {
 
         gerarEventoMinuto();
         renderizarTelaPartida();
-    }, 450);
+    }, obterIntervaloSimulacao());
 }
 
 function pararParaIntervalo() {
@@ -6228,6 +6341,21 @@ function aplicarImpactoVermelho(lado) {
 }
 
 function adicionarEvento(texto, tipo) {
+    if (tipo === "gol") {
+        tocarSomGol();
+    }
+
+    const textoNormalizado = (texto || "").toLowerCase();
+
+    if (
+        tipo === "cartao" ||
+        tipo === "vermelho" ||
+        textoNormalizado.startsWith("pênalti") ||
+        textoNormalizado.startsWith("penalti")
+    ) {
+        tocarSomJuiz();
+    }
+
     partida.eventos.unshift({
         minuto: partida.minuto,
         texto: texto,
@@ -7573,32 +7701,38 @@ function renderizarMercado() {
     renderizarPropostasRecebidas();
 
     const campoBusca = document.getElementById("campoBuscaMercado");
-const campoPosicao = document.getElementById("filtroPosicaoMercado");
-const campoLiga = document.getElementById("filtroLigaMercado");
-const campoClube = document.getElementById("filtroClubeMercado");
+    const campoPosicao = document.getElementById("filtroPosicaoMercado");
+    const campoCaracteristica = document.getElementById("filtroCaracteristicaMercado");
+    const campoLiga = document.getElementById("filtroLigaMercado");
+    const campoClube = document.getElementById("filtroClubeMercado");
 
-const busca = campoBusca ? (campoBusca.value || "").toLowerCase().trim() : "";
-const filtroPosicao = campoPosicao ? campoPosicao.value : "todos";
-const filtroLiga = campoLiga ? campoLiga.value : "todos";
-const filtroClube = campoClube ? campoClube.value : "todos";
+    const busca = campoBusca ? (campoBusca.value || "").toLowerCase().trim() : "";
+    const filtroPosicao = campoPosicao ? campoPosicao.value : "todos";
+    const filtroCaracteristica = campoCaracteristica ? campoCaracteristica.value : "todos";
+    const filtroLiga = campoLiga ? campoLiga.value : "todos";
+    const filtroClube = campoClube ? campoClube.value : "todos";
 
     const janelaAberta = janelaTransferenciasAberta();
 
     let jogadores = obterTodosJogadoresMercado();
 
-atualizarFiltroClubesMercado();
+    atualizarFiltroClubesMercado();
 
-jogadores = jogadores.filter(function(jogador) {
-    return jogadorPassaFiltroPosicaoMercado(jogador, filtroPosicao);
-});
+    jogadores = jogadores.filter(function(jogador) {
+        return jogadorPassaFiltroPosicaoMercado(jogador, filtroPosicao);
+    });
 
-jogadores = jogadores.filter(function(jogador) {
-    return jogadorPassaFiltroLigaMercado(jogador, filtroLiga);
-});
+    jogadores = jogadores.filter(function(jogador) {
+        return jogadorPassaFiltroCaracteristicaMercado(jogador, filtroCaracteristica);
+    });
 
-jogadores = jogadores.filter(function(jogador) {
-    return jogadorPassaFiltroClubeMercado(jogador, filtroClube);
-});
+    jogadores = jogadores.filter(function(jogador) {
+        return jogadorPassaFiltroLigaMercado(jogador, filtroLiga);
+    });
+
+    jogadores = jogadores.filter(function(jogador) {
+        return jogadorPassaFiltroClubeMercado(jogador, filtroClube);
+    });
 
     if (busca) {
         jogadores = jogadores.filter(function(jogador) {
@@ -7637,6 +7771,7 @@ jogadores = jogadores.filter(function(jogador) {
                     <strong>${jogador.nome}</strong>
                     <span>
                         ${jogador.p} · ${jogador.funcao} · Overall ${jogador.f} ·
+                        ${jogador.idade || 25} anos ·
                         ${jogador.clube} · ${jogador.liga} ·
                         Valor: ${formatarDinheiro(jogador.valor, save.moeda)}
                     </span>
