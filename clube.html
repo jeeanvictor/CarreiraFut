@@ -5749,9 +5749,13 @@ function alternarJogadorEscalacao(id) {
     const reservas = contextoEscalacao.reservas;
 
     if (titulares.includes(id)) {
-        contextoEscalacao.titulares = titulares.filter(item => item !== id);
+        contextoEscalacao.titulares = titulares.filter(function(item) {
+            return item !== id;
+        });
     } else if (reservas.includes(id)) {
-        contextoEscalacao.reservas = reservas.filter(item => item !== id);
+        contextoEscalacao.reservas = reservas.filter(function(item) {
+            return item !== id;
+        });
     } else {
         if (contextoEscalacao.titulares.length < 11) {
             contextoEscalacao.titulares.push(id);
@@ -5764,31 +5768,26 @@ function alternarJogadorEscalacao(id) {
 
     contextoEscalacao.titulares = ordenarJogadoresVisual(
         contextoEscalacao.titulares
-            .map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
+            .map(function(idJogador) {
+                return buscarJogador(obterElencoDisponivel(), idJogador);
+            })
             .filter(Boolean)
-    ).map(jogador => jogador.id);
+    ).map(function(jogador) {
+        return jogador.id;
+    });
 
     contextoEscalacao.reservas = ordenarJogadoresVisual(
         contextoEscalacao.reservas
-            .map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
+            .map(function(idJogador) {
+                return buscarJogador(obterElencoDisponivel(), idJogador);
+            })
             .filter(Boolean)
-    ).map(jogador => jogador.id);
+    ).map(function(jogador) {
+        return jogador.id;
+    });
 
     renderizarEscalacao();
-}
-
-    contextoEscalacao.titulares = ordenarJogadoresVisual(
-        contextoEscalacao.titulares.map(idJogador => buscarJogador(obterElencoDisponivel(), idJogador))
-    ).map(jogador => jogador.id);
-
-    contextoEscalacao.reservas = ordenarJogadoresVisual(
-        contextoEscalacao.reservas.map(idJogador => buscarJogador(obterElencoUsuario(), idJogador))
-    ).map(jogador => jogador.id);
-
-    renderizarEscalacao();
-}
-
-function confirmarEscalacao() {
+}function confirmarEscalacao() {
     if (contextoEscalacao.titulares.length !== 11 || contextoEscalacao.reservas.length !== 8) {
         alert("Escolha exatamente 11 titulares e 8 reservas.");
         return;
