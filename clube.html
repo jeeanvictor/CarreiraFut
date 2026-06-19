@@ -2628,6 +2628,19 @@ let jogadorSaidaSelecionado = null;
 
 iniciarPagina();
 
+function corrigirEstruturaAbaEstatisticas() {
+    const abaEstatisticas = document.getElementById("aba-estatisticas");
+    const navAbas = document.querySelector(".abas");
+
+    if (!abaEstatisticas || !navAbas || !navAbas.parentElement) return;
+
+    const containerAbas = navAbas.parentElement;
+
+    if (abaEstatisticas.parentElement !== containerAbas) {
+        containerAbas.appendChild(abaEstatisticas);
+    }
+}
+
 function iniciarPagina() {
     const selecao = obterSelecaoInicial();
     const saveExistente = lerSaveSalvo();
@@ -2653,6 +2666,8 @@ function iniciarPagina() {
         save = criarNovoSave(selecao.liga, selecao.clube);
         salvar();
     }
+
+corrigirEstruturaAbaEstatisticas();
 
 garantirDadosMercado();
 aplicarPaletaDoClube(save.clube);
