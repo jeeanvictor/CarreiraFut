@@ -303,28 +303,43 @@ body {
 }
 
 .escudo {
-
-
-.escudo.com-imagem {
-    width: 79px;
-    height: 79px;
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: transparent;
-    border: none;
-    border-radius: 0;
     box-shadow: none;
-    text-shadow: none;
-    overflow: visible;
-    margin-bottom: 8px;
+    border: none;
+    position: relative;
+    z-index: 2;
 }
 
-.escudo.com-imagem img {
+.img-escudo {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
 }
+
+.sigla-escudo {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-limao));
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 900;
+    text-shadow: 2px 2px 0 #082914;
+    box-shadow: 4px 4px 0 #082914;
+    border: 3px solid rgba(8,41,20,0.18);
+}
     
-.nome-time {
+    .nome-time {
     font-size: 12px;
     line-height: 1.12;
     font-weight: 900;
