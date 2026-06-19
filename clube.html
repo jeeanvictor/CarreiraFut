@@ -6415,6 +6415,7 @@ function gerarElencoGenericoRaw(clube) {
 }
 function garantirDadosMercado() {
 garantirDadosTransferencias();
+        atualizarElencosGenericosSalvos();
     if (!save.moeda) {
         save.moeda = save.liga === LIGA_BRASILEIRAO ? "R$" : "£";
     }
@@ -6957,11 +6958,78 @@ function jogadorEhGenericoDeMercado(jogador) {
     return nomesGenericos.includes(jogador.nome);
 }
 
+function elencoSalvoEhGenerico(elenco) {
+    if (!Array.isArray(elenco) || elenco.length === 0) return false;
+
+    let totalGenericos = 0;
+
+    elenco.forEach(function(jogador) {
+        if (jogadorEhGenericoDeMercado(jogador)) {
+            totalGenericos++;
+        }
+    });
+
+    return totalGenericos >= 4;
+}
+
+function resetarElencoSalvoParaElencoRaw(clube) {
+    if (!ELENCOS_RAW[clube]) return false;
+
+    save.elencosClubes[clube] = clonarElencoInicial(clube);
+    return true;
+}
+
+function atualizarElencosGenericosSalvos() {
+    garantirDadosTransferencias();
+
+    let alterou = false;
+
+    Object.keys(ELENCOS_RAW).forEach(function(clube) {
+        if (clube === save.clube) return;
+
+        const elencoSalvo = save.elencosClubes[clube];
+
+        if (elencoSalvoEhGenerico(elencoSalvo)) {
+            resetarElencoSalvoParaElencoRaw(clube);
+            alterou = true;
+        }
+    });
+
+    if (
+        ELENCOS_RAW[save.clube] &&
+        elencoSalvoEhGenerico(save.elenco)
+    ) {
+        save.elenco = clonarElencoInicial(save.clube);
+        alterou = true;
+    }
+
+    if (alterou) {
+        salvar();
+    }
+}
+    
 function obterElencoMercadoDeClube(clube) {
     garantirDadosTransferencias();
 
     if (clube === save.clube) {
+        if (
+            ELENCOS_RAW[clube] &&
+            elencoSalvoEhGenerico(save.elenco)
+        ) {
+            save.elenco = clonarElencoInicial(clube);
+            salvar();
+        }
+
         return obterElencoUsuario();
+    }
+
+    if (
+        save.elencosClubes[clube] &&
+        ELENCOS_RAW[clube] &&
+        elencoSalvoEhGenerico(save.elencosClubes[clube])
+    ) {
+        save.elencosClubes[clube] = clonarElencoInicial(clube);
+        salvar();
     }
 
     if (!save.elencosClubes[clube]) {
@@ -7055,7 +7123,24 @@ function obterElencoClube(clube) {
     garantirDadosTransferencias();
 
     if (clube === save.clube) {
+        if (
+            ELENCOS_RAW[clube] &&
+            elencoSalvoEhGenerico(save.elenco)
+        ) {
+            save.elenco = clonarElencoInicial(clube);
+            salvar();
+        }
+
         return obterElencoUsuario();
+    }
+
+    if (
+        save.elencosClubes[clube] &&
+        ELENCOS_RAW[clube] &&
+        elencoSalvoEhGenerico(save.elencosClubes[clube])
+    ) {
+        save.elencosClubes[clube] = clonarElencoInicial(clube);
+        salvar();
     }
 
     if (!save.elencosClubes[clube]) {
