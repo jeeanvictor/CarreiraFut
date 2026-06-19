@@ -1060,6 +1060,27 @@ tr.destaque {
     margin: 0;
 }
 
+.input-com-sufixo {
+    position: relative;
+    width: 100%;
+}
+
+.input-com-sufixo input {
+    padding-right: 100px;
+}
+
+.sufixo-input {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(0,0,0,0.55);
+    pointer-events: none;
+    text-transform: uppercase;
+}
+    
 </style>
 </head>
 
@@ -7415,11 +7436,11 @@ function voltarLigas() {
         type="number"
         min="1"
         step="1"
-        placeholder="Valor da proposta"
+        placeholder="Ex: 35"
     >
 
     <span class="sufixo-input">milhões</span>
-</div
+</div>
 
         <div class="modal-acoes" style="margin-top: 10px;">
             <button class="btn-confirmar" onclick="enviarPropostaTransferencia()">Enviar proposta</button>
