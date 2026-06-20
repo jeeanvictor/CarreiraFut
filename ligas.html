@@ -390,6 +390,25 @@ body {
     margin-top: 36px;
 }
 
+@media (min-width: 561px) {
+    .grid-times {
+        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    }
+
+    .tag-time {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 5px 4px;
+        font-size: 8px;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
 .card-time {
     border: none;
     background: var(--card-claro);
