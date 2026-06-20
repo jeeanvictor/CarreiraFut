@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Carreira Fut - Escolha da Liga</title>
+
+<style>
+:root {
+    --verde-escuro: #052d16;
+    --verde-medio: #0b5d2a;
+    --verde-claro: #0f6f34;
+    
+    --verde-limao: #b7ff3c;
+    --texto-claro: #f7ffe9;
+    --texto-suave: #d8e8d1;
+    --card-claro: rgba(247,255,233,0.96);
+    --sombra: #071d0e;
+    --texto-card: #082914;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button {
+    font-family: inherit;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        linear-gradient(rgba(5, 45, 22, 0.90), rgba(7, 75, 35, 0.96)),
+        repeating-linear-gradient(
+            90deg,
+            var(--verde-medio) 0px,
+            var(--verde-medio) 80px,
+            var(--verde-claro) 80px,
+            var(--verde-claro) 160px
+        );
+    color: var(--texto-claro);
+    overflow-x: hidden;
+}
+
+.tela {
+    width: 100%;
+    min-height: 100vh;
+    padding: 36px 26px;
+    position: relative;
+}
+
+.tela::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(to right, transparent 49.5%, rgba(255,255,255,0.10) 50%, transparent 50.5%),
+        radial-gradient(circle at center, transparent 0 90px, rgba(255,255,255,0.12) 92px, transparent 94px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tela::after {
+    content: "";
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: rgba(178, 255, 89, 0.12);
+    top: -140px;
+    right: -160px;
+    filter: blur(4px);
+    z-index: 0;
+}
+
+.conteudo {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 38px;
+}
+
+.marca {
+    text-transform: uppercase;
+}
+
+.marca-pequena {
+    font-size: 12px;
+    letter-spacing: 4px;
+    font-weight: 800;
+    color: #d9ffc2;
+}
+
+.marca-grande {
+    margin-top: 8px;
+    font-size: 34px;
+    line-height: 0.95;
+    font-weight: 900;
+    color: var(--verde-limao);
+    text-shadow: 4px 4px 0 #082914;
+}
+
+.btn-voltar {
+    border: 2px solid rgba(247,255,233,0.25);
+    background: rgba(0,0,0,0.18);
+    color: var(--texto-claro);
+    padding: 12px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 4px 4px 0 var(--sombra);
+}
+
+.btn-voltar:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--sombra);
+}
+
+.cabecalho-pagina {
+    margin-bottom: 32px;
+}
+
+.selo {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 2px solid rgba(247,255,233,0.30);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #d9ffc2;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.16);
+    margin-bottom: 24px;
+}
+
+.titulo {
+    font-size: 48px;
+    line-height: 0.96;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 5px 5px 0 #0d351c;
+    margin-bottom: 22px;
+}
+
+.descricao {
+    max-width: 650px;
+    font-size: 20px;
+    line-height: 1.45;
+    color: var(--texto-suave);
+    font-weight: 500;
+}
+
+.grid-ligas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-top: 42px;
+}
+
+.card-liga {
+    min-height: 210px;
+    border: none;
+    border-radius: 28px;
+    padding: 22px 14px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(232,247,218,0.96));
+    color: var(--texto-card);
+    box-shadow: 8px 8px 0 var(--sombra);
+    cursor: pointer;
+    text-align: center;
+    transition: 0.15s;
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-liga::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    left: 50%;
+    bottom: -78px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: rgba(11,93,42,0.12);
+}
+
+.card-liga:hover {
+    transform: translateY(-4px);
+}
+
+.card-liga:active {
+    transform: translate(5px, 5px);
+    box-shadow: 3px 3px 0 var(--sombra);
+}
+
+.card-liga.desativada {
+    opacity: 0.58;
+    cursor: not-allowed;
+    filter: grayscale(0.2);
+}
+
+.card-liga.desativada:hover {
+    transform: none;
+}
+
+.icone-liga {
+    width: 104px;
+    height: 104px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.72);
+    color: var(--verde-medio);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 23px;
+    font-weight: 900;
+    box-shadow: none;
+    margin: 0 auto 18px;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+}
+
+.icone-liga.com-logo {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.icone-liga.com-logo img {
+    width: 155%;
+    height: 155%;
+    object-fit: contain;
+    display: block;
+    transform: translateY(3px);
+}
+
+/* Ajustes finos por liga */
+.icone-liga.com-logo img[alt="Logo da Bundesliga"] {
+    transform: translate(-3px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Campeonato Brasileiro"] {
+    transform: translate(5px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da La Liga"] {
+    transform: translate(4px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Ligue 1"] {
+    transform: translate(3px, 0);
+}
+
+.icone-liga.com-logo img[alt="Logo da Premier League"] {
+    transform: translate(4px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Serie A"] {
+    transform: translate(10px, 3px);
+}
+
+.icone-liga.com-logo {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+}
+
+.card-liga {
+    min-height: 205px;
+    border: none;
+    border-radius: 28px;
+    padding: 20px 12px 18px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(232,247,218,0.96));
+    color: var(--texto-card);
+    box-shadow: 8px 8px 0 var(--sombra);
+    cursor: pointer;
+    text-align: center;
+    transition: 0.15s;
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+}
+
+.card-liga::after {
+    content: "";
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    left: 50%;
+    bottom: -86px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: rgba(11,93,42,0.12);
+}
+
+.icone-liga {
+    width: 132px;
+    height: 132px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.72);
+    color: var(--verde-medio);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    font-weight: 900;
+    box-shadow: none;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+}
+
+.icone-liga.com-logo {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.icone-liga.com-logo img {
+    width: 155%;
+    height: 155%;
+    object-fit: contain;
+    display: block;
+}
+
+.status-liga {
+    display: inline-block;
+    margin-top: 0;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: var(--verde-medio);
+    color: var(--verde-limao);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.tela-times {
+    display: none;
+}
+
+.barra-times {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.grid-times {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 16px;
+    margin-top: 36px;
+}
+
+.card-time {
+    border: none;
+    background: var(--card-claro);
+    color: var(--texto-card);
+    min-height: 146px;
+    border-radius: 16px;
+    padding: 16px 8px 12px;
+    box-shadow: 5px 5px 0 var(--sombra);
+    cursor: pointer;
+    transition: 0.15s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-time:hover {
+    transform: translateY(-4px);
+}
+
+.card-time:active {
+    transform: translate(4px, 4px);
+    box-shadow: 1px 1px 0 var(--sombra);
+}
+
+.card-time.nao-configurado {
+    opacity: 0.75;
+}
+
+.escudo {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    position: relative;
+    z-index: 2;
+}
+
+.img-escudo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.sigla-escudo {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-limao));
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 900;
+    text-shadow: 2px 2px 0 #082914;
+    box-shadow: 4px 4px 0 #082914;
+    border: 3px solid rgba(8,41,20,0.18);
+}
+    
+    .nome-time {
+    font-size: 12px;
+    line-height: 1.12;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.tag-time {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 7px;
+    border-radius: 999px;
+    background: rgba(8,41,20,0.10);
+    color: rgba(8,41,20,0.68);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-time.configurado .tag-time {
+    background: var(--verde-medio);
+    color: var(--verde-limao);
+}
+
+.aviso {
+    margin-top: 26px;
+    color: var(--texto-suave);
+    font-size: 14px;
+    line-height: 1.45;
+    opacity: 0.85;
+}
+
+/* MODAL */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    z-index: 20;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.ativo {
+    display: flex;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 430px;
+    background: var(--card-claro);
+    color: var(--texto-card);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 8px 8px 0 var(--sombra);
+}
+
+.modal-card h2 {
+    font-size: 30px;
+    line-height: 0.95;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.modal-card p {
+    font-size: 16px;
+    line-height: 1.45;
+    color: rgba(8,41,20,0.72);
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.modal-acoes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.btn-modal-principal,
+.btn-modal-secundario {
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--sombra);
+}
+
+.btn-modal-principal {
+    background: var(--verde-limao);
+    color: var(--texto-card);
+}
+
+.btn-modal-secundario {
+    background: var(--verde-medio);
+    color: var(--texto-claro);
+}
+
+.btn-modal-principal:active,
+.btn-modal-secundario:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 var(--sombra);
+}
+
+@media (max-width: 1000px) {
+    .grid-ligas {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-times {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .tela {
+        padding: 32px 20px;
+    }
+
+    .topo {
+        align-items: flex-start;
+    }
+
+    .marca-grande {
+        font-size: 28px;
+    }
+
+    .titulo {
+        font-size: 38px;
+    }
+
+    .descricao {
+        font-size: 18px;
+    }
+
+.grid-ligas {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.card-liga {
+    min-height: 176px;
+    border-radius: 22px;
+    padding: 16px 8px;
+    gap: 12px;
+}
+
+.icone-liga {
+    width: 104px;
+    height: 104px;
+}
+
+.icone-liga.com-logo img {
+    width: 160%;
+    height: 160%;
+}
+
+/* Ajustes finos por liga */
+.icone-liga.com-logo img[alt="Logo da Bundesliga"] {
+    transform: translate(-3px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Campeonato Brasileiro"] {
+    transform: translate(5px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da La Liga"] {
+    transform: translate(4px, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Ligue 1"] {
+    transform: translate(3px, 0);
+}
+
+.icone-liga.com-logo img[alt="Logo da Premier League"] {
+    transform: translate(9, 2px);
+}
+
+.icone-liga.com-logo img[alt="Logo da Serie A"] {
+    transform: translate(10px, 6);
+}
+
+.status-liga {
+    font-size: 9px;
+    padding: 7px 9px;
+    letter-spacing: 1px;
+}
+
+/* CORREÇÃO DOS CARDS DE TIMES NO CELULAR */
+.barra-times {
+    display: block;
+}
+
+.barra-times .btn-voltar {
+    margin-top: 18px;
+}
+
+.grid-times {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.card-time {
+    min-height: 168px;
+    border-radius: 22px;
+    padding: 16px 8px 14px;
+    overflow: hidden;
+}
+
+.escudo {
+    width: 82px;
+    height: 82px;
+    margin: 0 auto 12px;
+}
+
+.img-escudo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.nome-time {
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.08;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.tag-time {
+    margin-top: 10px;
+    max-width: 100%;
+    font-size: 9px;
+    padding: 6px 8px;
+    letter-spacing: 1px;
+}
+
+}
+</style>
+</style>
+</head>
+
+<body>
+
+<main class="tela">
+
+    <div class="conteudo">
+
+        <div class="topo">
+            <div class="marca">
+                <div class="marca-pequena">Carreira Fut</div>
+                <div class="marca-grande">Modo Carreira</div>
+            </div>
+
+            <button class="btn-voltar" type="button" onclick="voltarHome()">Home</button>
+        </div>
+
+        <section id="telaLigas" class="tela-ligas">
+
+            <div class="cabecalho-pagina">
+                <div class="selo">Nova carreira</div>
+
+                <h1 class="titulo">
+                    Escolha sua<br>
+                    liga inicial.
+                </h1>
+
+                <p class="descricao">
+                    Sua jornada começa aqui. Escolha o campeonato, assuma um clube
+                    e construa uma carreira rumo aos títulos nacionais e internacionais.
+                </p>
+            </div>
+
+            <div id="gridLigas" class="grid-ligas"></div>
+
+        </section>
+
+        <section id="telaTimes" class="tela-times">
+
+            <div class="barra-times">
+                <div class="cabecalho-pagina">
+                    <div id="seloLiga" class="selo">Liga</div>
+
+                    <h1 class="titulo">
+                        Escolha seu<br>
+                        clube.
+                    </h1>
+
+                    <p id="descricaoLiga" class="descricao">
+                        Selecione o time que você vai comandar.
+                    </p>
+                </div>
+
+                <button class="btn-voltar" type="button" onclick="voltarLigas()">Voltar</button>
+            </div>
+
+            <div id="gridTimes" class="grid-times"></div>
+
+
+        </section>
+
+    </div>
+
+</main>
+
+<div id="modalContinental" class="modal">
+    <div class="modal-card">
+        <h2>Competições continentais?</h2>
+
+        <p id="textoModalContinental">
+            Deseja disputar competições continentais nesta carreira?
+        </p>
+
+        <div class="modal-acoes">
+            <button class="btn-modal-principal" type="button" onclick="confirmarContinental(true)">
+                Sim, disputar
+            </button>
+
+            <button class="btn-modal-secundario" type="button" onclick="confirmarContinental(false)">
+                Não, só liga
+            </button>
+
+            <button class="btn-modal-secundario" type="button" onclick="fecharModalContinental()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const LIGAS = [
+    {
+        nome: "Bundesliga",
+        sigla: "BL",
+        logo: "assets/ligas/alemania.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube alemão que você vai comandar na sua carreira."
+    },
+    {
+        nome: "Campeonato Brasileiro",
+        sigla: "BR",
+        logo: "assets/ligas/brasil.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube brasileiro que você vai comandar na sua carreira."
+    },
+    {
+        nome: "La Liga",
+        sigla: "LL",
+        logo: "assets/ligas/espana2.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube espanhol que você vai comandar na sua carreira."
+    },
+    {
+        nome: "Ligue 1",
+        sigla: "L1",
+        logo: "assets/ligas/francia.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube francês que você vai comandar na sua carreira."
+    },
+    {
+        nome: "Premier League",
+        sigla: "PL",
+        logo: "assets/ligas/inglaterra.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube inglês que você vai comandar na sua carreira."
+    },
+    {
+        nome: "Serie A",
+        sigla: "SA",
+        logo: "assets/ligas/italia.png",
+        ativa: true,
+        status: "Escolher clubes",
+        descricao: "Selecione o clube italiano que você vai comandar na sua carreira."
+    }
+];
+
+const TIMES_POR_LIGA = {
+    "Premier League": [
+        { nome: "Arsenal", sigla: "ARS", escudo: "arsenal.png" },
+        { nome: "Aston Villa", sigla: "AVL", escudo: "astonvilla.png" },
+        { nome: "Bournemouth", sigla: "BOU", escudo: "bournemouth.png" },
+        { nome: "Brentford", sigla: "BRE", escudo: "brentford.png" },
+        { nome: "Brighton", sigla: "BHA", escudo: "brighton.png" },
+        { nome: "Chelsea", sigla: "CHE", escudo: "chelsea.png" },
+        { nome: "Coventry City", sigla: "COV", escudo: "coventry.png" },
+        { nome: "Crystal Palace", sigla: "CRY", escudo: "crystalpalace.png" },
+        { nome: "Everton", sigla: "EVE", escudo: "everton.png" },
+        { nome: "Fulham", sigla: "FUL", escudo: "fulham.png" },
+        { nome: "Hull City", sigla: "HUL", escudo: "hull_city.png" },
+        { nome: "Ipswich Town", sigla: "IPS", escudo: "ipswich_town​.png" },
+        { nome: "Leeds United", sigla: "LEE", escudo: "leeds.png" },
+        { nome: "Liverpool", sigla: "LIV", escudo: "liverpool.png" },
+        { nome: "Manchester City", sigla: "MCI", escudo: "manchestercity.png" },
+        { nome: "Manchester United", sigla: "MUN", escudo: "manchesterunited.png" },
+        { nome: "Newcastle United", sigla: "NEW", escudo: "newcastle.png" },
+        { nome: "Nottingham Forest", sigla: "NFO", escudo: "nottingham_forest.png" },
+        { nome: "Sunderland", sigla: "SUN", escudo: "sunderland.png" },
+        { nome: "Tottenham", sigla: "TOT", escudo: "tottenham.png" }
+    ],
+
+"Ligue 1": [
+    { nome: "Angers", sigla: "ANG", escudo: "angers.png" },
+    { nome: "Auxerre", sigla: "AUX", escudo: "auxerre.png" },
+    { nome: "Brest", sigla: "BRE", escudo: "stadebretois.png" },
+    { nome: "Le Havre", sigla: "HAC", escudo: "havre.png" },
+    { nome: "Le Mans", sigla: "LEM", escudo: "le_mans.png" },
+    { nome: "Lens", sigla: "LEN", escudo: "racinglens.png" },
+    { nome: "Lille", sigla: "LIL", escudo: "lille.png" },
+    { nome: "Lorient", sigla: "LOR", escudo: "lorient.png" },
+    { nome: "Lyon", sigla: "LYO", escudo: "olympiquelyon.png" },
+    { nome: "Marseille", sigla: "MAR", escudo: "olimpiquemarsella.png" },
+    { nome: "Monaco", sigla: "MON", escudo: "monaco.png" },
+    { nome: "Nice", sigla: "NIC", escudo: "niza.png" },
+    { nome: "Paris FC", sigla: "PFC", escudo: "paris_fc.png" },
+    { nome: "Paris Saint-Germain", sigla: "PSG", escudo: "psg.png" },
+    { nome: "Rennes", sigla: "REN", escudo: "rennais.png" },
+    { nome: "Strasbourg", sigla: "STR", escudo: "racingetrasburgo.png" },
+    { nome: "Toulouse", sigla: "TOU", escudo: "toulouse.png" },
+    { nome: "Troyes", sigla: "TRO", escudo: "troyes.png" }
+],
+
+"Serie A": [
+    { nome: "Atalanta", sigla: "ATA", escudo: "atalanta.png" },
+    { nome: "Bologna", sigla: "BOL", escudo: "bologna.png" },
+    { nome: "Cagliari", sigla: "CAG", escudo: "cagliari.png" },
+    { nome: "Como", sigla: "COM", escudo: "como.png" },
+    { nome: "Fiorentina", sigla: "FIO", escudo: "fiorentina.png" },
+    { nome: "Frosinone", sigla: "FRO", escudo: "frosinone.png" },
+    { nome: "Genoa", sigla: "GEN", escudo: "genoa.png" },
+    { nome: "Inter", sigla: "INT", escudo: "inter.png" },
+    { nome: "Juventus", sigla: "JUV", escudo: "juventus.png" },
+    { nome: "Lazio", sigla: "LAZ", escudo: "lazio.png" },
+    { nome: "Lecce", sigla: "LEC", escudo: "lecce.png" },
+    { nome: "Milan", sigla: "MIL", escudo: "milan.png" },
+    { nome: "Monza", sigla: "MON", escudo: "monza.png" },
+    { nome: "Napoli", sigla: "NAP", escudo: "napoli.png" },
+    { nome: "Parma", sigla: "PAR", escudo: "parma.png" },
+    { nome: "Roma", sigla: "ROM", escudo: "roma.png" },
+    { nome: "Sassuolo", sigla: "SAS", escudo: "sassuolo.png" },
+    { nome: "Torino", sigla: "TOR", escudo: "torino.png" },
+    { nome: "Udinese", sigla: "UDI", escudo: "udinese.png" },
+    { nome: "Venezia", sigla: "VEN", escudo: "venezia.png" }
+],
+
+"Bundesliga": [
+    { nome: "FC Augsburg", sigla: "AUG", escudo: "augsburgo.png" },
+    { nome: "Union Berlin", sigla: "FCU", escudo: "unionberlin.png" },
+    { nome: "Werder Bremen", sigla: "BRE", escudo: "werderbremen.png" },
+    { nome: "Borussia Dortmund", sigla: "BVB", escudo: "borussiadortmund.png" },
+    { nome: "SV Elversberg", sigla: "ELV", escudo: "elversberg.png" },
+    { nome: "Eintracht Frankfurt", sigla: "SGE", escudo: "eintrachtfrankfurt.png" },
+    { nome: "SC Freiburg", sigla: "SCF", escudo: "freiburg.png" },
+    { nome: "Hamburger SV", sigla: "HSV", escudo: "hamburgo.png" },
+    { nome: "TSG Hoffenheim", sigla: "TSG", escudo: "hoffenheim.png" },
+    { nome: "1. FC Köln", sigla: "KOE", escudo: "koln.png" },
+    { nome: "RB Leipzig", sigla: "RBL", escudo: "rbleipzig.png" },
+    { nome: "Bayer Leverkusen", sigla: "B04", escudo: "bayerleverkusen.png" },
+    { nome: "Mainz 05", sigla: "M05", escudo: "mainz05.png" },
+    { nome: "Borussia Mönchengladbach", sigla: "BMG", escudo: "bmonchengladbach.png" },
+    { nome: "Bayern Munich", sigla: "BAY", escudo: "bayernmunchen.png" },
+    { nome: "SC Paderborn", sigla: "SCP", escudo: "paderborn07.png" },
+    { nome: "Schalke 04", sigla: "S04", escudo: "schalke04.png" },
+    { nome: "VfB Stuttgart", sigla: "VFB", escudo: "stuttgart.png" }
+],
+    
+"La Liga": [
+    { nome: "Alavés", sigla: "ALA", escudo: "alaves.png" },
+    { nome: "Almería", sigla: "ALM", escudo: "almeria.png" },
+    { nome: "Athletic Bilbao", sigla: "ATH", escudo: "athletic.png" },
+    { nome: "Atlético de Madrid", sigla: "ATM", escudo: "atlmadrid.png" },
+    { nome: "Barcelona", sigla: "BAR", escudo: "barcelona.png" },
+    { nome: "Betis", sigla: "BET", escudo: "betis.png" },
+    { nome: "Celta de Vigo", sigla: "CEL", escudo: "celta.png" },
+    { nome: "Elche", sigla: "ELC", escudo: "elche.png" },
+    { nome: "Espanyol", sigla: "ESP", escudo: "espanyol.png" },
+    { nome: "Getafe", sigla: "GET", escudo: "getafe.png" },
+    { nome: "Deportivo La Coruña", sigla: "DEP", escudo: "depor.png" },
+    { nome: "Levante", sigla: "LEV", escudo: "levante.png" },
+    { nome: "Osasuna", sigla: "OSA", escudo: "osasuna.png" },
+    { nome: "Racing Santander", sigla: "RAC", escudo: "racingsantander.png" },
+    { nome: "Rayo Vallecano", sigla: "RAY", escudo: "rayovallecano.png" },
+    { nome: "Real Madrid", sigla: "RMA", escudo: "realmadrid.png" },
+    { nome: "Real Sociedad", sigla: "RSO", escudo: "realsociedad.png" },
+    { nome: "Sevilla", sigla: "SEV", escudo: "sevilla.png" },
+    { nome: "Valencia", sigla: "VAL", escudo: "valencia.png" },
+    { nome: "Villarreal", sigla: "VIL", escudo: "villarreal.png" }
+],
+        
+    "Campeonato Brasileiro": [
+        { nome: "Athletico-PR", sigla: "CAP", escudo: "atlparanaense.png" },
+        { nome: "Atlético-MG", sigla: "CAM", escudo: "atlmineiro.png" },
+        { nome: "Bahia", sigla: "BAH", escudo: "bahia.png" },
+        { nome: "Botafogo", sigla: "BOT", escudo: "botafogo.png" },
+        { nome: "Chapecoense", sigla: "CHA", escudo: "chapecoense.png" },
+        { nome: "Corinthians", sigla: "COR", escudo: "corinthians.png" },
+        { nome: "Coritiba", sigla: "CFC", escudo: "coritiba.png" },
+        { nome: "Cruzeiro", sigla: "CRU", escudo: "cruzeiro.png" },
+        { nome: "Flamengo", sigla: "FLA", escudo: "flamengo.png" },
+        { nome: "Fluminense", sigla: "FLU", escudo: "fluminense.png" },
+        { nome: "Grêmio", sigla: "GRE", escudo: "gremio.png" },
+        { nome: "Internacional", sigla: "INT", escudo: "internacional.png" },
+        { nome: "Mirassol", sigla: "MIR", escudo: "mirassol.png" },
+        { nome: "Palmeiras", sigla: "PAL", escudo: "palmeiras.png" },
+        { nome: "RB Bragantino", sigla: "RBB", escudo: "rbbragantino.png" },
+        { nome: "Remo", sigla: "REM", escudo: "remo.png" },
+        { nome: "Santos", sigla: "SAN", escudo: "santos.png" },
+        { nome: "São Paulo", sigla: "SPF", escudo: "saopaulo.png" },
+        { nome: "Vasco da Gama", sigla: "VAS", escudo: "vasco.png" },
+        { nome: "Vitória", sigla: "VIT", escudo: "vitoria.png" }
+    ]
+};
+
+function obterCaminhoEscudo(time) {
+    if (time.escudo) {
+        return "assets/times/" + time.escudo;
+    }
+    return "";
+}
+    
+function obterCaminhoEscudoTime(nomeTime) {
+    return ESCUDOS_TIMES[nomeTime] || "";
+}
+
+function aplicarEscudoTime(elemento, time) {
+    const caminho = obterCaminhoEscudoTime(time.nome);
+
+    elemento.innerHTML = "";
+    elemento.classList.remove("com-imagem");
+
+    if (!caminho) {
+        elemento.textContent = time.sigla;
+        return;
+    }
+
+    elemento.classList.add("com-imagem");
+
+    const img = document.createElement("img");
+    img.src = caminho;
+    img.alt = "Escudo do " + time.nome;
+
+    img.onerror = function() {
+        elemento.classList.remove("com-imagem");
+        elemento.innerHTML = "";
+        elemento.textContent = time.sigla;
+    };
+
+    elemento.appendChild(img);
+}
+    
+const CLUBES_CONFIGURADOS = new Set([
+    "Premier League::Arsenal",
+    "Premier League::Manchester City",
+    "Premier League::Bournemouth",
+    "Premier League::Crystal Palace",
+    "Premier League::Nottingham Forest",
+    "Premier League::Manchester United",
+    "Premier League::Tottenham",
+    "Premier League::Newcastle United",
+    "Premier League::Chelsea",
+    "Premier League::Aston Villa",
+    "Premier League::Liverpool",
+
+    "Campeonato Brasileiro::Athletico-PR",
+    "Campeonato Brasileiro::Atlético-MG",
+    "Campeonato Brasileiro::Bahia",
+    "Campeonato Brasileiro::Botafogo",
+    "Campeonato Brasileiro::Chapecoense",
+    "Campeonato Brasileiro::Corinthians",
+    "Campeonato Brasileiro::Coritiba",
+    "Campeonato Brasileiro::Cruzeiro",
+    "Campeonato Brasileiro::Flamengo",
+    "Campeonato Brasileiro::Fluminense",
+    "Campeonato Brasileiro::Grêmio",
+    "Campeonato Brasileiro::Internacional",
+    "Campeonato Brasileiro::Mirassol",
+    "Campeonato Brasileiro::Palmeiras",
+    "Campeonato Brasileiro::RB Bragantino",
+    "Campeonato Brasileiro::Remo",
+    "Campeonato Brasileiro::Santos",
+    "Campeonato Brasileiro::São Paulo",
+    "Campeonato Brasileiro::Vasco da Gama",
+    "Campeonato Brasileiro::Vitória"
+]);
+const estado = {
+    ligaAtual: null,
+    selecaoPendente: null
+};
+
+iniciarPagina();
+
+function iniciarPagina() {
+    renderizarLigas();
+}
+
+function renderizarLigas() {
+    const grid = document.getElementById("gridLigas");
+    grid.innerHTML = "";
+
+    LIGAS.forEach(function(liga) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "card-liga";
+        botao.setAttribute("aria-label", liga.nome);
+
+        if (!liga.ativa) {
+            botao.classList.add("desativada");
+            botao.setAttribute("aria-disabled", "true");
+        }
+
+        const conteudoIcone = liga.logo
+            ? `<div class="icone-liga com-logo"><img src="${liga.logo}" alt="Logo da ${liga.nome}" onerror="this.parentElement.classList.remove('com-logo'); this.parentElement.textContent='${liga.sigla}';"></div>`
+            : `<div class="icone-liga">${liga.sigla}</div>`;
+
+        botao.innerHTML = `
+            ${conteudoIcone}
+            <div class="status-liga">${liga.status}</div>
+        `;
+
+        botao.addEventListener("click", function() {
+            if (!liga.ativa) {
+                ligaIndisponivel(liga.nome);
+                return;
+            }
+
+            abrirLiga(liga.nome);
+        });
+
+        grid.appendChild(botao);
+    });
+}
+
+function voltarHome() {
+    window.location.href = "index.html";
+}
+
+function abrirLiga(nomeLiga) {
+    const liga = buscarLiga(nomeLiga);
+    const times = obterTimesDaLiga(nomeLiga);
+
+    if (!liga || times.length === 0) {
+        ligaIndisponivel(nomeLiga);
+        return;
+    }
+
+    estado.ligaAtual = nomeLiga;
+
+    document.getElementById("telaLigas").style.display = "none";
+    document.getElementById("telaTimes").style.display = "block";
+
+    document.getElementById("seloLiga").textContent = nomeLiga;
+    document.getElementById("descricaoLiga").textContent = liga.descricao;
+
+    renderizarTimes(nomeLiga);
+    window.scrollTo(0, 0);
+}
+
+function renderizarTimes(nomeLiga) {
+    const grid = document.getElementById("gridTimes");
+    const times = obterTimesDaLiga(nomeLiga);
+
+    grid.innerHTML = "";
+
+    times.forEach(function(time) {
+        const configurado = clubeEstaConfigurado(nomeLiga, time.nome);
+        const caminhoEscudo = obterCaminhoEscudo(time);
+
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = configurado ? "card-time configurado" : "card-time nao-configurado";
+
+        botao.innerHTML = `
+            <div class="escudo">
+                ${
+                    caminhoEscudo
+                        ? `<img src="${caminhoEscudo}" alt="Escudo do ${time.nome}" class="img-escudo">`
+                        : `<span class="sigla-escudo">${time.sigla}</span>`
+                }
+            </div>
+            <div class="nome-time">${time.nome}</div>
+            <div class="tag-time">${configurado ? "Configurado" : "Em breve"}</div>
+        `;
+
+        botao.addEventListener("click", function() {
+            selecionarTime(nomeLiga, time.nome);
+        });
+
+        grid.appendChild(botao);
+    });
+}
+
+
+    
+function voltarLigas() {
+    estado.ligaAtual = null;
+    document.getElementById("telaTimes").style.display = "none";
+    document.getElementById("telaLigas").style.display = "block";
+    window.scrollTo(0, 0);
+}
+
+function ligaIndisponivel(nomeLiga) {
+    alert(nomeLiga + " será configurada depois.");
+}
+
+function selecionarTime(nomeLiga, nomeTime) {
+    estado.selecaoPendente = {
+        liga: nomeLiga,
+        time: nomeTime
+    };
+
+    const texto = clubeEstaConfigurado(nomeLiga, nomeTime)
+        ? "Deseja disputar competições continentais com o " + nomeTime + "?"
+        : nomeTime + " ainda não está configurado. Deseja visualizar o fluxo de escolha mesmo assim?";
+
+    document.getElementById("textoModalContinental").textContent = texto;
+    document.getElementById("modalContinental").classList.add("ativo");
+}
+
+function confirmarContinental(disputarContinental) {
+    const selecao = estado.selecaoPendente;
+
+    fecharModalContinental();
+
+    if (!selecao) {
+        return;
+    }
+
+    if (!clubeEstaConfigurado(selecao.liga, selecao.time)) {
+        alert(
+            selecao.time + " ainda não está configurado.\n\n" +
+            "Escolha um clube marcado como Configurado para iniciar a carreira."
+        );
+        return;
+    }
+
+    iniciarCarreira(selecao.liga, selecao.time, disputarContinental);
+}
+function fecharModalContinental() {
+    document.getElementById("modalContinental").classList.remove("ativo");
+}
+
+function iniciarCarreira(nomeLiga, nomeTime, disputarContinental) {
+    localStorage.removeItem("saveCarreiraFut");
+
+    localStorage.setItem("ligaSelecionada", nomeLiga);
+    localStorage.setItem("timeSelecionado", nomeTime);
+    localStorage.setItem("disputaContinental", disputarContinental ? "sim" : "nao");
+
+    const ligaUrl = encodeURIComponent(nomeLiga);
+    const timeUrl = encodeURIComponent(nomeTime);
+
+    window.location.href = "clube.html?liga=" + ligaUrl + "&time=" + timeUrl;
+}
+
+function buscarLiga(nomeLiga) {
+    return LIGAS.find(function(liga) {
+        return liga.nome === nomeLiga;
+    });
+}
+
+function obterTimesDaLiga(nomeLiga) {
+    const times = TIMES_POR_LIGA[nomeLiga] || [];
+
+    return times.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome, "pt-BR");
+    });
+}
+
+function clubeEstaConfigurado(nomeLiga, nomeTime) {
+    return CLUBES_CONFIGURADOS.has(nomeLiga + "::" + nomeTime);
+}
+</script>
+
+</body>
+</html>
