@@ -1588,6 +1588,131 @@ th,
     color: #ffffff !important;
 }
     
+	.mini-subvalor {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.72;
+    line-height: 1.3;
+}
+
+.mini-info-patrocinio {
+    grid-column: 1 / -1;
+}
+
+.modal-card-patrocinio {
+    max-width: 920px;
+}
+
+.patrocinio-topo {
+    margin-bottom: 14px;
+}
+
+.patrocinio-topo strong {
+    display: block;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 6px;
+}
+
+.patrocinio-topo .patrocinio-resumo {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.45;
+    color: rgba(0,0,0,0.72);
+}
+
+.patrocinio-lista {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.patrocinio-opcao {
+    border: 2px solid rgba(0,0,0,0.08);
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 16px 14px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.patrocinio-opcao:hover {
+    transform: translateY(-2px);
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.16);
+}
+
+.patrocinio-selo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.patrocinio-logo-box {
+    width: 100%;
+    height: 66px;
+    border-radius: 14px;
+    background: #f3f3f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.patrocinio-logo {
+    max-width: 100%;
+    max-height: 46px;
+    object-fit: contain;
+    display: block;
+}
+
+.patrocinio-nome {
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.patrocinio-valor {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.patrocinio-detalhe {
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.72;
+    line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+    .patrocinio-lista {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-card-patrocinio {
+        max-width: 480px;
+    }
+}
+	
 </style>
 </head>
 
@@ -1680,6 +1805,11 @@ th,
                                 <div class="mini-label">Continental</div>
                                 <div id="continentalClube" class="mini-valor">--</div>
                             </div>
+							<div class="mini-info mini-info-patrocinio">
+							<div class="mini-label">Patrocínio master</div>
+							<div id="patrocinioMasterNome" class="mini-valor">Sem patrocinador</div>
+							<div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 2 jogos</div>
+							</div>
                         </div>
                     </div>
 
@@ -5346,6 +5476,442 @@ function tocarSomJuiz() {
     tocarSomArquivo(SOM_JUIZ, 0.75);
 }
     
+	const BASE_PASTA_PATROCINIOS = "assets/patrocinios/";
+
+const PATROCINIOS_MASTER_POR_LIGA = {
+    [LIGA_BRASILEIRAO]: {
+        1: [
+            { nome: "Guaraná Poty", arquivo: "poty.png" },
+            { nome: "Grupo Mendes", arquivo: "grupomendes.png" },
+            { nome: "Havan", arquivo: "havan.png" }
+        ],
+        2: [
+            { nome: "Banco BMG", arquivo: "bmg.png" },
+            { nome: "Neo Química", arquivo: "neoqimica.png" },
+            { nome: "Banco Inter", arquivo: "bancointer.png" }
+        ],
+        3: [
+            { nome: "Nubank", arquivo: "nubank.png" },
+            { nome: "Crefisa", arquivo: "crefisa.png" },
+            { nome: "Sportingbet", arquivo: "sportingbet.png" }
+        ]
+    },
+
+    [LIGA_BUNDESLIGA]: {
+        1: [
+            { nome: "REWE", arquivo: "REWE.png" },
+            { nome: "Paramount+", arquivo: "paramount.png" },
+            { nome: "Gazprom", arquivo: "gazprom.png" }
+        ],
+        2: [
+            { nome: "Volkswagen", arquivo: "volkswagen.png" },
+            { nome: "Indeed", arquivo: "indeed.png" },
+            { nome: "1+1", arquivo: "1e1.png" }
+        ],
+        3: [
+            { nome: "T-Mobile", arquivo: "tmobile.png" },
+            { nome: "Barmenia", arquivo: "barmenia.png" },
+            { nome: "evonik", arquivo: "evonik.png" }
+        ]
+    },
+
+    [LIGA_LALIGA]: {
+        1: [
+            { nome: "Estrella Galicia", arquivo: "estrellagalicia.png" },
+            { nome: "Dafabet", arquivo: "dafabet.png" },
+            { nome: "Cazoo", arquivo: "cazoo.png" }
+        ],
+        2: [
+            { nome: "Spotify", arquivo: "spotify.png" },
+            { nome: "Betway", arquivo: "betway.png" },
+            { nome: "Kutxabank", arquivo: "kutxabank.png" }
+        ],
+        3: [
+            { nome: "Bwin", arquivo: "bwin.png" },
+            { nome: "Emirates", arquivo: "emirates.png" },
+            { nome: "Spotify", arquivo: "spotify.png" }
+        ]
+    },
+
+    [LIGA_PREMIER]: {
+        1: [
+            { nome: "Cazoo", arquivo: "cazoo.png" },
+            { nome: "Dafabet", arquivo: "dafabet.png" },
+            { nome: "American Express", arquivo: "americanexpress.png" }
+        ],
+        2: [
+            { nome: "AIA", arquivo: "aia.png" },
+            { nome: "Betway", arquivo: "betway.png" },
+            { nome: "Snapdragon", arquivo: "snapdragon.png" }
+        ],
+        3: [
+            { nome: "Standard Chartered", arquivo: "standard.png" },
+            { nome: "Emirates", arquivo: "emirates.png" },
+            { nome: "Etihad Airways", arquivo: "etihad.png" }
+        ]
+    },
+
+    [LIGA_LIGUE_1]: {
+        1: [
+            { nome: "Cazoo", arquivo: "cazoo.png" },
+            { nome: "Dafabet", arquivo: "dafabet.png" },
+            { nome: "Samsic", arquivo: "samsic.png" }
+        ],
+        2: [
+            { nome: "CMA CGM", arquivo: "cmacgm.png" },
+            { nome: "Orange", arquivo: "orange.png" },
+            { nome: "Ineos", arquivo: "ineos.png" }
+        ],
+        3: [
+            { nome: "Uber Eats", arquivo: "ubereats.png" },
+            { nome: "Emirates", arquivo: "emirates.png" },
+            { nome: "Accor Live Limitless", arquivo: "accor.png" }
+        ]
+    },
+
+    [LIGA_SERIE_A]: {
+        1: [
+            { nome: "Suzuki", arquivo: "suzuki.png" },
+            { nome: "Dafabet", arquivo: "dafabet.png" },
+            { nome: "MAPEI", arquivo: "mapei.png" }
+        ],
+        2: [
+            { nome: "Uber", arquivo: "uber.png" },
+            { nome: "Jeep", arquivo: "jeep.png" },
+            { nome: "MSC", arquivo: "msc.png" }
+        ],
+        3: [
+            { nome: "Betsson", arquivo: "betsson.png" },
+            { nome: "Emirates", arquivo: "emirates.png" },
+            { nome: "Lete", arquivo: "lete.png" }
+        ]
+    }
+};
+
+function garantirDadosPatrocinio() {
+    if (!save) return;
+
+    if (!save.patrocinio || typeof save.patrocinio !== "object") {
+        save.patrocinio = {
+            masterAtual: null,
+            historico: [],
+            ofertaPendente: null,
+            temporadaUltimaOferta: 0
+        };
+    }
+
+    if (!Array.isArray(save.patrocinio.historico)) {
+        save.patrocinio.historico = [];
+    }
+
+    if (!Array.isArray(save.historicoCampanhas)) {
+        save.historicoCampanhas = [];
+    }
+}
+
+function obterPercentualPatrocinioPorNivel(nivel) {
+    if (nivel === 1) return 0.15;
+    if (nivel === 2) return 0.25;
+    return 0.40;
+}
+
+function obterTextoNivelPatrocinio(nivel) {
+    if (nivel === 1) return "Nível 1 · Prestígio baixo";
+    if (nivel === 2) return "Nível 2 · Prestígio médio";
+    return "Nível 3 · Prestígio alto";
+}
+
+function obterCorteCampanhaBoaPatrocinio(liga) {
+    if (liga === LIGA_BRASILEIRAO) return 6;
+    if (liga === LIGA_PREMIER) return 6;
+    if (liga === LIGA_LALIGA) return 5;
+    if (liga === LIGA_SERIE_A) return 6;
+    if (liga === LIGA_BUNDESLIGA) return 4;
+    if (liga === LIGA_LIGUE_1) return 4;
+
+    return 4;
+}
+
+function calcularNivelPrestigioBaseClube(liga, clube) {
+    const ranking = obterClubesDaLiga(liga, clube)
+        .map(function(nomeClube) {
+            return {
+                clube: nomeClube,
+                orcamento: (obterOrcamentoInicial(liga, nomeClube) || {}).transferencias || 0
+            };
+        })
+        .sort(function(a, b) {
+            return b.orcamento - a.orcamento;
+        });
+
+    const posicao = ranking.findIndex(function(item) {
+        return item.clube === clube;
+    }) + 1;
+
+    const total = ranking.length || 1;
+    const corteNivel3 = Math.max(1, Math.round(total * 0.20));
+    const corteNivel2 = Math.max(corteNivel3 + 1, Math.round(total * 0.55));
+
+    if (posicao > 0 && posicao <= corteNivel3) return 3;
+    if (posicao > 0 && posicao <= corteNivel2) return 2;
+    return 1;
+}
+
+function clubeDesbloqueouPatrocinioNivel3() {
+    return contarTitulosCarreira() > 0;
+}
+
+function obterUltimaCampanhaRegistradaPatrocinio() {
+    garantirDadosPatrocinio();
+
+    if (save.historicoCampanhas.length === 0) return null;
+
+    const campanhasOrdenadas = save.historicoCampanhas.slice().sort(function(a, b) {
+        return (a.temporada || 0) - (b.temporada || 0);
+    });
+
+    return campanhasOrdenadas[campanhasOrdenadas.length - 1] || null;
+}
+
+function calcularNivelPrestigioAtualPatrocinio() {
+    garantirDadosPatrocinio();
+
+    const base = calcularNivelPrestigioBaseClube(save.liga, save.clube);
+    let nivel = base;
+
+    const ultimaCampanha = obterUltimaCampanhaRegistradaPatrocinio();
+
+    if (ultimaCampanha) {
+        if (
+            ultimaCampanha.posicaoLiga > 0 &&
+            ultimaCampanha.posicaoLiga <= obterCorteCampanhaBoaPatrocinio(save.liga)
+        ) {
+            nivel += 1;
+        }
+
+        if (
+            ultimaCampanha.ganhouLiga ||
+            ultimaCampanha.ganhouCopa ||
+            ultimaCampanha.ganhouContinental
+        ) {
+            nivel += 1;
+        }
+    }
+
+    if (base < 3 && !clubeDesbloqueouPatrocinioNivel3() && nivel > 2) {
+        nivel = 2;
+    }
+
+    if (nivel < 1) nivel = 1;
+    if (nivel > 3) nivel = 3;
+
+    return nivel;
+}
+
+function criarOfertaPatrocinioMaster() {
+    garantirDadosPatrocinio();
+
+    const blocoLiga = PATROCINIOS_MASTER_POR_LIGA[save.liga];
+
+    if (!blocoLiga) return null;
+
+    const nivel = calcularNivelPrestigioAtualPatrocinio();
+    const percentual = obterPercentualPatrocinioPorNivel(nivel);
+
+    const baseOrcamento = typeof save.orcamentoInicial === "number"
+        ? save.orcamentoInicial
+        : (obterOrcamentoInicial(save.liga, save.clube) || {}).transferencias || save.orcamentoTransferencias || 0;
+
+    const valor = arredondarMi(baseOrcamento * percentual);
+    const opcoesBase = (blocoLiga[nivel] || []).slice(0, 3);
+
+    if (opcoesBase.length === 0) return null;
+
+    return {
+        temporada: obterNumeroTemporadaAtual(),
+        nivel: nivel,
+        percentual: percentual,
+        valor: valor,
+        baseOrcamento: baseOrcamento,
+        opcoes: opcoesBase.map(function(item) {
+            return {
+                nome: item.nome,
+                arquivo: item.arquivo,
+                logo: BASE_PASTA_PATROCINIOS + item.arquivo
+            };
+        })
+    };
+}
+
+function renderizarModalPatrocinioMaster() {
+    const lista = document.getElementById("listaPatrocinioMaster");
+    const texto = document.getElementById("textoModalPatrocinioMaster");
+
+    if (!lista || !texto) return;
+
+    garantirDadosPatrocinio();
+
+    const oferta = save.patrocinio.ofertaPendente;
+
+    if (!oferta) {
+        lista.innerHTML = "";
+        texto.textContent = "Nenhuma proposta disponível no momento.";
+        return;
+    }
+
+    texto.textContent =
+        "Após 2 jogos, chegaram 3 propostas de patrocínio master. " +
+		"Todas pagam " + formatarDinheiro(oferta.valor, save.moeda) +
+		" (" + Math.round(oferta.percentual * 100) + "% do orçamento inicial: " +
+		formatarDinheiro(oferta.baseOrcamento || save.orcamentoInicial, save.moeda) + "). " +
+        obterTextoNivelPatrocinio(oferta.nivel) + ".";
+
+    lista.innerHTML = "";
+
+    oferta.opcoes.forEach(function(opcao) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "patrocinio-opcao";
+        botao.onclick = function() {
+            aceitarPatrocinioMaster(opcao.nome);
+        };
+
+        botao.innerHTML =
+            '<div class="patrocinio-selo">' + obterTextoNivelPatrocinio(oferta.nivel) + '</div>' +
+            '<div class="patrocinio-logo-box">' +
+                '<img class="patrocinio-logo" src="' + opcao.logo + '" alt="' + opcao.nome + '" onerror="this.style.display=\'none\'">' +
+            '</div>' +
+            '<div class="patrocinio-nome">' + opcao.nome + '</div>' +
+            '<div class="patrocinio-valor">' + formatarDinheiro(oferta.valor, save.moeda) + '</div>' +
+            '<div class="patrocinio-detalhe">Clique para assinar o contrato e receber o valor imediatamente no orçamento.</div>';
+
+        lista.appendChild(botao);
+    });
+}
+
+function abrirModalPatrocinioMaster() {
+    const modal = document.getElementById("modalPatrocinioMaster");
+
+    if (!modal) return;
+
+    renderizarModalPatrocinioMaster();
+    modal.classList.add("ativo");
+}
+
+function fecharModalPatrocinioMaster() {
+    const modal = document.getElementById("modalPatrocinioMaster");
+
+    if (!modal) return;
+
+    modal.classList.remove("ativo");
+}
+
+function aceitarPatrocinioMaster(nomePatrocinador) {
+    garantirDadosPatrocinio();
+
+    const oferta = save.patrocinio.ofertaPendente;
+
+    if (!oferta) return;
+
+    const patrocinadorEscolhido = oferta.opcoes.find(function(opcao) {
+        return opcao.nome === nomePatrocinador;
+    });
+
+    if (!patrocinadorEscolhido) return;
+
+    save.orcamentoTransferencias = arredondarMi(save.orcamentoTransferencias + oferta.valor);
+    save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
+
+    save.patrocinio.masterAtual = {
+        nome: patrocinadorEscolhido.nome,
+        arquivo: patrocinadorEscolhido.arquivo,
+        logo: patrocinadorEscolhido.logo,
+        nivel: oferta.nivel,
+        valorContrato: oferta.valor,
+        temporadaContrato: obterNumeroTemporadaAtual()
+    };
+
+    save.patrocinio.historico.push({
+        temporada: obterNumeroTemporadaAtual(),
+        nome: patrocinadorEscolhido.nome,
+        nivel: oferta.nivel,
+        valor: oferta.valor
+    });
+
+    save.patrocinio.ofertaPendente = null;
+
+    adicionarNoticia(
+        "financeiro",
+        "Novo patrocinador master",
+        patrocinadorEscolhido.nome + " fechou com o " + save.clube +
+        ". O clube recebeu " + formatarDinheiro(oferta.valor, save.moeda) +
+        " em novo contrato de patrocínio.",
+        "patrocinio-master-" + obterNumeroTemporadaAtual()
+    );
+
+    salvar();
+    fecharModalPatrocinioMaster();
+    renderizarTudo();
+
+    alert(
+        "Patrocínio fechado com " + patrocinadorEscolhido.nome + "!\n\n" +
+        "Valor recebido: " + formatarDinheiro(oferta.valor, save.moeda)
+    );
+}
+
+function verificarOfertaPatrocinioMaster() {
+    if (!save) return;
+
+    garantirDadosPatrocinio();
+
+    const temporadaAtual = obterNumeroTemporadaAtual();
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada === temporadaAtual
+    ) {
+        abrirModalPatrocinioMaster();
+        return;
+    }
+
+    if (!save.progressao || (save.progressao.jogosTemporada || 0) < 2) return;
+    if (save.patrocinio.temporadaUltimaOferta === temporadaAtual) return;
+
+    const oferta = criarOfertaPatrocinioMaster();
+
+    if (!oferta) return;
+
+    save.patrocinio.ofertaPendente = oferta;
+    save.patrocinio.temporadaUltimaOferta = temporadaAtual;
+
+    salvar();
+    abrirModalPatrocinioMaster();
+}
+
+function registrarCampanhaPatrocinioFimTemporada() {
+    if (!save) return;
+
+    garantirDadosPatrocinio();
+
+    const entrada = {
+        temporada: obterNumeroTemporadaAtual(),
+        posicaoLiga: obterPosicaoLigaUsuario(),
+        ganhouLiga: obterPosicaoLigaUsuario() === 1,
+        ganhouCopa: Boolean(save.copaBrasilStats && save.copaBrasilStats.campeao),
+        ganhouContinental: Boolean(save.continentalStats && save.continentalStats.campeao)
+    };
+
+    const indiceExistente = save.historicoCampanhas.findIndex(function(item) {
+        return item.temporada === entrada.temporada;
+    });
+
+    if (indiceExistente >= 0) {
+        save.historicoCampanhas[indiceExistente] = entrada;
+    } else {
+        save.historicoCampanhas.push(entrada);
+    }
+}
+	
 iniciarPagina();
 
 function corrigirEstruturaAbaEstatisticas() {
@@ -5395,6 +5961,7 @@ function iniciarPagina() {
 
     aplicarPaletaDoClube(save.clube);
     renderizarTudo();
+	verificarOfertaPatrocinioMaster();
 }
 
 function lerSaveSalvo() {
@@ -5765,6 +6332,7 @@ function criarNovoSave(liga, clube, disputaContinental) {
         resultados: [],
         historicoResultados: [],
         titulos: [],
+        historicoCampanhas: [],
         noticias: [
             {
                 tipo: "inicio",
@@ -5775,6 +6343,12 @@ function criarNovoSave(liga, clube, disputaContinental) {
                 chave: "inicio-carreira"
             }
         ],
+        patrocinio: {
+            masterAtual: null,
+            historico: [],
+            ofertaPendente: null,
+            temporadaUltimaOferta: 0
+        },
         escalacaoAnterior: null,
         capitaoAnteriorId: null,
         cobradorPenaltiAnteriorId: null,
@@ -5789,13 +6363,12 @@ function criarNovoSave(liga, clube, disputaContinental) {
             ultimoBonusOrcamento: 0
         },
         participantesContinentaisTemporadaAtual: null,
-classificacaoContinentalAnterior: null,
-premiosCopaBrasilPagos: {},
-premiosContinentaisPagos: {},
-premiosLigaPagos: {},
-
-continentalStats: criarContinentalStats(liga, clube, disputaContinental),
-copaBrasilStats: criarCopaBrasilStats(liga)
+        classificacaoContinentalAnterior: null,
+        premiosCopaBrasilPagos: {},
+        premiosContinentaisPagos: {},
+        premiosLigaPagos: {},
+        continentalStats: criarContinentalStats(liga, clube, disputaContinental),
+        copaBrasilStats: criarCopaBrasilStats(liga)
     };
 
     return novoSave;
@@ -7545,6 +8118,8 @@ function obterJogoDoClube(evento) {
 }
 
 function renderizarInfo() {
+    garantirDadosPatrocinio();
+
     document.getElementById("resumoCarreira").textContent =
         "Você assumiu o " + save.clube + " no modo carreira. Gerencie o elenco, dispute partidas e tente conquistar títulos.";
 
@@ -7554,6 +8129,37 @@ function renderizarInfo() {
 
     document.getElementById("continentalClube").textContent =
         save.disputaContinental ? save.competicaoContinental : "Não disputa";
+
+    const patrocinioNome = document.getElementById("patrocinioMasterNome");
+    const patrocinioValor = document.getElementById("patrocinioMasterValor");
+
+    if (patrocinioNome && patrocinioValor) {
+        if (save.patrocinio.masterAtual) {
+            patrocinioNome.textContent = save.patrocinio.masterAtual.nome;
+
+            let textoContrato =
+                "Contrato atual: " +
+                formatarDinheiro(save.patrocinio.masterAtual.valorContrato, save.moeda);
+
+            if (
+                save.patrocinio.ofertaPendente &&
+                save.patrocinio.ofertaPendente.temporada === obterNumeroTemporadaAtual()
+            ) {
+                textoContrato += " · nova proposta pendente";
+            }
+
+            patrocinioValor.textContent = textoContrato;
+        } else if (
+            save.patrocinio.ofertaPendente &&
+            save.patrocinio.ofertaPendente.temporada === obterNumeroTemporadaAtual()
+        ) {
+            patrocinioNome.textContent = "Proposta pendente";
+            patrocinioValor.textContent = "Escolha um patrocinador master";
+        } else {
+            patrocinioNome.textContent = "Sem patrocinador";
+            patrocinioValor.textContent = "As propostas chegam após 2 jogos";
+        }
+    }
 }
 
 function renderizarElenco() {
@@ -10307,6 +10913,7 @@ function voltarAoPainelDepoisDoJogo() {
     document.getElementById("telaPainel").classList.remove("escondida");
 
     renderizarTudo();
+    verificarOfertaPatrocinioMaster();
     window.scrollTo(0, 0);
 }
 
@@ -14712,6 +15319,9 @@ function iniciarNovaTemporada() {
 
     if (!confirmar) return;
 
+    garantirDadosPatrocinio();
+    registrarCampanhaPatrocinioFimTemporada();
+
     if (typeof registrarTitulosConquistadosDaTemporada === "function") {
         registrarTitulosConquistadosDaTemporada();
     }
@@ -14805,6 +15415,9 @@ function iniciarNovaTemporada() {
     save.capitaoAnteriorId = null;
     save.cobradorPenaltiAnteriorId = null;
     save.ultimaLesao = null;
+
+    garantirDadosPatrocinio();
+    save.patrocinio.ofertaPendente = null;
 
     save.moeda = moedaAtual;
     save.orcamentoTransferencias = orcamentoAtual;
@@ -15024,6 +15637,20 @@ function voltarLigas() {
     Remover do mercado
 </button>
         </div>
+    </div>
+</div>
+<div id="modalPatrocinioMaster" class="modal">
+    <div class="modal-card modal-card-patrocinio">
+        <h2>Patrocínio master</h2>
+
+        <div class="patrocinio-topo">
+            <strong>Novas propostas</strong>
+            <div id="textoModalPatrocinioMaster" class="patrocinio-resumo">
+                Escolha um patrocinador para o clube.
+            </div>
+        </div>
+
+        <div id="listaPatrocinioMaster" class="patrocinio-lista"></div>
     </div>
 </div>
 </body>
