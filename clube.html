@@ -1560,6 +1560,34 @@ tr.destaque {
     color: var(--cor-secundaria);
 }
 
+/* CORREÇÃO DE CONTRASTE DAS PALETAS */
+.btn-jogar,
+.btn-confirmar,
+.btn-nova-temporada-topo {
+    background: var(--cor-botao-fundo, var(--cor-principal)) !important;
+    color: var(--cor-botao-texto, #ffffff) !important;
+}
+
+.aba-btn.ativa,
+.selo,
+th,
+.btn-mercado,
+.btn-toggle-tabela.ativo,
+.card-jogador::before {
+    background: var(--cor-destaque-fundo, var(--cor-principal)) !important;
+    color: var(--cor-destaque-texto, #ffffff) !important;
+    border-color: var(--cor-destaque-fundo, var(--cor-principal)) !important;
+}
+
+.btn-topo,
+.btn-secundario {
+    color: #ffffff !important;
+}
+
+.btn-partida.sec {
+    color: #ffffff !important;
+}
+    
 </style>
 </head>
 
@@ -2173,7 +2201,7 @@ const CLUBES_SERIE_A = [
     "Fiorentina",
     "Frosinone",
     "Genoa",
-    "Inter",
+    "Internazionale",
     "Juventus",
     "Lazio",
     "Lecce",
@@ -2676,7 +2704,7 @@ Object.assign(PALETAS_CLUBES, {
         textoCard: "#25050b"
     },
 
-    "Inter": {
+    "Internazionale": {
         principal: "#0057b8",
         secundaria: "#111111",
         escura: "#020914",
@@ -5623,6 +5651,57 @@ function limparFiltrosMercado() {
     renderizarMercado();
 }
 
+function converterHexParaRgb(cor) {
+    if (!cor || typeof cor !== "string") return null;
+
+    let hex = cor.trim();
+
+    if (!hex.startsWith("#")) return null;
+
+    hex = hex.replace("#", "");
+
+    if (hex.length === 3) {
+        hex = hex.split("").map(function(letra) {
+            return letra + letra;
+        }).join("");
+    }
+
+    if (hex.length !== 6) return null;
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
+        return null;
+    }
+
+    return { r: r, g: g, b: b };
+}
+
+function obterTextoContraste(corFundo) {
+    const rgb = converterHexParaRgb(corFundo);
+
+    if (!rgb) {
+        return "#ffffff";
+    }
+
+    const r = rgb.r / 255;
+    const g = rgb.g / 255;
+    const b = rgb.b / 255;
+
+    const luminancia =
+        (0.2126 * r) +
+        (0.7152 * g) +
+        (0.0722 * b);
+
+    if (luminancia > 0.58) {
+        return "#061028";
+    }
+
+    return "#ffffff";
+}
+    
 function aplicarPaletaDoClube(nomeClube) {
     const paleta = PALETAS_CLUBES[nomeClube] || {
         principal: "#0b5d2a",
@@ -5636,6 +5715,12 @@ function aplicarPaletaDoClube(nomeClube) {
 
     const root = document.documentElement;
 
+    const fundoBotao = paleta.botaoFundo || paleta.principal;
+    const textoBotao = paleta.botaoTexto || obterTextoContraste(fundoBotao);
+
+    const fundoDestaque = paleta.destaqueFundo || paleta.principal;
+    const textoDestaque = paleta.destaqueTexto || obterTextoContraste(fundoDestaque);
+
     root.style.setProperty("--cor-principal", paleta.principal);
     root.style.setProperty("--cor-secundaria", paleta.secundaria);
     root.style.setProperty("--cor-escura", paleta.escura);
@@ -5644,6 +5729,11 @@ function aplicarPaletaDoClube(nomeClube) {
     root.style.setProperty("--cor-card", paleta.card);
     root.style.setProperty("--cor-texto-card", paleta.textoCard);
     root.style.setProperty("--sombra-forte", paleta.escura);
+
+    root.style.setProperty("--cor-botao-fundo", fundoBotao);
+    root.style.setProperty("--cor-botao-texto", textoBotao);
+    root.style.setProperty("--cor-destaque-fundo", fundoDestaque);
+    root.style.setProperty("--cor-destaque-texto", textoDestaque);
 }
 
 function criarNovoSave(liga, clube, disputaContinental) {
