@@ -6190,6 +6190,8 @@ function verificarOfertaMaterialEsportivo() {
 }
 
 function verificarOfertasComerciais() {
+    if (!save) return;
+
     garantirDadosPatrocinio();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
@@ -6203,6 +6205,21 @@ function verificarOfertasComerciais() {
     }
 
     if (
+        save.progressao &&
+        (save.progressao.jogosTemporada || 0) >= 2 &&
+        save.patrocinio.temporadaUltimaOferta !== temporadaAtual
+    ) {
+        verificarOfertaPatrocinioMaster();
+
+        if (
+            save.patrocinio.ofertaPendente &&
+            save.patrocinio.ofertaPendente.temporada === temporadaAtual
+        ) {
+            return;
+        }
+    }
+
+    if (
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
         save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
     ) {
@@ -6210,16 +6227,13 @@ function verificarOfertasComerciais() {
         return;
     }
 
-    verificarOfertasComerciais();
-
     if (
-        save.patrocinio.ofertaPendente &&
-        save.patrocinio.ofertaPendente.temporada === temporadaAtual
+        save.progressao &&
+        (save.progressao.jogosTemporada || 0) >= 4 &&
+        save.patrocinio.temporadaUltimaOfertaMaterialEsportivo !== temporadaAtual
     ) {
-        return;
+        verificarOfertaMaterialEsportivo();
     }
-
-    verificarOfertaMaterialEsportivo();
 }
 
 function iniciarPagina() {
@@ -6256,7 +6270,10 @@ function iniciarPagina() {
 
     aplicarPaletaDoClube(save.clube);
     renderizarTudo();
-	verificarOfertaPatrocinioMaster();
+
+    setTimeout(function() {
+        verificarOfertasComerciais();
+    }, 0);
 }
 
 function lerSaveSalvo() {
@@ -11244,7 +11261,11 @@ function voltarAoPainelDepoisDoJogo() {
     document.getElementById("telaPainel").classList.remove("escondida");
 
     renderizarTudo();
-    verificarOfertasComerciais();
+
+    setTimeout(function() {
+        verificarOfertasComerciais();
+    }, 0);
+
     window.scrollTo(0, 0);
 }
 
