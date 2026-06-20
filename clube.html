@@ -1805,10 +1805,17 @@ th,
                                 <div class="mini-label">Continental</div>
                                 <div id="continentalClube" class="mini-valor">--</div>
                             </div>
+							
 							<div class="mini-info mini-info-patrocinio">
 							<div class="mini-label">Patrocínio master</div>
 							<div id="patrocinioMasterNome" class="mini-valor">Sem patrocinador</div>
 							<div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 2 jogos</div>
+							</div>
+							
+							<div class="mini-info mini-info-patrocinio">
+							<div class="mini-label">Material esportivo</div>
+							<div id="materialEsportivoNome" class="mini-valor">Sem fornecedor</div>
+							<div id="materialEsportivoValor" class="mini-subvalor">As propostas chegam após 4 jogos</div>
 							</div>
                         </div>
                     </div>
@@ -5588,6 +5595,24 @@ const PATROCINIOS_MASTER_POR_LIGA = {
     }
 };
 
+const MATERIAL_ESPORTIVO_POR_NIVEL = {
+    1: [
+        { nome: "Macron", arquivo: "macron.png" },
+        { nome: "Joma", arquivo: "joma.png" },
+        { nome: "Kappa", arquivo: "kappa.png" }
+    ],
+    2: [
+        { nome: "Umbro", arquivo: "umbro.png" },
+        { nome: "New Balance", arquivo: "newbalance.png" },
+        { nome: "Under Armour", arquivo: "underarmour.png" }
+    ],
+    3: [
+        { nome: "Nike", arquivo: "nike.png" },
+        { nome: "Adidas", arquivo: "adidas.png" },
+        { nome: "Puma", arquivo: "puma.png" }
+    ]
+};
+
 function garantirDadosPatrocinio() {
     if (!save) return;
 
@@ -5596,12 +5621,45 @@ function garantirDadosPatrocinio() {
             masterAtual: null,
             historico: [],
             ofertaPendente: null,
-            temporadaUltimaOferta: 0
+            temporadaUltimaOferta: 0,
+
+            materialEsportivoAtual: null,
+            historicoMaterialEsportivo: [],
+            ofertaPendenteMaterialEsportivo: null,
+            temporadaUltimaOfertaMaterialEsportivo: 0
         };
     }
 
     if (!Array.isArray(save.patrocinio.historico)) {
         save.patrocinio.historico = [];
+    }
+
+    if (!Array.isArray(save.patrocinio.historicoMaterialEsportivo)) {
+        save.patrocinio.historicoMaterialEsportivo = [];
+    }
+
+    if (!("masterAtual" in save.patrocinio)) {
+        save.patrocinio.masterAtual = null;
+    }
+
+    if (!("ofertaPendente" in save.patrocinio)) {
+        save.patrocinio.ofertaPendente = null;
+    }
+
+    if (!("temporadaUltimaOferta" in save.patrocinio)) {
+        save.patrocinio.temporadaUltimaOferta = 0;
+    }
+
+    if (!("materialEsportivoAtual" in save.patrocinio)) {
+        save.patrocinio.materialEsportivoAtual = null;
+    }
+
+    if (!("ofertaPendenteMaterialEsportivo" in save.patrocinio)) {
+        save.patrocinio.ofertaPendenteMaterialEsportivo = null;
+    }
+
+    if (!("temporadaUltimaOfertaMaterialEsportivo" in save.patrocinio)) {
+        save.patrocinio.temporadaUltimaOfertaMaterialEsportivo = 0;
     }
 
     if (!Array.isArray(save.historicoCampanhas)) {
@@ -5857,6 +5915,8 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
         "Patrocínio fechado com " + patrocinadorEscolhido.nome + "!\n\n" +
         "Valor recebido: " + formatarDinheiro(oferta.valor, save.moeda)
     );
+
+    verificarOfertasComerciais();
 }
 
 function verificarOfertaPatrocinioMaster() {
@@ -5865,6 +5925,14 @@ function verificarOfertaPatrocinioMaster() {
     garantirDadosPatrocinio();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada !== temporadaAtual
+    ) {
+        save.patrocinio.ofertaPendente = null;
+        salvar();
+    }
 
     if (
         save.patrocinio.ofertaPendente &&
@@ -5911,7 +5979,9 @@ function registrarCampanhaPatrocinioFimTemporada() {
         save.historicoCampanhas.push(entrada);
     }
 }
-	
+
+
+
 iniciarPagina();
 
 function corrigirEstruturaAbaEstatisticas() {
@@ -5925,6 +5995,231 @@ function corrigirEstruturaAbaEstatisticas() {
     if (abaEstatisticas.parentElement !== containerAbas) {
         containerAbas.appendChild(abaEstatisticas);
     }
+}
+
+function obterBaseOrcamentoOfertaComercial() {
+    if (typeof save.orcamentoInicial === "number") {
+        return save.orcamentoInicial;
+    }
+
+    const dadosClube = obterOrcamentoInicial(save.liga, save.clube) || {};
+    return dadosClube.transferencias || save.orcamentoTransferencias || 0;
+}
+
+function criarOfertaMaterialEsportivo() {
+    garantirDadosPatrocinio();
+
+    const nivel = calcularNivelPrestigioAtualPatrocinio();
+    const percentualMaster = obterPercentualPatrocinioPorNivel(nivel);
+    const baseOrcamento = obterBaseOrcamentoOfertaComercial();
+    const valorMaster = baseOrcamento * percentualMaster;
+    const valor = arredondarMi(valorMaster / 3);
+
+    const opcoesBase = (MATERIAL_ESPORTIVO_POR_NIVEL[nivel] || []).slice(0, 3);
+
+    if (opcoesBase.length === 0) return null;
+
+    return {
+        temporada: obterNumeroTemporadaAtual(),
+        nivel: nivel,
+        percentualMaster: percentualMaster,
+        valor: valor,
+        valorReferenciaMaster: arredondarMi(valorMaster),
+        baseOrcamento: baseOrcamento,
+        opcoes: opcoesBase.map(function(item) {
+            return {
+                nome: item.nome,
+                arquivo: item.arquivo,
+                logo: BASE_PASTA_PATROCINIOS + item.arquivo
+            };
+        })
+    };
+}
+
+function renderizarModalMaterialEsportivo() {
+    const lista = document.getElementById("listaMaterialEsportivo");
+    const texto = document.getElementById("textoModalMaterialEsportivo");
+
+    if (!lista || !texto) return;
+
+    garantirDadosPatrocinio();
+
+    const oferta = save.patrocinio.ofertaPendenteMaterialEsportivo;
+
+    if (!oferta) {
+        lista.innerHTML = "";
+        texto.textContent = "Nenhuma proposta disponível no momento.";
+        return;
+    }
+
+    texto.textContent =
+        "Após 4 jogos, chegaram 3 propostas de fornecimento de material esportivo. " +
+        "Todas pagam " + formatarDinheiro(oferta.valor, save.moeda) +
+        " (1/3 da cota master de " + formatarDinheiro(oferta.valorReferenciaMaster, save.moeda) + "). " +
+        "Base usada: " + formatarDinheiro(oferta.baseOrcamento, save.moeda) +
+        ". " + obterTextoNivelPatrocinio(oferta.nivel) + ".";
+
+    lista.innerHTML = "";
+
+    oferta.opcoes.forEach(function(opcao) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "patrocinio-opcao";
+        botao.onclick = function() {
+            aceitarMaterialEsportivo(opcao.nome);
+        };
+
+        botao.innerHTML =
+            '<div class="patrocinio-selo">' + obterTextoNivelPatrocinio(oferta.nivel) + '</div>' +
+            '<div class="patrocinio-logo-box">' +
+                '<img class="patrocinio-logo" src="' + opcao.logo + '" alt="' + opcao.nome + '" onerror="this.style.display=\'none\'">' +
+            '</div>' +
+            '<div class="patrocinio-nome">' + opcao.nome + '</div>' +
+            '<div class="patrocinio-valor">' + formatarDinheiro(oferta.valor, save.moeda) + '</div>' +
+            '<div class="patrocinio-detalhe">Clique para assinar o contrato e receber o valor imediatamente no orçamento.</div>';
+
+        lista.appendChild(botao);
+    });
+}
+
+function abrirModalMaterialEsportivo() {
+    const modal = document.getElementById("modalMaterialEsportivo");
+
+    if (!modal) return;
+
+    renderizarModalMaterialEsportivo();
+    modal.classList.add("ativo");
+}
+
+function fecharModalMaterialEsportivo() {
+    const modal = document.getElementById("modalMaterialEsportivo");
+
+    if (!modal) return;
+
+    modal.classList.remove("ativo");
+}
+
+function aceitarMaterialEsportivo(nomeMarca) {
+    garantirDadosPatrocinio();
+
+    const oferta = save.patrocinio.ofertaPendenteMaterialEsportivo;
+
+    if (!oferta) return;
+
+    const marcaEscolhida = oferta.opcoes.find(function(opcao) {
+        return opcao.nome === nomeMarca;
+    });
+
+    if (!marcaEscolhida) return;
+
+    save.orcamentoTransferencias = arredondarMi(save.orcamentoTransferencias + oferta.valor);
+    save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
+
+    save.patrocinio.materialEsportivoAtual = {
+        nome: marcaEscolhida.nome,
+        arquivo: marcaEscolhida.arquivo,
+        logo: marcaEscolhida.logo,
+        nivel: oferta.nivel,
+        valorContrato: oferta.valor,
+        temporadaContrato: obterNumeroTemporadaAtual()
+    };
+
+    save.patrocinio.historicoMaterialEsportivo.push({
+        temporada: obterNumeroTemporadaAtual(),
+        nome: marcaEscolhida.nome,
+        nivel: oferta.nivel,
+        valor: oferta.valor
+    });
+
+    save.patrocinio.ofertaPendenteMaterialEsportivo = null;
+
+    adicionarNoticia(
+        "financeiro",
+        "Novo fornecedor esportivo",
+        marcaEscolhida.nome + " fechou com o " + save.clube +
+        ". O clube recebeu " + formatarDinheiro(oferta.valor, save.moeda) +
+        " em novo contrato de material esportivo.",
+        "material-esportivo-" + obterNumeroTemporadaAtual()
+    );
+
+    salvar();
+    fecharModalMaterialEsportivo();
+    renderizarTudo();
+
+    alert(
+        "Contrato fechado com " + marcaEscolhida.nome + "!\n\n" +
+        "Valor recebido: " + formatarDinheiro(oferta.valor, save.moeda)
+    );
+}
+
+function verificarOfertaMaterialEsportivo() {
+    if (!save) return;
+
+    garantirDadosPatrocinio();
+
+    const temporadaAtual = obterNumeroTemporadaAtual();
+
+    if (
+        save.patrocinio.ofertaPendenteMaterialEsportivo &&
+        save.patrocinio.ofertaPendenteMaterialEsportivo.temporada !== temporadaAtual
+    ) {
+        save.patrocinio.ofertaPendenteMaterialEsportivo = null;
+        salvar();
+    }
+
+    if (
+        save.patrocinio.ofertaPendenteMaterialEsportivo &&
+        save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
+    ) {
+        abrirModalMaterialEsportivo();
+        return;
+    }
+
+    if (!save.progressao || (save.progressao.jogosTemporada || 0) < 4) return;
+    if (save.patrocinio.temporadaUltimaOfertaMaterialEsportivo === temporadaAtual) return;
+
+    const oferta = criarOfertaMaterialEsportivo();
+
+    if (!oferta) return;
+
+    save.patrocinio.ofertaPendenteMaterialEsportivo = oferta;
+    save.patrocinio.temporadaUltimaOfertaMaterialEsportivo = temporadaAtual;
+
+    salvar();
+    abrirModalMaterialEsportivo();
+}
+
+function verificarOfertasComerciais() {
+    garantirDadosPatrocinio();
+
+    const temporadaAtual = obterNumeroTemporadaAtual();
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada === temporadaAtual
+    ) {
+        abrirModalPatrocinioMaster();
+        return;
+    }
+
+    if (
+        save.patrocinio.ofertaPendenteMaterialEsportivo &&
+        save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
+    ) {
+        abrirModalMaterialEsportivo();
+        return;
+    }
+
+    verificarOfertasComerciais();
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada === temporadaAtual
+    ) {
+        return;
+    }
+
+    verificarOfertaMaterialEsportivo();
 }
 
 function iniciarPagina() {
@@ -6347,7 +6642,12 @@ function criarNovoSave(liga, clube, disputaContinental) {
             masterAtual: null,
             historico: [],
             ofertaPendente: null,
-            temporadaUltimaOferta: 0
+            temporadaUltimaOferta: 0,
+
+            materialEsportivoAtual: null,
+            historicoMaterialEsportivo: [],
+            ofertaPendenteMaterialEsportivo: null,
+            temporadaUltimaOfertaMaterialEsportivo: 0
         },
         escalacaoAnterior: null,
         capitaoAnteriorId: null,
@@ -8158,6 +8458,37 @@ function renderizarInfo() {
         } else {
             patrocinioNome.textContent = "Sem patrocinador";
             patrocinioValor.textContent = "As propostas chegam após 2 jogos";
+        }
+    }
+
+    const materialNome = document.getElementById("materialEsportivoNome");
+    const materialValor = document.getElementById("materialEsportivoValor");
+
+    if (materialNome && materialValor) {
+        if (save.patrocinio.materialEsportivoAtual) {
+            materialNome.textContent = save.patrocinio.materialEsportivoAtual.nome;
+
+            let textoContrato =
+                "Contrato atual: " +
+                formatarDinheiro(save.patrocinio.materialEsportivoAtual.valorContrato, save.moeda);
+
+            if (
+                save.patrocinio.ofertaPendenteMaterialEsportivo &&
+                save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === obterNumeroTemporadaAtual()
+            ) {
+                textoContrato += " · nova proposta pendente";
+            }
+
+            materialValor.textContent = textoContrato;
+        } else if (
+            save.patrocinio.ofertaPendenteMaterialEsportivo &&
+            save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === obterNumeroTemporadaAtual()
+        ) {
+            materialNome.textContent = "Proposta pendente";
+            materialValor.textContent = "Escolha o fornecedor esportivo";
+        } else {
+            materialNome.textContent = "Sem fornecedor";
+            materialValor.textContent = "As propostas chegam após 4 jogos";
         }
     }
 }
@@ -10913,7 +11244,7 @@ function voltarAoPainelDepoisDoJogo() {
     document.getElementById("telaPainel").classList.remove("escondida");
 
     renderizarTudo();
-    verificarOfertaPatrocinioMaster();
+    verificarOfertasComerciais();
     window.scrollTo(0, 0);
 }
 
@@ -15651,6 +15982,21 @@ function voltarLigas() {
         </div>
 
         <div id="listaPatrocinioMaster" class="patrocinio-lista"></div>
+    </div>
+</div>
+
+<div id="modalMaterialEsportivo" class="modal">
+    <div class="modal-card modal-card-patrocinio">
+        <h2>Material esportivo</h2>
+
+        <div class="patrocinio-topo">
+            <strong>Novas propostas</strong>
+            <div id="textoModalMaterialEsportivo" class="patrocinio-resumo">
+                Escolha o novo fornecedor de material esportivo do clube.
+            </div>
+        </div>
+
+        <div id="listaMaterialEsportivo" class="patrocinio-lista"></div>
     </div>
 </div>
 </body>
