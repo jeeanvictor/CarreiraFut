@@ -1712,6 +1712,104 @@ th,
         max-width: 480px;
     }
 }
+
+.tela-oferta-comercial .card {
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.oferta-comercial-resumo {
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 800;
+    color: rgba(0,0,0,0.72);
+    margin-bottom: 14px;
+}
+
+.oferta-comercial-lista {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.oferta-comercial-opcao {
+    border: 2px solid rgba(0,0,0,0.08);
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 16px 14px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.oferta-comercial-opcao:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.18);
+}
+
+.oferta-comercial-selo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--cor-destaque-fundo, var(--cor-principal));
+    color: var(--cor-destaque-texto, #ffffff);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.oferta-comercial-logo-box {
+    width: 100%;
+    height: 72px;
+    border-radius: 14px;
+    background: #f3f3f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.oferta-comercial-logo {
+    max-width: 100%;
+    max-height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
+.oferta-comercial-nome {
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.oferta-comercial-valor {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.oferta-comercial-detalhe {
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.72;
+    line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+    .oferta-comercial-lista {
+        grid-template-columns: 1fr;
+    }
+}
 	
 </style>
 </head>
@@ -1809,7 +1907,7 @@ th,
 							<div class="mini-info mini-info-patrocinio">
 							<div class="mini-label">Patrocínio master</div>
 							<div id="patrocinioMasterNome" class="mini-valor">Sem patrocinador</div>
-							<div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 2 jogos</div>
+							<div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 3 jogos</div>
 							</div>
 							
 							<div class="mini-info mini-info-patrocinio">
@@ -2233,6 +2331,31 @@ th,
         <button class="btn-confirmar" onclick="voltarAoPainelDepoisDoJogo()">
             Continuar carreira
         </button>
+    </div>
+</section>
+
+<section id="telaOfertaComercial" class="tela tela-cheia tela-oferta-comercial">
+    <div class="conteudo">
+        <div class="topo-app">
+            <div>
+                <div class="marca-pequena">Carreira Fut</div>
+                <div id="marcaOfertaComercial" class="marca-grande">Proposta comercial</div>
+            </div>
+        </div>
+
+        <div class="cabecalho-tela">
+            <div id="seloOfertaComercial" class="selo">Proposta</div>
+            <h1 id="tituloOfertaComercial" class="titulo-tela">Escolha uma proposta.</h1>
+            <p id="subtituloOfertaComercial" class="subtitulo-tela">
+                Novas empresas querem fechar contrato com o clube.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 id="tituloCardOfertaComercial">Propostas recebidas</h2>
+            <div id="textoOfertaComercial" class="oferta-comercial-resumo"></div>
+            <div id="listaOfertaComercial" class="oferta-comercial-lista"></div>
+        </div>
     </div>
 </section>
 
@@ -5848,20 +5971,11 @@ function renderizarModalPatrocinioMaster() {
 }
 
 function abrirModalPatrocinioMaster() {
-    const modal = document.getElementById("modalPatrocinioMaster");
-
-    if (!modal) return;
-
-    renderizarModalPatrocinioMaster();
-    modal.classList.add("ativo");
+    abrirTelaOfertaComercial("master");
 }
 
 function fecharModalPatrocinioMaster() {
-    const modal = document.getElementById("modalPatrocinioMaster");
-
-    if (!modal) return;
-
-    modal.classList.remove("ativo");
+    voltarPainelAposOfertaComercial();
 }
 
 function aceitarPatrocinioMaster(nomePatrocinador) {
@@ -5908,14 +6022,11 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
     );
 
     salvar();
-    fecharModalPatrocinioMaster();
+
+    const telaOferta = document.getElementById("telaOfertaComercial");
+    if (telaOferta) telaOferta.classList.remove("ativa");
+
     renderizarTudo();
-
-    alert(
-        "Patrocínio fechado com " + patrocinadorEscolhido.nome + "!\n\n" +
-        "Valor recebido: " + formatarDinheiro(oferta.valor, save.moeda)
-    );
-
     verificarOfertasComerciais();
 }
 
@@ -5981,6 +6092,152 @@ function registrarCampanhaPatrocinioFimTemporada() {
 }
 
 
+
+function obterTipoOfertaComercialPendente() {
+    garantirDadosPatrocinio();
+
+    const temporadaAtual = obterNumeroTemporadaAtual();
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada === temporadaAtual
+    ) {
+        return "master";
+    }
+
+    if (
+        save.patrocinio.ofertaPendenteMaterialEsportivo &&
+        save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
+    ) {
+        return "material";
+    }
+
+    return null;
+}
+
+function obterOfertaComercialPorTipo(tipo) {
+    garantirDadosPatrocinio();
+
+    if (tipo === "master") {
+        return save.patrocinio.ofertaPendente;
+    }
+
+    if (tipo === "material") {
+        return save.patrocinio.ofertaPendenteMaterialEsportivo;
+    }
+
+    return null;
+}
+
+function esconderTelasParaOfertaComercial() {
+    const telaPainel = document.getElementById("telaPainel");
+    const telaEscalacao = document.getElementById("telaEscalacao");
+    const telaPartida = document.getElementById("telaPartida");
+    const telaFim = document.getElementById("telaFim");
+
+    if (telaPainel) telaPainel.classList.add("escondida");
+    if (telaEscalacao) telaEscalacao.classList.remove("ativa");
+    if (telaPartida) telaPartida.classList.remove("ativa");
+    if (telaFim) telaFim.classList.remove("ativa");
+}
+
+function voltarPainelAposOfertaComercial() {
+    const telaOferta = document.getElementById("telaOfertaComercial");
+    const telaPainel = document.getElementById("telaPainel");
+
+    if (telaOferta) telaOferta.classList.remove("ativa");
+    if (telaPainel) telaPainel.classList.remove("escondida");
+
+    renderizarTudo();
+    window.scrollTo(0, 0);
+}
+
+function abrirTelaOfertaComercial(tipo) {
+    const tela = document.getElementById("telaOfertaComercial");
+
+    if (!tela) return;
+
+    tipo = tipo || obterTipoOfertaComercialPendente();
+
+    if (!tipo) return;
+
+    renderizarTelaOfertaComercial(tipo);
+    esconderTelasParaOfertaComercial();
+
+    tela.classList.add("ativa");
+    window.scrollTo(0, 0);
+}
+
+function renderizarTelaOfertaComercial(tipo) {
+    const oferta = obterOfertaComercialPorTipo(tipo);
+
+    if (!oferta) return;
+
+    const marca = document.getElementById("marcaOfertaComercial");
+    const selo = document.getElementById("seloOfertaComercial");
+    const titulo = document.getElementById("tituloOfertaComercial");
+    const subtitulo = document.getElementById("subtituloOfertaComercial");
+    const tituloCard = document.getElementById("tituloCardOfertaComercial");
+    const texto = document.getElementById("textoOfertaComercial");
+    const lista = document.getElementById("listaOfertaComercial");
+
+    if (!lista || !texto) return;
+
+    lista.innerHTML = "";
+
+    if (tipo === "master") {
+        if (marca) marca.textContent = "Patrocínio master";
+        if (selo) selo.textContent = "Patrocínio";
+        if (titulo) titulo.textContent = "Escolha seu patrocinador master.";
+        if (subtitulo) subtitulo.textContent = "Após os primeiros jogos, empresas querem estampar a marca principal do clube.";
+        if (tituloCard) tituloCard.textContent = "Propostas de patrocínio master";
+
+        texto.textContent =
+            "Chegaram 3 propostas para o " + save.clube + ". " +
+            "Todas pagam " + formatarDinheiro(oferta.valor, save.moeda) +
+            " (" + Math.round(oferta.percentual * 100) + "% do orçamento inicial: " +
+            formatarDinheiro(oferta.baseOrcamento || save.orcamentoInicial, save.moeda) + "). " +
+            obterTextoNivelPatrocinio(oferta.nivel) + ".";
+    } else {
+        if (marca) marca.textContent = "Material esportivo";
+        if (selo) selo.textContent = "Fornecedor";
+        if (titulo) titulo.textContent = "Escolha o fornecedor esportivo.";
+        if (subtitulo) subtitulo.textContent = "Marcas de material esportivo querem vestir o clube nesta temporada.";
+        if (tituloCard) tituloCard.textContent = "Propostas de material esportivo";
+
+        texto.textContent =
+            "Chegaram 3 propostas para fornecer material esportivo ao " + save.clube + ". " +
+            "Todas pagam " + formatarDinheiro(oferta.valor, save.moeda) +
+            " (1/3 da cota master de " + formatarDinheiro(oferta.valorReferenciaMaster, save.moeda) + "). " +
+            "Base usada: " + formatarDinheiro(oferta.baseOrcamento, save.moeda) +
+            ". " + obterTextoNivelPatrocinio(oferta.nivel) + ".";
+    }
+
+    oferta.opcoes.forEach(function(opcao) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "oferta-comercial-opcao";
+
+        botao.onclick = function() {
+            if (tipo === "master") {
+                aceitarPatrocinioMaster(opcao.nome);
+            } else {
+                aceitarMaterialEsportivo(opcao.nome);
+            }
+        };
+
+        botao.innerHTML =
+            '<div class="oferta-comercial-selo">' + obterTextoNivelPatrocinio(oferta.nivel) + '</div>' +
+            '<div class="oferta-comercial-logo-box">' +
+                '<img class="oferta-comercial-logo" src="' + opcao.logo + '" alt="' + opcao.nome + '" onerror="this.style.display=\'none\'">' +
+            '</div>' +
+            '<div class="oferta-comercial-nome">' + opcao.nome + '</div>' +
+            '<div class="oferta-comercial-valor">' + formatarDinheiro(oferta.valor, save.moeda) + '</div>' +
+            '<div class="oferta-comercial-detalhe">Clique para fechar o contrato e receber o valor no orçamento.</div>';
+
+        lista.appendChild(botao);
+    });
+}
 
 iniciarPagina();
 
@@ -6083,20 +6340,11 @@ function renderizarModalMaterialEsportivo() {
 }
 
 function abrirModalMaterialEsportivo() {
-    const modal = document.getElementById("modalMaterialEsportivo");
-
-    if (!modal) return;
-
-    renderizarModalMaterialEsportivo();
-    modal.classList.add("ativo");
+    abrirTelaOfertaComercial("material");
 }
 
 function fecharModalMaterialEsportivo() {
-    const modal = document.getElementById("modalMaterialEsportivo");
-
-    if (!modal) return;
-
-    modal.classList.remove("ativo");
+    voltarPainelAposOfertaComercial();
 }
 
 function aceitarMaterialEsportivo(nomeMarca) {
@@ -6143,13 +6391,7 @@ function aceitarMaterialEsportivo(nomeMarca) {
     );
 
     salvar();
-    fecharModalMaterialEsportivo();
-    renderizarTudo();
-
-    alert(
-        "Contrato fechado com " + marcaEscolhida.nome + "!\n\n" +
-        "Valor recebido: " + formatarDinheiro(oferta.valor, save.moeda)
-    );
+    voltarPainelAposOfertaComercial();
 }
 
 function verificarOfertaMaterialEsportivo() {
