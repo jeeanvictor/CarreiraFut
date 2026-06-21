@@ -6023,11 +6023,11 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
 
     salvar();
 
-    const telaOferta = document.getElementById("telaOfertaComercial");
-    if (telaOferta) telaOferta.classList.remove("ativa");
+    voltarPainelAposOfertaComercial();
 
-    renderizarTudo();
-    verificarOfertasComerciais();
+    setTimeout(function() {
+        verificarOfertasComerciais();
+    }, 0);
 }
 
 function verificarOfertaPatrocinioMaster() {
