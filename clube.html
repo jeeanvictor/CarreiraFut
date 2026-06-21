@@ -6194,6 +6194,7 @@ function verificarOfertaPatrocinioMaster() {
     garantirDadosPatrocinio();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
+    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
 
     if (
         save.patrocinio.ofertaPendente &&
@@ -6211,8 +6212,8 @@ function verificarOfertaPatrocinioMaster() {
         return;
     }
 
-    if (!save.progressao || (save.progressao.jogosTemporada || 0) < 2) return;
-    if (save.patrocinio.temporadaUltimaOferta === temporadaAtual) return;
+    if (save.patrocinio.masterAtual) return;
+    if (jogosTemporada < 2) return;
 
     const oferta = criarOfertaPatrocinioMaster();
 
@@ -6565,6 +6566,7 @@ function verificarOfertaMaterialEsportivo() {
     garantirDadosPatrocinio();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
+    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
 
     if (
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
@@ -6582,8 +6584,8 @@ function verificarOfertaMaterialEsportivo() {
         return;
     }
 
-    if (!save.progressao || (save.progressao.jogosTemporada || 0) < 4) return;
-    if (save.patrocinio.temporadaUltimaOfertaMaterialEsportivo === temporadaAtual) return;
+    if (save.patrocinio.materialEsportivoAtual) return;
+    if (jogosTemporada < 4) return;
 
     const oferta = criarOfertaMaterialEsportivo();
 
@@ -6612,21 +6614,6 @@ function verificarOfertasComerciais() {
     }
 
     if (
-        save.progressao &&
-        (save.progressao.jogosTemporada || 0) >= 2 &&
-        save.patrocinio.temporadaUltimaOferta !== temporadaAtual
-    ) {
-        verificarOfertaPatrocinioMaster();
-
-        if (
-            save.patrocinio.ofertaPendente &&
-            save.patrocinio.ofertaPendente.temporada === temporadaAtual
-        ) {
-            return;
-        }
-    }
-
-    if (
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
         save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
     ) {
@@ -6634,13 +6621,16 @@ function verificarOfertasComerciais() {
         return;
     }
 
+    verificarOfertaPatrocinioMaster();
+
     if (
-        save.progressao &&
-        (save.progressao.jogosTemporada || 0) >= 4 &&
-        save.patrocinio.temporadaUltimaOfertaMaterialEsportivo !== temporadaAtual
+        save.patrocinio.ofertaPendente &&
+        save.patrocinio.ofertaPendente.temporada === temporadaAtual
     ) {
-        verificarOfertaMaterialEsportivo();
+        return;
     }
+
+    verificarOfertaMaterialEsportivo();
 }
 
 function iniciarPagina() {
@@ -8390,13 +8380,13 @@ function garantirPremiosCopaBrasil() {
 }
 
 function obterValorPremioCopaBrasil(fase, resultado) {
-    if (fase === "5ª fase") return 2000000;
-    if (fase === "Oitavas") return 3000000;
-    if (fase === "Quartas") return 4000000;
-    if (fase === "Semifinal") return 9000000;
+    if (fase === "5ª fase" && resultado === "classificacao") return 2;
+    if (fase === "Oitavas" && resultado === "classificacao") return 3;
+    if (fase === "Quartas" && resultado === "classificacao") return 4;
+    if (fase === "Semifinal" && resultado === "classificacao") return 9;
 
-    if (fase === "Final" && resultado === "campeao") return 78000000;
-    if (fase === "Final" && resultado === "vice") return 34000000;
+    if (fase === "Final" && resultado === "campeao") return 78;
+    if (fase === "Final" && resultado === "vice") return 34;
 
     return 0;
 }
@@ -8404,7 +8394,7 @@ function obterValorPremioCopaBrasil(fase, resultado) {
 function pagarPremioCopaBrasil(fase, resultado) {
     garantirPremiosCopaBrasil();
 
-    const chave = fase + "-" + resultado;
+    const chave = fase + "-" + resultado + "-temporada-" + (save.temporadaNumero || 1);
     const valor = obterValorPremioCopaBrasil(fase, resultado);
 
     if (valor <= 0) return 0;
@@ -8414,7 +8404,7 @@ function pagarPremioCopaBrasil(fase, resultado) {
     }
 
     save.premiosCopaBrasilPagos[chave] = true;
-    save.orcamentoTransferencias = (save.orcamentoTransferencias || 0) + valor;
+    save.orcamentoTransferencias = arredondarMi((save.orcamentoTransferencias || 0) + valor);
     save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
 
     if (typeof adicionarNoticia === "function") {
@@ -8422,11 +8412,48 @@ function pagarPremioCopaBrasil(fase, resultado) {
             "financeiro",
             "Premiação recebida",
             save.clube + " recebeu " + formatarDinheiro(valor, save.moeda) + " pela campanha na Copa do Brasil.",
-            "premio-copa-brasil-" + chave + "-" + (save.temporadaNumero || 1)
+            "premio-copa-brasil-" + chave
         );
     }
 
     return valor;
+}
+
+function sortearDisputaPenaltisCopaBrasil(nomeClube, nomeAdversario) {
+    let penaltisClube = 0;
+    let penaltisAdv = 0;
+
+    for (let i = 0; i < 5; i++) {
+        if (Math.random() < 0.76) penaltisClube++;
+        if (Math.random() < 0.74) penaltisAdv++;
+    }
+
+    while (penaltisClube === penaltisAdv) {
+        if (Math.random() < 0.76) penaltisClube++;
+        if (Math.random() < 0.74) penaltisAdv++;
+    }
+
+    return {
+        clube: nomeClube,
+        adversario: nomeAdversario,
+        golsClube: penaltisClube,
+        golsAdv: penaltisAdv,
+        passou: penaltisClube > penaltisAdv
+    };
+}
+
+function aplicarPenaltisNoJogoCopaBrasil(jogo, resultadoPenaltis) {
+    if (!jogo || !resultadoPenaltis) return;
+
+    jogo.decididoNosPenaltis = true;
+
+    if (jogo.casa === save.clube) {
+        jogo.penaltisCasa = resultadoPenaltis.golsClube;
+        jogo.penaltisFora = resultadoPenaltis.golsAdv;
+    } else {
+        jogo.penaltisCasa = resultadoPenaltis.golsAdv;
+        jogo.penaltisFora = resultadoPenaltis.golsClube;
+    }
 }
 
 function atualizarCopaBrasil(evento, jogo) {
@@ -8468,6 +8495,8 @@ function atualizarCopaBrasil(evento, jogo) {
             concluida: false,
             passou: false,
             decididoNosPenaltis: false,
+            penaltisClube: null,
+            penaltisAdv: null,
             premioPago: 0
         };
     }
@@ -8496,9 +8525,18 @@ function atualizarCopaBrasil(evento, jogo) {
 
     if (fase.golsClube > fase.golsAdv) {
         passou = true;
-    } else if (fase.golsClube === fase.golsAdv) {
-        passou = Math.random() >= 0.5;
+    } else if (fase.golsClube < fase.golsAdv) {
+        passou = false;
+    } else {
+        const penaltis = sortearDisputaPenaltisCopaBrasil(save.clube, adversario);
+
+        passou = penaltis.passou;
+
         fase.decididoNosPenaltis = true;
+        fase.penaltisClube = penaltis.golsClube;
+        fase.penaltisAdv = penaltis.golsAdv;
+
+        aplicarPenaltisNoJogoCopaBrasil(jogo, penaltis);
     }
 
     fase.concluida = true;
@@ -8512,6 +8550,10 @@ function atualizarCopaBrasil(evento, jogo) {
             stats.viceClube = adversario;
             stats.status = "Campeão";
             stats.faseAtual = "Campeão";
+
+            if (fase.decididoNosPenaltis) {
+                stats.status += " · venceu nos pênaltis (" + fase.penaltisClube + " x " + fase.penaltisAdv + ")";
+            }
 
             fase.premioPago = pagarPremioCopaBrasil(evento.fase, "campeao");
             return;
@@ -8528,7 +8570,7 @@ function atualizarCopaBrasil(evento, jogo) {
             fase.golsAdv;
 
         if (fase.decididoNosPenaltis) {
-            stats.status += " · venceu nos pênaltis";
+            stats.status += " · venceu nos pênaltis (" + fase.penaltisClube + " x " + fase.penaltisAdv + ")";
         }
 
         fase.premioPago = pagarPremioCopaBrasil(evento.fase, "classificacao");
@@ -8547,6 +8589,10 @@ function atualizarCopaBrasil(evento, jogo) {
         stats.status = "Vice-campeão";
         stats.faseAtual = "Final";
 
+        if (fase.decididoNosPenaltis) {
+            stats.status += " · perdeu nos pênaltis (" + fase.penaltisClube + " x " + fase.penaltisAdv + ")";
+        }
+
         fase.premioPago = pagarPremioCopaBrasil(evento.fase, "vice");
         return;
     }
@@ -8562,7 +8608,7 @@ function atualizarCopaBrasil(evento, jogo) {
         fase.golsAdv;
 
     if (fase.decididoNosPenaltis) {
-        stats.status += " · perdeu nos pênaltis";
+        stats.status += " · perdeu nos pênaltis (" + fase.penaltisClube + " x " + fase.penaltisAdv + ")";
     }
 
     cancelarJogosFuturosCopaBrasil(evento.fase);
@@ -11609,7 +11655,7 @@ function finalizarPartida() {
     try {
         registrarNoticiasAposPartida(evento, jogoUsuario);
     } catch (erro) {
-        console.warn("Erro ao registrar notícias/tweets após a partida:", erro);
+        console.warn("Erro ao registrar notícias/tweets:", erro);
     }
 
     salvar();
@@ -11732,7 +11778,7 @@ function voltarAoPainelDepoisDoJogo() {
 
     setTimeout(function() {
         verificarOfertasComerciais();
-    }, 0);
+    }, 50);
 
     window.scrollTo(0, 0);
 }
@@ -12646,34 +12692,42 @@ function criarLinhaTabela(clube) {
 }
 
 function registrarResultado(evento, jogo) {
-    const registro = {
+    const textoPenaltis = jogo.decididoNosPenaltis
+        ? " · Pênaltis: " + jogo.penaltisCasa + " x " + jogo.penaltisFora
+        : "";
+
+    save.resultados.unshift({
         competicao: evento.competicao,
-        tipo: evento.tipo,
-        rodada: evento.rodada,
-        data: evento.data,
+        rodada: evento.rodada || evento.fase || "",
         casa: jogo.casa,
         fora: jogo.fora,
         golsCasa: jogo.golsCasa,
         golsFora: jogo.golsFora,
-        golsDetalhados: partida && partida.golsDetalhados
-            ? partida.golsDetalhados.map(function(gol) {
-                return Object.assign({}, gol);
-            })
-            : []
-    };
+        penaltisCasa: jogo.penaltisCasa || null,
+        penaltisFora: jogo.penaltisFora || null,
+        decididoNosPenaltis: Boolean(jogo.decididoNosPenaltis),
+        texto: jogo.casa + " " + jogo.golsCasa + " x " + jogo.golsFora + " " + jogo.fora + textoPenaltis,
+        data: evento.data
+    });
 
-    save.resultados.unshift(registro);
-
-    if (save.resultados.length > 12) {
+    if (save.resultados.length > 10) {
         save.resultados.pop();
     }
 
-    if (!Array.isArray(save.historicoResultados)) {
-        save.historicoResultados = [];
-    }
-
-    save.historicoResultados.push(registro);
+    save.historicoResultados.push({
+        competicao: evento.competicao,
+        rodada: evento.rodada || evento.fase || "",
+        casa: jogo.casa,
+        fora: jogo.fora,
+        golsCasa: jogo.golsCasa,
+        golsFora: jogo.golsFora,
+        penaltisCasa: jogo.penaltisCasa || null,
+        penaltisFora: jogo.penaltisFora || null,
+        decididoNosPenaltis: Boolean(jogo.decididoNosPenaltis),
+        data: evento.data
+    });
 }
+
 
 function ajustarConfianca() {
     return;
@@ -16519,6 +16573,17 @@ function registrarNoticiasAposPartida(evento, jogo) {
     } else if (golsUsuario < golsAdversario) {
         titulo = save.clube + " perde para " + adversario;
         tipo = "derrota";
+    } else if (jogo.decididoNosPenaltis) {
+        const penaltisUsuario = jogo.casa === save.clube ? jogo.penaltisCasa : jogo.penaltisFora;
+        const penaltisAdv = jogo.casa === save.clube ? jogo.penaltisFora : jogo.penaltisCasa;
+
+        if (penaltisUsuario > penaltisAdv) {
+            titulo = save.clube + " vence " + adversario + " nos pênaltis";
+            tipo = "vitoria";
+        } else {
+            titulo = save.clube + " perde para " + adversario + " nos pênaltis";
+            tipo = "derrota";
+        }
     }
 
     const mando = jogo.casa === save.clube ? "em casa" : "fora de casa";
@@ -16527,6 +16592,11 @@ function registrarNoticiasAposPartida(evento, jogo) {
         "Pela competição " + evento.competicao + ", o " + save.clube +
         " jogou " + mando + " e o placar terminou " +
         jogo.golsCasa + " x " + jogo.golsFora + ".";
+
+    if (jogo.decididoNosPenaltis) {
+        texto += " A decisão foi para os pênaltis e terminou " +
+            jogo.penaltisCasa + " x " + jogo.penaltisFora + ".";
+    }
 
     if (partida && partida.capitaoUsuarioNome) {
         texto += " O capitão da equipe foi " + partida.capitaoUsuarioNome + ".";
@@ -16550,7 +16620,11 @@ function registrarNoticiasAposPartida(evento, jogo) {
         );
     });
 
-    registrarTweetsAposPartida(evento, jogo);
+    try {
+        registrarTweetsAposPartida(evento, jogo);
+    } catch (erro) {
+        console.warn("Erro ao registrar tweets:", erro);
+    }
 }
 
 function registrarNoticiaTitulo(competicao, detalhe) {
