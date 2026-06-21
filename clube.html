@@ -2526,7 +2526,7 @@ th,
 </div>
 
 <script>
-const VERSAO_SAVE = 24;
+const VERSAO_SAVE = 25;
 
 const LIGA_PREMIER = "Premier League";
 const LIGA_BRASILEIRAO = "Campeonato Brasileiro";
@@ -5941,6 +5941,60 @@ function garantirDadosPatrocinio() {
     }
 }
 
+function contratoComercialValido(contrato) {
+    return contrato &&
+        typeof contrato === "object" &&
+        typeof contrato.nome === "string" &&
+        contrato.nome.trim() !== "";
+}
+
+function obterJogosTemporadaComercial() {
+    const jogosProgressao = save && save.progressao
+        ? Number(save.progressao.jogosTemporada || 0)
+        : 0;
+
+    const jogosHistorico = Array.isArray(save.historicoResultados)
+        ? save.historicoResultados.length
+        : 0;
+
+    const jogosResultados = Array.isArray(save.resultados)
+        ? save.resultados.length
+        : 0;
+
+    return Math.max(jogosProgressao, jogosHistorico, jogosResultados);
+}
+
+function limparTravasComerciaisInvalidas() {
+    if (!save || !save.patrocinio) return;
+
+    if (save.patrocinio.masterAtual && !contratoComercialValido(save.patrocinio.masterAtual)) {
+        save.patrocinio.masterAtual = null;
+    }
+
+    if (
+        save.patrocinio.materialEsportivoAtual &&
+        !contratoComercialValido(save.patrocinio.materialEsportivoAtual)
+    ) {
+        save.patrocinio.materialEsportivoAtual = null;
+    }
+
+    if (
+        save.patrocinio.ofertaPendente &&
+        (!Array.isArray(save.patrocinio.ofertaPendente.opcoes) ||
+        save.patrocinio.ofertaPendente.opcoes.length === 0)
+    ) {
+        save.patrocinio.ofertaPendente = null;
+    }
+
+    if (
+        save.patrocinio.ofertaPendenteMaterialEsportivo &&
+        (!Array.isArray(save.patrocinio.ofertaPendenteMaterialEsportivo.opcoes) ||
+        save.patrocinio.ofertaPendenteMaterialEsportivo.opcoes.length === 0)
+    ) {
+        save.patrocinio.ofertaPendenteMaterialEsportivo = null;
+    }
+}
+
 function obterPercentualPatrocinioPorNivel(nivel) {
     if (nivel === 1) return 0.15;
     if (nivel === 2) return 0.25;
@@ -6189,41 +6243,56 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
 }
 
 function verificarOfertaPatrocinioMaster() {
-    if (!save) return;
+    if (!save) return false;
 
     garantirDadosPatrocinio();
+    limparTravasComerciaisInvalidas();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
-    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+    const jogosTemporada = obterJogosTemporadaComercial();
 
     if (
         save.patrocinio.ofertaPendente &&
         save.patrocinio.ofertaPendente.temporada !== temporadaAtual
     ) {
         save.patrocinio.ofertaPendente = null;
-        salvar();
     }
 
     if (
         save.patrocinio.ofertaPendente &&
         save.patrocinio.ofertaPendente.temporada === temporadaAtual
     ) {
-        abrirModalPatrocinioMaster();
-        return;
+        abrirTelaOfertaComercial("master");
+        return true;
     }
 
-    if (save.patrocinio.masterAtual) return;
-    if (jogosTemporada < 2) return;
+    if (contratoComercialValido(save.patrocinio.masterAtual)) {
+        return false;
+    }
+
+    if (jogosTemporada < 3) {
+        return false;
+    }
 
     const oferta = criarOfertaPatrocinioMaster();
 
-    if (!oferta) return;
+    if (!oferta) {
+        console.warn("Não foi possível criar oferta de patrocínio master.", {
+            liga: save.liga,
+            clube: save.clube,
+            jogosTemporada: jogosTemporada
+        });
+        return false;
+    }
 
+    save.patrocinio.masterAtual = null;
     save.patrocinio.ofertaPendente = oferta;
     save.patrocinio.temporadaUltimaOferta = temporadaAtual;
 
     salvar();
-    abrirModalPatrocinioMaster();
+    abrirTelaOfertaComercial("master");
+
+    return true;
 }
 
 function registrarCampanhaPatrocinioFimTemporada() {
@@ -6561,47 +6630,63 @@ function aceitarMaterialEsportivo(nomeMarca) {
 }
 
 function verificarOfertaMaterialEsportivo() {
-    if (!save) return;
+    if (!save) return false;
 
     garantirDadosPatrocinio();
+    limparTravasComerciaisInvalidas();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
-    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+    const jogosTemporada = obterJogosTemporadaComercial();
 
     if (
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
         save.patrocinio.ofertaPendenteMaterialEsportivo.temporada !== temporadaAtual
     ) {
         save.patrocinio.ofertaPendenteMaterialEsportivo = null;
-        salvar();
     }
 
     if (
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
         save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
     ) {
-        abrirModalMaterialEsportivo();
-        return;
+        abrirTelaOfertaComercial("material");
+        return true;
     }
 
-    if (save.patrocinio.materialEsportivoAtual) return;
-    if (jogosTemporada < 4) return;
+    if (contratoComercialValido(save.patrocinio.materialEsportivoAtual)) {
+        return false;
+    }
+
+    if (jogosTemporada < 4) {
+        return false;
+    }
 
     const oferta = criarOfertaMaterialEsportivo();
 
-    if (!oferta) return;
+    if (!oferta) {
+        console.warn("Não foi possível criar oferta de material esportivo.", {
+            liga: save.liga,
+            clube: save.clube,
+            jogosTemporada: jogosTemporada
+        });
+        return false;
+    }
 
+    save.patrocinio.materialEsportivoAtual = null;
     save.patrocinio.ofertaPendenteMaterialEsportivo = oferta;
     save.patrocinio.temporadaUltimaOfertaMaterialEsportivo = temporadaAtual;
 
     salvar();
-    abrirModalMaterialEsportivo();
+    abrirTelaOfertaComercial("material");
+
+    return true;
 }
 
 function verificarOfertasComerciais() {
     if (!save) return;
 
     garantirDadosPatrocinio();
+    limparTravasComerciaisInvalidas();
 
     const temporadaAtual = obterNumeroTemporadaAtual();
 
@@ -6609,7 +6694,7 @@ function verificarOfertasComerciais() {
         save.patrocinio.ofertaPendente &&
         save.patrocinio.ofertaPendente.temporada === temporadaAtual
     ) {
-        abrirModalPatrocinioMaster();
+        abrirTelaOfertaComercial("master");
         return;
     }
 
@@ -6617,18 +6702,13 @@ function verificarOfertasComerciais() {
         save.patrocinio.ofertaPendenteMaterialEsportivo &&
         save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
     ) {
-        abrirModalMaterialEsportivo();
+        abrirTelaOfertaComercial("material");
         return;
     }
 
-    verificarOfertaPatrocinioMaster();
+    const abriuMaster = verificarOfertaPatrocinioMaster();
 
-    if (
-        save.patrocinio.ofertaPendente &&
-        save.patrocinio.ofertaPendente.temporada === temporadaAtual
-    ) {
-        return;
-    }
+    if (abriuMaster) return;
 
     verificarOfertaMaterialEsportivo();
 }
@@ -6665,12 +6745,12 @@ function iniciarPagina() {
     garantirDadosMercado();
     garantirContinentalSelecionadaNoSave();
 
-    aplicarPaletaDoClube(save.clube);
-    renderizarTudo();
+	aplicarPaletaDoClube(save.clube);
+	renderizarTudo();
 
-    setTimeout(function() {
-        verificarOfertasComerciais();
-    }, 0);
+	setTimeout(function() {
+	verificarOfertasComerciais();
+	}, 150);
 }
 
 function lerSaveSalvo() {
@@ -11779,7 +11859,7 @@ function voltarAoPainelDepoisDoJogo() {
 
     setTimeout(function() {
         verificarOfertasComerciais();
-    }, 50);
+    }, 100);
 
     window.scrollTo(0, 0);
 }
@@ -13553,64 +13633,68 @@ function resolverCaminhoLogoEmpresa(empresa) {
 }
 
 function atualizarResumoComercial() {
-    const patrocinio = save.patrocinioMaster || null;
-    const material = save.materialEsportivo || null;
+    if (!save) return;
 
-    const patrocinioNome = typeof patrocinio === "string"
-        ? patrocinio
-        : (patrocinio?.nome || "Sem patrocinador");
+    garantirDadosPatrocinio();
+    limparTravasComerciaisInvalidas();
 
-    const patrocinioValor = typeof patrocinio === "object"
-        ? Number(patrocinio.valor || 0)
-        : 0;
+    const temporadaAtual = obterNumeroTemporadaAtual();
 
-    const materialNome = typeof material === "string"
-        ? material
-        : (material?.nome || "Sem fornecedor");
+    const patrocinio = save.patrocinio.masterAtual;
+    const material = save.patrocinio.materialEsportivoAtual;
 
-    const materialValor = typeof material === "object"
-        ? Number(material.valor || 0)
-        : 0;
+    const patrocinioNome = document.getElementById("patrocinioMasterNome");
+    const patrocinioValor = document.getElementById("patrocinioMasterValor");
+    const materialNome = document.getElementById("materialEsportivoNome");
+    const materialValor = document.getElementById("materialEsportivoValor");
 
-    document.getElementById("patrocinioMasterNome").textContent = patrocinioNome || "Sem patrocinador";
-    document.getElementById("patrocinioMasterValor").textContent =
-        patrocinioValor > 0
-            ? "Contrato atual: " + formatarDinheiro(patrocinioValor, save.moeda)
-            : "As propostas chegam após 3 jogos";
-
-    document.getElementById("materialEsportivoNome").textContent = materialNome || "Sem fornecedor";
-    document.getElementById("materialEsportivoValor").textContent =
-        materialValor > 0
-            ? "Contrato atual: " + formatarDinheiro(materialValor, save.moeda)
-            : "As propostas chegam após 4 jogos";
-
-    const patrocinioMasterLogo = document.getElementById("patrocinioMasterLogo");
-    const patrocinioMasterLogoPlaceholder = document.getElementById("patrocinioMasterLogoPlaceholder");
-    const materialEsportivoLogo = document.getElementById("materialEsportivoLogo");
-    const materialEsportivoLogoPlaceholder = document.getElementById("materialEsportivoLogoPlaceholder");
-
-    const caminhoLogoPatrocinio = resolverCaminhoLogoEmpresa(patrocinio);
-    const caminhoLogoMaterial = resolverCaminhoLogoEmpresa(material);
-
-    if (caminhoLogoPatrocinio) {
-        patrocinioMasterLogo.src = caminhoLogoPatrocinio;
-        patrocinioMasterLogo.style.display = "block";
-        patrocinioMasterLogoPlaceholder.style.display = "none";
-    } else {
-        patrocinioMasterLogo.removeAttribute("src");
-        patrocinioMasterLogo.style.display = "none";
-        patrocinioMasterLogoPlaceholder.style.display = "block";
+    if (patrocinioNome && patrocinioValor) {
+        if (contratoComercialValido(patrocinio)) {
+            patrocinioNome.textContent = patrocinio.nome;
+            patrocinioValor.textContent =
+                "Contrato atual: " +
+                formatarDinheiro(patrocinio.valorContrato || patrocinio.valor || 0, save.moeda);
+        } else if (
+            save.patrocinio.ofertaPendente &&
+            save.patrocinio.ofertaPendente.temporada === temporadaAtual
+        ) {
+            patrocinioNome.textContent = "Proposta pendente";
+            patrocinioValor.textContent = "Escolha um patrocinador master";
+        } else {
+            patrocinioNome.textContent = "Sem patrocinador";
+            patrocinioValor.textContent = "As propostas chegam após 3 jogos";
+        }
     }
 
-    if (caminhoLogoMaterial) {
-        materialEsportivoLogo.src = caminhoLogoMaterial;
-        materialEsportivoLogo.style.display = "block";
-        materialEsportivoLogoPlaceholder.style.display = "none";
-    } else {
-        materialEsportivoLogo.removeAttribute("src");
-        materialEsportivoLogo.style.display = "none";
-        materialEsportivoLogoPlaceholder.style.display = "block";
+    if (materialNome && materialValor) {
+        if (contratoComercialValido(material)) {
+            materialNome.textContent = material.nome;
+            materialValor.textContent =
+                "Contrato atual: " +
+                formatarDinheiro(material.valorContrato || material.valor || 0, save.moeda);
+        } else if (
+            save.patrocinio.ofertaPendenteMaterialEsportivo &&
+            save.patrocinio.ofertaPendenteMaterialEsportivo.temporada === temporadaAtual
+        ) {
+            materialNome.textContent = "Proposta pendente";
+            materialValor.textContent = "Escolha o fornecedor esportivo";
+        } else {
+            materialNome.textContent = "Sem fornecedor";
+            materialValor.textContent = "As propostas chegam após 4 jogos";
+        }
     }
+
+    atualizarLogoEmpresaNoCard(
+        "patrocinioMasterLogo",
+        "patrocinioMasterLogoPlaceholder",
+        contratoComercialValido(patrocinio) ? patrocinio : null
+    );
+
+    atualizarLogoEmpresaNoCard(
+        "materialEsportivoLogo",
+        "materialEsportivoLogoPlaceholder",
+        contratoComercialValido(material) ? material : null
+    );
 }
 
 function obterTodosJogadoresMercado() {
