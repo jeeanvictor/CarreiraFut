@@ -11861,10 +11861,26 @@ function voltarAoPainelDepoisDoJogo() {
     document.getElementById("telaFim").classList.remove("ativa");
     document.getElementById("telaPainel").classList.remove("escondida");
 
-    renderizarTudo();
+    try {
+        renderizarTudo();
+    } catch (erro) {
+        console.warn("Erro ao renderizar painel depois do jogo:", erro);
+
+        try {
+            renderizarTopo();
+            renderizarProximoJogo();
+            renderizarInfo();
+        } catch (erroBasico) {
+            console.warn("Erro ao renderizar painel básico:", erroBasico);
+        }
+    }
 
     setTimeout(function() {
-        verificarOfertasComerciais();
+        try {
+            verificarOfertasComerciais();
+        } catch (erro) {
+            console.warn("Erro ao verificar ofertas comerciais:", erro);
+        }
     }, 100);
 
     window.scrollTo(0, 0);
@@ -16741,7 +16757,20 @@ function obterPerfilSocialSeguro(perfilId) {
     return perfisPadrao[perfilId] || null;
 }
 
-function resolverAvatarPerfilTweet(perfil) {
+function resolverAvatarPerfilTweet(perfil, perfilId) {
+    const mapaAvatares = {
+        tnt: "assets/perfis/TNTSportsBR.jpg",
+        fabrizio: "assets/perfis/FabrizioRomano.jpg",
+        edu: "assets/perfis/edufutirinhas.jpg",
+        cifut: "assets/perfis/CifutBR.jpg",
+        caze: "assets/perfis/CazeTVOficial.jpg",
+        rafael: "assets/perfis/OliveiraRafa.jpg"
+    };
+
+    if (perfilId && mapaAvatares[perfilId]) {
+        return mapaAvatares[perfilId];
+    }
+
     if (!perfil || !perfil.avatar) return "";
 
     if (perfil.avatar.indexOf("/") >= 0) {
@@ -16754,7 +16783,9 @@ function resolverAvatarPerfilTweet(perfil) {
 function adicionarTweetNoticia(perfilId, texto, chave) {
     if (!save || !texto) return false;
 
-    const perfil = obterPerfilSocialSeguro(perfilId);
+    const perfil = typeof obterPerfilSocialSeguro === "function"
+        ? obterPerfilSocialSeguro(perfilId)
+        : obterPerfilSocial(perfilId);
 
     if (!perfil) return false;
 
@@ -16766,7 +16797,7 @@ function adicionarTweetNoticia(perfilId, texto, chave) {
         {
             perfilSocialId: perfilId,
             perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: resolverAvatarPerfilTweet(perfil),
+            perfilSocialAvatar: resolverAvatarPerfilTweet(perfil, perfilId),
             perfilSocialVerificado: !!perfil.verificado,
             perfilSocialRotulo: perfil.rotulo || "SOCIAL"
         }
@@ -16944,40 +16975,46 @@ function registrarTweetCifutSePossivel(chaveBase) {
 }
 
 function registrarTweetsAposPartida(evento, jogo) {
-    if (!save || !jogo) return;
+    if (!save || !evento || !jogo) return;
 
-    const ctx = criarContextoTweetDeJogo(evento, jogo);
-    const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
+    try {
+        const ctx = criarContextoTweetDeJogo(evento, jogo);
+        const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
 
-    const perfisJogo = ["tnt", "edu", "caze", "rafael"];
-    const primeiroPerfil = escolherAleatorioSeguro(perfisJogo);
-    const primeiroTexto = gerarTextoTweetJogo(primeiroPerfil, ctx);
+        const perfisJogo = ["tnt", "edu", "caze", "rafael"];
+        const primeiroPerfil = escolherAleatorioSeguro(perfisJogo);
 
-    adicionarTweetNoticia(
-        primeiroPerfil,
-        primeiroTexto,
-        chaveBase + "-" + primeiroPerfil
-    );
+        if (primeiroPerfil) {
+            adicionarTweetNoticia(
+                primeiroPerfil,
+                gerarTextoTweetJogo(primeiroPerfil, ctx),
+                chaveBase + "-" + primeiroPerfil
+            );
+        }
 
-    if (Math.random() < 0.30) {
-        const restantes = perfisJogo.filter(function(perfil) {
-            return perfil !== primeiroPerfil;
-        });
+        if (Math.random() < 0.30) {
+            const restantes = perfisJogo.filter(function(perfil) {
+                return perfil !== primeiroPerfil;
+            });
 
-        const segundoPerfil = escolherAleatorioSeguro(restantes);
-        const segundoTexto = gerarTextoTweetJogo(segundoPerfil, ctx);
+            const segundoPerfil = escolherAleatorioSeguro(restantes);
 
-        adicionarTweetNoticia(
-            segundoPerfil,
-            segundoTexto,
-            chaveBase + "-" + segundoPerfil
-        );
-    }
+            if (segundoPerfil) {
+                adicionarTweetNoticia(
+                    segundoPerfil,
+                    gerarTextoTweetJogo(segundoPerfil, ctx),
+                    chaveBase + "-" + segundoPerfil
+                );
+            }
+        }
 
-    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+        const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
 
-    if (jogosTemporada > 0 && jogosTemporada % 3 === 0) {
-        registrarTweetCifutSePossivel(chaveBase);
+        if (jogosTemporada > 0 && jogosTemporada % 3 === 0) {
+            registrarTweetCifutSePossivel(chaveBase);
+        }
+    } catch (erro) {
+        console.warn("Erro ao gerar tweets da partida:", erro);
     }
 }
 
@@ -17024,40 +17061,48 @@ function corrigirTweetsFaltantesDoHistoricoNoticias() {
 
     let alterou = false;
 
-    save.resultados.slice(0, 5).forEach(function(resultado, index) {
-        const chaveBase =
-            "tweets-retro-" +
-            (resultado.data || "sem-data") +
-            "-" +
-            resultado.casa +
-            "-" +
-            resultado.fora +
-            "-" +
-            resultado.golsCasa +
-            "-" +
-            resultado.golsFora;
+    try {
+        save.resultados.slice(0, 5).forEach(function(resultado, index) {
+            const chaveBase =
+                "tweets-retro-" +
+                (resultado.data || "sem-data") +
+                "-" +
+                resultado.casa +
+                "-" +
+                resultado.fora +
+                "-" +
+                resultado.golsCasa +
+                "-" +
+                resultado.golsFora;
 
-        const jaTemTweet = save.noticias.some(function(noticia) {
-            return noticia.chave && noticia.chave.indexOf(chaveBase) === 0;
+            const jaTemTweet = save.noticias.some(function(noticia) {
+                return noticia.chave && noticia.chave.indexOf(chaveBase) === 0;
+            });
+
+            if (jaTemTweet) return;
+
+            const ctx = criarContextoTweetPorResultadoSalvo(resultado);
+
+            if (!ctx) return;
+
+            const perfisJogo = ["tnt", "edu", "caze", "rafael"];
+            const perfil = perfisJogo[index % perfisJogo.length];
+
+            const texto = gerarTextoTweetJogo(perfil, ctx);
+
+            if (!texto) return;
+
+            const criou = adicionarTweetNoticia(
+                perfil,
+                texto,
+                chaveBase + "-" + perfil
+            );
+
+            if (criou) alterou = true;
         });
-
-        if (jaTemTweet) return;
-
-        const ctx = criarContextoTweetPorResultadoSalvo(resultado);
-
-        if (!ctx) return;
-
-        const perfisJogo = ["tnt", "edu", "caze", "rafael"];
-        const perfil = perfisJogo[index % perfisJogo.length];
-
-        const criou = adicionarTweetNoticia(
-            perfil,
-            gerarTextoTweetJogo(perfil, ctx),
-            chaveBase + "-" + perfil
-        );
-
-        if (criou) alterou = true;
-    });
+    } catch (erro) {
+        console.warn("Erro ao corrigir tweets faltantes:", erro);
+    }
 
     if (alterou && typeof salvar === "function") {
         salvar();
