@@ -13519,36 +13519,6 @@ function enviarPropostaTransferencia() {
     renderizarTudo();
 }
 
-    const novoJogador = criarJogadorContratado(jogadorMercadoSelecionado);
-
-removerJogadorDoClubeOrigemCompra(jogadorMercadoSelecionado);
-
-save.elenco.push(novoJogador);
-save.transferencias.comprados.push(jogadorMercadoSelecionado.mercadoId);
-save.orcamentoTransferencias = arredondarMi(save.orcamentoTransferencias - valor);
-save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
-
-registrarTweetTransferenciaConcluida(
-    jogadorMercadoSelecionado.nome,
-    jogadorMercadoSelecionado.clube,
-    save.clube,
-    valor
-);
-
-salvar();
-
-    alert(
-        "Contratação realizada! " +
-        jogadorMercadoSelecionado.nome +
-        " agora é jogador do " +
-        save.clube +
-        "."
-    );
-
-    fecharModalProposta();
-    renderizarTudo();
-}
-
 function calcularChanceAceiteProposta(valorProposta, valorMercado) {
     const proporcao = valorProposta / valorMercado;
 
@@ -15717,207 +15687,6 @@ function registrarTweetRumorTransferencia(jogador, origem, destino, valor) {
     );
 }
 
-const TEMPLATES_TWEETS = {
-    tnt: [
-        ctx => "COMO VOCÊ AVALIA A ATUAÇÃO DO " + ctx.clube.toUpperCase() + " HOJE? 🤔🔥\n" +
-               ctx.placar + " pra cima do " + ctx.adversario + " e " + ctx.destaque +
-               " chamou atenção durante a partida! #" + ctx.hashtagClube,
-        ctx => "QUE JOGO! 🤯 " + ctx.clube + " x " + ctx.adversario + " entregou emoção e " +
-               ctx.destaque + " foi um dos nomes do confronto. " + ctx.placar + " no placar final! #" + ctx.hashtagClube,
-        ctx => "ALÔ TORCIDA, deu bom pro " + ctx.clube + "? 👀\n" +
-               "Resultado final: " + ctx.placar + ". O nome que mais apareceu no jogo foi " + ctx.destaque + ".",
-        ctx => "JOGO MOVIMENTADO, hein! ⚽\n" +
-               ctx.clube + " saiu de campo com " + ctx.resultadoDescricao +
-               " diante do " + ctx.adversario + ". Destaque de hoje: " + ctx.destaque + ".",
-        ctx => "TEMOS UM DESTAQUE! 🌟\n" + ctx.destaque +
-               " apareceu muito no duelo entre " + ctx.clube + " e " + ctx.adversario +
-               ". Placar final: " + ctx.placar + ".",
-        ctx => "O " + ctx.clube + " ENTREGOU TUDO? 🫣\n" +
-               "Contra o " + ctx.adversario + ", o time terminou com " + ctx.placar +
-               ". " + ctx.destaque + " foi bem observado ao longo do jogo.",
-        ctx => "FALA, TORCEDOR! 🗣️\n" +
-               ctx.clube + " encerra a partida com " + ctx.placar +
-               ". " + ctx.destaque + " foi um dos personagens do confronto.",
-        ctx => "PARTIDA ENCERRADA! ✅\n" +
-               ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario +
-               " por " + ctx.placar + ". Curtiu o jogo de " + ctx.destaque + "?",
-        ctx => "NOITE DE FUTEBOL pra conta ⚽\n" +
-               ctx.clube + " mediu forças com o " + ctx.adversario +
-               " e o placar terminou " + ctx.placar +
-               ". " + ctx.destaque + " foi um dos nomes da partida.",
-        ctx => "RESULTADO DEFINIDO! 📣\n" +
-               ctx.clube + " terminou o jogo contra o " + ctx.adversario +
-               " com " + ctx.placar + ". Pra muita gente, " + ctx.destaque + " foi o cara do jogo!"
-    ],
-
-    edu: [
-        ctx => "ALÔ " + ctx.clube.toUpperCase() + ", BOA NOITE KKKKKK\n" +
-               "Se era pra " + ctx.resultadoVerbo + " assim, avisava antes. " + ctx.destaque + " jogou BOLA.",
-        ctx => "PRA QUE ZAGUEIRO se o " + ctx.clube + " resolveu sofrer desse jeito? 😂\n" +
-               ctx.placar + " e " + ctx.destaque + " no centro do caos.",
-        ctx => "O TIME DO HOMEM APRONTOU DE NOVO 😭\n" +
-               ctx.clube + " x " + ctx.adversario + " acabou " + ctx.placar +
-               " e eu quero saber como " + ctx.destaque + " saiu vivo disso.",
-        ctx => "SENHORAS E SENHORES, o entretenimento venceu.\n" +
-               ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario +
-               " e " + ctx.destaque + " virou pauta do grupo do zap.",
-        ctx => "EU TÔ RINDO MAS COM RESPEITO 😂\n" +
-               ctx.clube + " terminou " + ctx.placar +
-               ". O melhor de tudo foi ver " + ctx.destaque + " aprontando.",
-        ctx => "RESPEITA O PROFESSOR? OU NÃO? 👀\n" +
-               ctx.clube + " saiu com " + ctx.resultadoDescricao +
-               " e " + ctx.destaque + " foi o nome do rolê.",
-        ctx => "SE ISSO NÃO É FUTEBOL, EU NÃO SEI O QUE É KKKK\n" +
-               ctx.placar + " no placar e " + ctx.destaque + " vivendo intensamente.",
-        ctx => "OLHA O NAIPE DESSE JOGO 😭\n" +
-               ctx.clube + " contra " + ctx.adversario + ", placar de " + ctx.placar +
-               " e " + ctx.destaque + " entregando tudo.",
-        ctx => "PAREM TUDO.\n" +
-               ctx.destaque + " acabou de ganhar mais um capítulo na novela do " + ctx.clube +
-               ". Resultado? " + ctx.placar + ".",
-        ctx => "ME EXPLICA COMO O " + ctx.clube + " CONSEGUE SEMPRE ME TIRAR UM SORRISO KKK\n" +
-               ctx.resultadoDescricao + " contra o " + ctx.adversario +
-               " e " + ctx.destaque + " sendo assunto obrigatório."
-    ],
-
-    caze: [
-        ctx => "ABSURDO o que o " + ctx.clube + " aprontou hoje 😂💚\n" +
-               ctx.placar + " no jogo e " + ctx.destaque + " roubando a cena.",
-        ctx => "FUTEBOL É BOM DEMAIS, tá maluco! 🤯\n" +
-               ctx.clube + " x " + ctx.adversario + " terminou " + ctx.placar +
-               " e eu ainda tô pensando no jogo de " + ctx.destaque + ".",
-        ctx => "SIMPLESMENTE " + ctx.destaque.toUpperCase() + ".\n" +
-               "Partidaça no duelo entre " + ctx.clube + " e " + ctx.adversario +
-               ". Resultado final: " + ctx.placar + ".",
-        ctx => "TÉCNICO, PODE SORRIR 😅\n" +
-               ctx.clube + " saiu de campo com " + ctx.resultadoDescricao +
-               " e " + ctx.destaque + " foi bem demais.",
-        ctx => "QUEM GOSTA DE FUTEBOL gostou disso aqui ⚽\n" +
-               ctx.clube + " terminou com " + ctx.placar +
-               ". Nome do jogo: " + ctx.destaque + ".",
-        ctx => "É DISSO QUE O POVO GOSTA! 😂\n" +
-               ctx.placar + " entre " + ctx.clube + " e " + ctx.adversario +
-               ", com " + ctx.destaque + " chamando muita atenção.",
-        ctx => "MEU AMIGO, O JOGO ENTREGOU 🎙️\n" +
-               ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario +
-               ". " + ctx.destaque + " saiu fortalecido.",
-        ctx => "EU TÔ FECHADO COM ESSE JOGO 😂\n" +
-               ctx.clube + " fez " + ctx.resultadoDescricao +
-               " e " + ctx.destaque + " foi figura central do confronto.",
-        ctx => "SE O FUTEBOL BRIGA COM O TÉDIO, HOJE ELE VENCEU 😎\n" +
-               ctx.placar + " no placar e " + ctx.destaque + " brilhando.",
-        ctx => "OLHA ISSO AQUI, FAMÍLIA! 👀\n" +
-               ctx.clube + " x " + ctx.adversario + " acabou " + ctx.placar +
-               ". E o " + ctx.destaque + "? Jogou MUITO."
-    ],
-
-    rafael: [
-        ctx => "O " + ctx.clube + " encontrou vantagens principalmente na ocupação dos espaços entre linhas. " +
-               ctx.destaque + " foi importante para sustentar a dinâmica ofensiva no " + ctx.placar + ".",
-        ctx => "A partida passou pelo controle de ritmo do " + ctx.clube + ". " +
-               "Mesmo quando sofreu pressão, a equipe conseguiu ajustar o posicionamento e terminou com " + ctx.placar + ".",
-        ctx => "O jogo foi decidido em detalhes de execução. O " + ctx.clube +
-               " conseguiu ser mais eficiente nas zonas de definição, e isso ajuda a explicar o " + ctx.placar + ".",
-        ctx => "Houve um recorte interessante no comportamento do " + ctx.clube +
-               ": alternou momentos de pressão com bloco mais baixo e soube administrar a partida. " +
-               ctx.destaque + " teve papel relevante.",
-        ctx => "No aspecto tático, o " + ctx.clube +
-               " conseguiu atacar bem os corredores e proteger melhor a área em momentos decisivos. Resultado final: " + ctx.placar + ".",
-        ctx => "Foi um jogo em que o " + ctx.clube +
-               " soube interpretar os momentos. Nem sempre controlou a posse, mas controlou melhor os lances-chave. " +
-               ctx.destaque + " apareceu bem.",
-        ctx => "A leitura da comissão foi importante. O " + ctx.clube +
-               " conseguiu manter competitividade durante quase todo o jogo, e isso explica a " + ctx.resultadoNominal +
-               " sobre o " + ctx.adversario + ".",
-        ctx => "O " + ctx.clube +
-               " teve boa resposta comportamental. Quando o jogo pedia mais agressividade, acelerou; quando exigiu proteção, compactou melhor. " +
-               "O placar de " + ctx.placar + " conversa com isso.",
-        ctx => "Partida com nuances táticas claras. O " + ctx.clube +
-               " atacou melhor os espaços vazios e impediu o " + ctx.adversario +
-               " de crescer com continuidade. " + ctx.destaque + " foi um nome importante.",
-        ctx => "O resultado de " + ctx.placar +
-               " passa por organização sem a bola e eficiência com ela. O " + ctx.clube +
-               " foi mais funcional, especialmente nas ações protagonizadas por " + ctx.destaque + "."
-    ],
-
-    cifut: [
-        ctx => "🧩 " + ctx.jogador + " (" + ctx.idade + ") é um nome que encaixa no " + save.clube +
-               " para a sequência da carreira.\n" +
-               "Atua em " + ctx.posicao + ", tem overall " + ctx.overall +
-               " e margem real de evolução.\n\nTem selo CIFUTBR! ✅",
-        ctx => "📈 Olho em " + ctx.jogador + " (" + ctx.idade + ").\n" +
-               "Promessa do " + ctx.clubeOrigem + ", pode crescer bastante no save e ajudaria o " +
-               save.clube + " em " + ctx.posicao + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "💎 " + ctx.jogador + " (" + ctx.idade + ") merece atenção.\n" +
-               "Boa relação entre idade e overall (" + ctx.overall + "), além de encaixe claro no " +
-               save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "🟢 Recomendação da vez: " + ctx.jogador + ".\n" +
-               "Jovem, potencial interessante e perfil que pode elevar o nível do " + save.clube +
-               " no setor " + ctx.posicao + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "🔍 Nome para monitorar: " + ctx.jogador + " (" + ctx.clubeOrigem + ").\n" +
-               "É jovem, já entrega overall " + ctx.overall +
-               " e pode render muito no projeto do " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "🚨 PROMESSA DA LIGA!\n" +
-               ctx.jogador + " (" + ctx.idade + ") chama atenção pelo conjunto técnico e pode encaixar bem no " +
-               save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "📌 Se o " + save.clube + " quiser mercado inteligente, " + ctx.jogador +
-               " é um nome bem interessante.\n" +
-               "Idade: " + ctx.idade + " | Overall: " + ctx.overall + " | Setor: " + ctx.posicao + ".",
-        ctx => "🧠 Scout da vez: " + ctx.jogador + ".\n" +
-               "Jogador jovem do " + ctx.clubeOrigem +
-               ", com potencial pra valorizar e ser útil ao " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "⚙️ " + ctx.jogador + " pode ser solução de médio prazo pro " + save.clube + ".\n" +
-               "Boa idade, bom overall e espaço para desenvolvimento.\n\nTem selo CIFUTBR! ✅",
-        ctx => "✅ Recomendado pelo CIFUTBR: " + ctx.jogador + ".\n" +
-               "Perfil de promessa, encaixe em " + ctx.posicao +
-               " e boa perspectiva de evolução no save."
-    ],
-
-    fabrizio_concluido: [
-        ctx => "BREAKING: " + ctx.jogador + " transferred from " + ctx.origem + " to " + ctx.destino + ", here we go! " +
-               "Deal agreed between all parties. Fee: " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " to " + ctx.destino + ", here we go! " +
-               "Agreement completed with " + ctx.origem + " and green light on final details. Fee worth " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " has joined " + ctx.destino + ", here we go! " +
-               "Package sealed, all documents approved. " + ctx.origem + " accepted " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " will play for " + ctx.destino + ", here we go! " +
-               "Full agreement in place after final round of talks with " + ctx.origem + ".",
-        ctx => "BREAKING: " + ctx.jogador + " from " + ctx.origem + " to " + ctx.destino + ", here we go! " +
-               "Deal done and confirmed. Transfer fee: " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " becomes new " + ctx.destino + " player, here we go! " +
-               "Everything completed with " + ctx.origem + ".",
-        ctx => "BREAKING: " + ctx.jogador + " has been transferred to " + ctx.destino + ", here we go! " +
-               "Agreement reached on every detail of the move from " + ctx.origem + ".",
-        ctx => "BREAKING: " + ctx.jogador + " to " + ctx.destino + " — here we go! " +
-               "Clubs have signed off, player accepted the project, deal completed.",
-        ctx => "BREAKING: " + ctx.jogador + " leaves " + ctx.origem + " and joins " + ctx.destino + ", here we go! " +
-               "Transfer now completed after positive final contacts.",
-        ctx => "BREAKING: " + ctx.jogador + " is the new signing of " + ctx.destino + ", here we go! " +
-               "Move completed from " + ctx.origem + " for " + ctx.valor + "."
-    ],
-
-    fabrizio_rumor: [
-        ctx => ctx.destino + " remain interested in " + ctx.jogador + ". " +
-               "Contacts took place with " + ctx.origem + ", but no agreement so far.",
-        ctx => ctx.jogador + " is on " + ctx.destino + "'s shortlist. " +
-               "Talks explored, but deal not sealed at this stage.",
-        ctx => ctx.destino + " made an approach for " + ctx.jogador + ", but " +
-               ctx.origem + " rejected the initial proposal of " + ctx.valor + ".",
-        ctx => "Negotiations for " + ctx.jogador + " are not advancing yet. " +
-               ctx.destino + " asked for conditions; " + ctx.origem + " still waiting for improved bid.",
-        ctx => ctx.jogador + " was discussed internally by " + ctx.destino + ". " +
-               "Nothing agreed with " + ctx.origem + " as of now.",
-        ctx => "No deal completed for " + ctx.jogador + " and " + ctx.destino + " at this stage. " +
-               ctx.origem + " want better conditions.",
-        ctx => ctx.destino + " have genuine interest in " + ctx.jogador + ", but talks are currently off after first proposal.",
-        ctx => ctx.jogador + " remains a target for " + ctx.destino + ". " +
-               "Initial bid was turned down by " + ctx.origem + ".",
-        ctx => "Understand " + ctx.destino + " tried for " + ctx.jogador + ". " +
-               "Negotiations did not reach full agreement with " + ctx.origem + ".",
-        ctx => "Approach made by " + ctx.destino + " for " + ctx.jogador + ", but no here we go. " +
-               ctx.origem + " did not accept the offer."
-    ]
-};
 
 function escolherItemAleatorio(lista) {
     return lista[Math.floor(Math.random() * lista.length)];
@@ -16264,41 +16033,70 @@ function criarCardNoticia(noticia) {
     div.className = ehTweet ? "noticia-card tweet" : "noticia-card";
 
     if (ehTweet) {
-        const avatar = noticia.perfilSocialAvatar
-            ? '<img src="' + escaparHtml(noticia.perfilSocialAvatar) + '" alt="' + escaparHtml(noticia.titulo) + '" onerror="this.parentNode.innerHTML=\\'' + escaparHtml(obterIconeNoticia("tweet")) + '\\'">'
-            : obterIconeNoticia("tweet");
+        const icone = document.createElement("div");
+        icone.className = "noticia-icone tem-avatar";
 
-        div.innerHTML =
-            '<div class="noticia-icone tem-avatar">' + avatar + '</div>' +
-            '<div>' +
-                '<div class="noticia-perfil-linha">' +
-                    '<div class="noticia-perfil-esquerda">' +
-                        '<div class="noticia-perfil-nome">' +
-                            escaparHtml(noticia.titulo) +
-                            (noticia.perfilSocialVerificado ? '<span class="noticia-selo-verificado">✔</span>' : '') +
-                        '</div>' +
-                        '<div class="noticia-perfil-handle">' + escaparHtml(noticia.perfilSocialHandle || "") + '</div>' +
-                    '</div>' +
-                    '<div class="noticia-perfil-tag">' + escaparHtml(noticia.perfilSocialRotulo || "Social") + '</div>' +
-                '</div>' +
-                '<p class="noticia-texto-tweet">' + escaparHtml(noticia.texto) + '</p>' +
-            '</div>';
+        if (noticia.perfilSocialAvatar) {
+            const img = document.createElement("img");
+            img.src = noticia.perfilSocialAvatar;
+            img.alt = noticia.titulo || "Perfil";
+
+            img.onerror = function() {
+                icone.classList.remove("tem-avatar");
+                icone.textContent = obterIconeNoticia("tweet");
+            };
+
+            icone.appendChild(img);
+        } else {
+            icone.classList.remove("tem-avatar");
+            icone.textContent = obterIconeNoticia("tweet");
+        }
+
+        const conteudo = document.createElement("div");
+
+        const linha = document.createElement("div");
+        linha.className = "noticia-perfil-linha";
+
+        const esquerda = document.createElement("div");
+        esquerda.className = "noticia-perfil-esquerda";
+
+        const nome = document.createElement("div");
+        nome.className = "noticia-perfil-nome";
+        nome.textContent = noticia.titulo || "Perfil";
+
+        if (noticia.perfilSocialVerificado) {
+            const verificado = document.createElement("span");
+            verificado.className = "noticia-selo-verificado";
+            verificado.textContent = "✔";
+            nome.appendChild(verificado);
+        }
+
+        const handle = document.createElement("div");
+        handle.className = "noticia-perfil-handle";
+        handle.textContent = noticia.perfilSocialHandle || "";
+
+        esquerda.appendChild(nome);
+        esquerda.appendChild(handle);
+
+        const tag = document.createElement("div");
+        tag.className = "noticia-perfil-tag";
+        tag.textContent = noticia.perfilSocialRotulo || "Social";
+
+        linha.appendChild(esquerda);
+        linha.appendChild(tag);
+
+        const texto = document.createElement("p");
+        texto.className = "noticia-texto-tweet";
+        texto.textContent = noticia.texto || "";
+
+        conteudo.appendChild(linha);
+        conteudo.appendChild(texto);
+
+        div.appendChild(icone);
+        div.appendChild(conteudo);
 
         return div;
     }
-
-    div.innerHTML =
-        '<div class="noticia-icone">' + obterIconeNoticia(noticia.tipo) + '</div>' +
-        '<div>' +
-            '<div class="noticia-topo">' +
-                '<strong>' + escaparHtml(noticia.titulo) + '</strong>' +
-                '<span>' + escaparHtml(obterRotuloTipoNoticia(noticia.tipo)) + '</span>' +
-            '</div>' +
-            '<p>' + escaparHtml(noticia.texto) + '</p>' +
-        '</div>';
-
-    return div;
-}
 
     div.innerHTML =
         '<div class="noticia-icone">' + obterIconeNoticia(noticia.tipo) + '</div>' +
