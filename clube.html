@@ -1600,6 +1600,57 @@ th,
     grid-column: 1 / -1;
 }
 
+.mini-info-linha-logo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.mini-info-textos {
+    flex: 1;
+    min-width: 0;
+}
+
+.mini-logo-empresa-box {
+    width: 110px;
+    min-width: 110px;
+    height: 84px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.mini-logo-empresa {
+    max-width: 100%;
+    max-height: 56px;
+    object-fit: contain;
+    display: block;
+}
+
+.mini-logo-placeholder {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(0,0,0,0.62);
+    text-transform: lowercase;
+}
+
+@media (max-width: 560px) {
+    .mini-logo-empresa-box {
+        width: 96px;
+        min-width: 96px;
+        height: 76px;
+    }
+
+    .mini-logo-empresa {
+        max-height: 50px;
+    }
+}
+
 .modal-card-patrocinio {
     max-width: 920px;
 }
@@ -1875,6 +1926,26 @@ th,
     white-space: pre-line;
 }
 
+.noticia-icone.tem-avatar {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.noticia-icone.tem-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 </style>
 </head>
 
@@ -1968,17 +2039,35 @@ th,
                                 <div id="continentalClube" class="mini-valor">--</div>
                             </div>
 							
-							<div class="mini-info mini-info-patrocinio">
-							<div class="mini-label">Patrocínio master</div>
-							<div id="patrocinioMasterNome" class="mini-valor">Sem patrocinador</div>
-							<div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 3 jogos</div>
-							</div>
-							
-							<div class="mini-info mini-info-patrocinio">
-							<div class="mini-label">Material esportivo</div>
-							<div id="materialEsportivoNome" class="mini-valor">Sem fornecedor</div>
-							<div id="materialEsportivoValor" class="mini-subvalor">As propostas chegam após 4 jogos</div>
-							</div>
+<div class="mini-info mini-info-patrocinio">
+    <div class="mini-info-linha-logo">
+        <div class="mini-info-textos">
+            <div class="mini-label">Patrocínio master</div>
+            <div id="patrocinioMasterNome" class="mini-valor">Sem patrocinador</div>
+            <div id="patrocinioMasterValor" class="mini-subvalor">As propostas chegam após 3 jogos</div>
+        </div>
+
+        <div class="mini-logo-empresa-box">
+            <img id="patrocinioMasterLogo" class="mini-logo-empresa" alt="Logo do patrocinador master" style="display:none;">
+            <span id="patrocinioMasterLogoPlaceholder" class="mini-logo-placeholder">logo</span>
+        </div>
+    </div>
+</div>
+
+<div class="mini-info mini-info-patrocinio">
+    <div class="mini-info-linha-logo">
+        <div class="mini-info-textos">
+            <div class="mini-label">Material esportivo</div>
+            <div id="materialEsportivoNome" class="mini-valor">Sem fornecedor</div>
+            <div id="materialEsportivoValor" class="mini-subvalor">As propostas chegam após 4 jogos</div>
+        </div>
+
+        <div class="mini-logo-empresa-box">
+            <img id="materialEsportivoLogo" class="mini-logo-empresa" alt="Logo do material esportivo" style="display:none;">
+            <span id="materialEsportivoLogoPlaceholder" class="mini-logo-placeholder">logo</span>
+        </div>
+    </div>
+</div>
                         </div>
                     </div>
 
@@ -6055,13 +6144,18 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
 
     if (!patrocinadorEscolhido) return;
 
+    const logoResolvido =
+        patrocinadorEscolhido.logo ||
+        resolverCaminhoLogoEmpresa(patrocinadorEscolhido) ||
+        resolverCaminhoLogoEmpresa(patrocinadorEscolhido.nome);
+
     save.orcamentoTransferencias = arredondarMi(save.orcamentoTransferencias + oferta.valor);
     save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
 
     save.patrocinio.masterAtual = {
         nome: patrocinadorEscolhido.nome,
-        arquivo: patrocinadorEscolhido.arquivo,
-        logo: patrocinadorEscolhido.logo,
+        arquivo: patrocinadorEscolhido.arquivo || obterArquivoLogoEmpresa(patrocinadorEscolhido.nome),
+        logo: logoResolvido,
         nivel: oferta.nivel,
         valorContrato: oferta.valor,
         temporadaContrato: obterNumeroTemporadaAtual()
@@ -6070,6 +6164,8 @@ function aceitarPatrocinioMaster(nomePatrocinador) {
     save.patrocinio.historico.push({
         temporada: obterNumeroTemporadaAtual(),
         nome: patrocinadorEscolhido.nome,
+        arquivo: patrocinadorEscolhido.arquivo || obterArquivoLogoEmpresa(patrocinadorEscolhido.nome),
+        logo: logoResolvido,
         nivel: oferta.nivel,
         valor: oferta.valor
     });
@@ -6424,13 +6520,18 @@ function aceitarMaterialEsportivo(nomeMarca) {
 
     if (!marcaEscolhida) return;
 
+    const logoResolvido =
+        marcaEscolhida.logo ||
+        resolverCaminhoLogoEmpresa(marcaEscolhida) ||
+        resolverCaminhoLogoEmpresa(marcaEscolhida.nome);
+
     save.orcamentoTransferencias = arredondarMi(save.orcamentoTransferencias + oferta.valor);
     save.dinheiro = formatarDinheiro(save.orcamentoTransferencias, save.moeda);
 
     save.patrocinio.materialEsportivoAtual = {
         nome: marcaEscolhida.nome,
-        arquivo: marcaEscolhida.arquivo,
-        logo: marcaEscolhida.logo,
+        arquivo: marcaEscolhida.arquivo || obterArquivoLogoEmpresa(marcaEscolhida.nome),
+        logo: logoResolvido,
         nivel: oferta.nivel,
         valorContrato: oferta.valor,
         temporadaContrato: obterNumeroTemporadaAtual()
@@ -6439,6 +6540,8 @@ function aceitarMaterialEsportivo(nomeMarca) {
     save.patrocinio.historicoMaterialEsportivo.push({
         temporada: obterNumeroTemporadaAtual(),
         nome: marcaEscolhida.nome,
+        arquivo: marcaEscolhida.arquivo || obterArquivoLogoEmpresa(marcaEscolhida.nome),
+        logo: logoResolvido,
         nivel: oferta.nivel,
         valor: oferta.valor
     });
@@ -8607,6 +8710,7 @@ function renderizarTudo() {
     renderizarEstatisticas();
     renderizarNoticias();
     renderizarTitulos();
+	atualizarResumoComercial();
 }
 
 function renderizarTopo() {
@@ -8780,7 +8884,7 @@ function renderizarInfo() {
             patrocinioValor.textContent = "Escolha um patrocinador master";
         } else {
             patrocinioNome.textContent = "Sem patrocinador";
-            patrocinioValor.textContent = "As propostas chegam após 2 jogos";
+            patrocinioValor.textContent = "As propostas chegam após 3 jogos";
         }
     }
 
@@ -8814,6 +8918,18 @@ function renderizarInfo() {
             materialValor.textContent = "As propostas chegam após 4 jogos";
         }
     }
+
+    atualizarLogoEmpresaNoCard(
+        "patrocinioMasterLogo",
+        "patrocinioMasterLogoPlaceholder",
+        save.patrocinio.masterAtual
+    );
+
+    atualizarLogoEmpresaNoCard(
+        "materialEsportivoLogo",
+        "materialEsportivoLogoPlaceholder",
+        save.patrocinio.materialEsportivoAtual
+    );
 }
 
 function renderizarElenco() {
@@ -13148,6 +13264,278 @@ function formatarDinheiro(valor, moeda) {
     return simbolo + " " + numero.toFixed(1).replace(".", ",") + " mi";
 }
 
+function obterArquivoLogoEmpresa(nome) {
+    const mapa = {
+        "Guaraná Poty": "poty.png",
+        "Grupo Mendes": "grupomendes.png",
+        "Havan": "havan.png",
+        "Banco BMG": "bmg.png",
+        "Neo Química": "neoqimica.png",
+        "Banco Inter": "bancointer.png",
+        "Nubank": "nubank.png",
+        "Crefisa": "crefisa.png",
+        "Sportingbet": "sportingbet.png",
+        "sportingbet": "sportingbet.png",
+
+        "REWE": "REWE.png",
+        "Paramount+": "paramount.png",
+        "Gazprom": "gazprom.png",
+        "Volkswagen": "volkswagen.png",
+        "Indeed": "indeed.png",
+        "indeed": "indeed.png",
+        "1+1": "1e1.png",
+        "T-Mobile": "tmobile.png",
+        "Barmenia": "barmenia.png",
+        "Evonik": "evonik.png",
+        "evonik": "evonik.png",
+
+        "Estrella Galicia": "estrellagalicia.png",
+        "Dafabet": "dafabet.png",
+        "Cazoo": "cazoo.png",
+        "Spotify": "spotify.png",
+        "Betway": "betway.png",
+        "Kutxabank": "kutxabank.png",
+        "Bwin": "bwin.png",
+        "Emirates": "emirates.png",
+
+        "American Express": "americanexpress.png",
+        "AIA": "aia.png",
+        "Snapdragon": "snapdragon.png",
+        "Standard Chartered": "standard.png",
+        "Etihad Airways": "etihad.png",
+
+        "Samsic": "samsic.png",
+        "CMA CGM": "cmacgm.png",
+        "Orange": "orange.png",
+        "Ineos": "ineos.png",
+        "Uber Eats": "ubereats.png",
+        "uber eats": "ubereats.png",
+        "Accor Live Limitless": "accor.png",
+
+        "Suzuki": "suzuki.png",
+        "MAPEI": "mapei.png",
+        "Mapei": "mapei.png",
+        "Uber": "uber.png",
+        "uber": "uber.png",
+        "Jeep": "jeep.png",
+        "MSC": "msc.png",
+        "Betsson": "betsson.png",
+        "betsson": "betsson.png",
+        "Lete": "lete.png",
+
+        "Macron": "macron.png",
+        "Joma": "joma.png",
+        "Kappa": "kappa.png",
+        "Umbro": "umbro.png",
+        "New Balance": "newbalance.png",
+        "Under Armour": "underarmour.png",
+        "Nike": "nike.png",
+        "Adidas": "adidas.png",
+        "Puma": "puma.png"
+    };
+
+    return mapa[nome] || "";
+}
+
+function obterPastaLogosPatrocinio() {
+    if (typeof BASE_PASTA_PATROCINIOS !== "undefined") {
+        return BASE_PASTA_PATROCINIOS;
+    }
+
+    return "assets/patrocinios/";
+}
+
+function resolverCaminhoLogoEmpresa(empresa) {
+    if (!empresa) return "";
+
+    if (typeof empresa === "object") {
+        if (empresa.logo) {
+            if (empresa.logo.indexOf("/") >= 0) return empresa.logo;
+            return obterPastaLogosPatrocinio() + empresa.logo;
+        }
+
+        if (empresa.arquivo) {
+            if (empresa.arquivo.indexOf("/") >= 0) return empresa.arquivo;
+            return obterPastaLogosPatrocinio() + empresa.arquivo;
+        }
+    }
+
+    const nome = typeof empresa === "string" ? empresa : empresa.nome;
+    const arquivo = obterArquivoLogoEmpresa(nome);
+
+    if (!arquivo) return "";
+
+    return obterPastaLogosPatrocinio() + arquivo;
+}
+
+function atualizarLogoEmpresaNoCard(idImg, idPlaceholder, empresa) {
+    const img = document.getElementById(idImg);
+    const placeholder = document.getElementById(idPlaceholder);
+
+    if (!img || !placeholder) return;
+
+    const caminho = resolverCaminhoLogoEmpresa(empresa);
+
+    if (!caminho) {
+        img.removeAttribute("src");
+        img.style.display = "none";
+        placeholder.style.display = "block";
+        return;
+    }
+
+    img.src = caminho;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+
+    img.onerror = function() {
+        img.removeAttribute("src");
+        img.style.display = "none";
+        placeholder.style.display = "block";
+    };
+}
+
+function obterArquivoLogoEmpresa(nome) {
+    const mapa = {
+        "Guaraná Poty": "poty.png",
+        "Grupo Mendes": "grupomendes.png",
+        "Havan": "havan.png",
+        "Banco BMG": "bmg.png",
+        "Neo Química": "neoquimica.png",
+        "Banco Inter": "bancointer.png",
+        "Nubank": "nubank.png",
+        "Crefisa": "crefisa.png",
+        "sportingbet": "sportingbet.png",
+
+        "REWE": "REWE.png",
+        "Paramount+": "paramount.png",
+        "Gazprom": "gazprom.png",
+        "Volkswagen": "volkswagen.png",
+        "indeed": "indeed.png",
+        "1+1": "1e1.png",
+        "T-Mobile": "tmobile.png",
+        "Barmenia": "barmenia.png",
+        "evonik": "evonik.png",
+
+        "Estrella Galicia": "estrellagalicia.png",
+        "Dafabet": "dafabet.png",
+        "Cazoo": "cazoo.png",
+        "Spotify": "spotify.png",
+        "Betway": "betway.png",
+        "Kutxabank": "kutxabank.png",
+        "Bwin": "bwin.png",
+        "Emirates": "emirates.png",
+
+        "American Express": "americanexpress.png",
+        "AIA": "aia.png",
+        "Snapdragon": "snapdragon.png",
+        "Standard Chartered": "standard.png",
+        "Etihad Airways": "etihad.png",
+
+        "Samsic": "samsic.png",
+        "CMA CGM": "cmacgm.png",
+        "Orange": "orange.png",
+        "Ineos": "ineos.png",
+        "uber eats": "ubereats.png",
+        "Accor Live Limitless": "accor.png",
+
+        "Suzuki": "suzuki.png",
+        "uber": "uber.png",
+        "Jeep": "jeep.png",
+        "MSC": "msc.png",
+        "betsson": "betsson.png",
+        "Lete": "lete.png",
+
+        "Macron": "macron.png",
+        "Joma": "joma.png",
+        "Kappa": "kappa.png",
+        "Umbro": "umbro.png",
+        "New Balance": "newbalance.png",
+        "Under Armour": "underarmour.png",
+        "Nike": "nike.png",
+        "Adidas": "adidas.png",
+        "Puma": "puma.png"
+    };
+
+    return mapa[nome] || "";
+}
+
+function resolverCaminhoLogoEmpresa(empresa) {
+    if (!empresa) return "";
+
+    if (typeof empresa === "object" && empresa.logo) {
+        if (empresa.logo.includes("/")) return empresa.logo;
+        return "patrocinios/" + empresa.logo;
+    }
+
+    const nome = typeof empresa === "string" ? empresa : (empresa.nome || "");
+    const arquivo = obterArquivoLogoEmpresa(nome);
+
+    if (!arquivo) return "";
+
+    return "patrocinios/" + arquivo;
+}
+
+function atualizarResumoComercial() {
+    const patrocinio = save.patrocinioMaster || null;
+    const material = save.materialEsportivo || null;
+
+    const patrocinioNome = typeof patrocinio === "string"
+        ? patrocinio
+        : (patrocinio?.nome || "Sem patrocinador");
+
+    const patrocinioValor = typeof patrocinio === "object"
+        ? Number(patrocinio.valor || 0)
+        : 0;
+
+    const materialNome = typeof material === "string"
+        ? material
+        : (material?.nome || "Sem fornecedor");
+
+    const materialValor = typeof material === "object"
+        ? Number(material.valor || 0)
+        : 0;
+
+    document.getElementById("patrocinioMasterNome").textContent = patrocinioNome || "Sem patrocinador";
+    document.getElementById("patrocinioMasterValor").textContent =
+        patrocinioValor > 0
+            ? "Contrato atual: " + formatarDinheiro(patrocinioValor, save.moeda)
+            : "As propostas chegam após 3 jogos";
+
+    document.getElementById("materialEsportivoNome").textContent = materialNome || "Sem fornecedor";
+    document.getElementById("materialEsportivoValor").textContent =
+        materialValor > 0
+            ? "Contrato atual: " + formatarDinheiro(materialValor, save.moeda)
+            : "As propostas chegam após 4 jogos";
+
+    const patrocinioMasterLogo = document.getElementById("patrocinioMasterLogo");
+    const patrocinioMasterLogoPlaceholder = document.getElementById("patrocinioMasterLogoPlaceholder");
+    const materialEsportivoLogo = document.getElementById("materialEsportivoLogo");
+    const materialEsportivoLogoPlaceholder = document.getElementById("materialEsportivoLogoPlaceholder");
+
+    const caminhoLogoPatrocinio = resolverCaminhoLogoEmpresa(patrocinio);
+    const caminhoLogoMaterial = resolverCaminhoLogoEmpresa(material);
+
+    if (caminhoLogoPatrocinio) {
+        patrocinioMasterLogo.src = caminhoLogoPatrocinio;
+        patrocinioMasterLogo.style.display = "block";
+        patrocinioMasterLogoPlaceholder.style.display = "none";
+    } else {
+        patrocinioMasterLogo.removeAttribute("src");
+        patrocinioMasterLogo.style.display = "none";
+        patrocinioMasterLogoPlaceholder.style.display = "block";
+    }
+
+    if (caminhoLogoMaterial) {
+        materialEsportivoLogo.src = caminhoLogoMaterial;
+        materialEsportivoLogo.style.display = "block";
+        materialEsportivoLogoPlaceholder.style.display = "none";
+    } else {
+        materialEsportivoLogo.removeAttribute("src");
+        materialEsportivoLogo.style.display = "none";
+        materialEsportivoLogoPlaceholder.style.display = "block";
+    }
+}
+
 function obterTodosJogadoresMercado() {
     garantirDadosTransferencias();
     garantirJogadoresExtrasNoElencos();
@@ -15292,51 +15680,148 @@ const PERFIS_NOTICIAS_SOCIAIS = {
         id: "tnt",
         nome: "TNT Sports BR",
         handle: "@TNTSportsBR",
-        avatar: "assets/perfis/tntsportsbr.png",
+        avatar: "tntsportsbr.png",
         verificado: true,
-        rotulo: "Esporte"
+        rotulo: "ESPORTE"
     },
     fabrizio: {
         id: "fabrizio",
         nome: "Fabrizio Romano",
         handle: "@FabrizioRomano",
-        avatar: "assets/perfis/fabrizioromano.png",
+        avatar: "fabrizioromano.png",
         verificado: true,
-        rotulo: "Mercado"
+        rotulo: "MERCADO"
     },
     edu: {
         id: "edu",
         nome: "Edu Futirinhas",
         handle: "@edufutirinhas",
-        avatar: "assets/perfis/edufutirinhas.png",
+        avatar: "edufutirinhas.png",
         verificado: true,
-        rotulo: "Humor"
+        rotulo: "HUMOR"
     },
     cifut: {
         id: "cifut",
         nome: "Cifut Brasil",
         handle: "@CifutBR",
-        avatar: "assets/perfis/cifutbr.png",
+        avatar: "cifutbr.png",
         verificado: true,
-        rotulo: "Scout"
+        rotulo: "SCOUT"
     },
     caze: {
         id: "caze",
-        nome: "CazéTV",
+        nome: "CazeTV",
         handle: "@CazeTVOficial",
-        avatar: "assets/perfis/cazetvoficial.png",
+        avatar: "cazetvoficial.png",
         verificado: true,
-        rotulo: "Esporte"
+        rotulo: "ESPORTE"
     },
     rafael: {
         id: "rafael",
         nome: "Rafael Oliveira",
         handle: "@OliveiraRafa",
-        avatar: "assets/perfis/oliveirarafa.png",
+        avatar: "oliveirarafa.png",
         verificado: true,
-        rotulo: "Análise"
+        rotulo: "ANÁLISE"
     }
 };
+
+function resolverAvatarPerfilSocial(caminho) {
+    if (!caminho) return "";
+
+    if (caminho.indexOf("/") >= 0) {
+        return caminho;
+    }
+
+    return "assets/perfis/" + caminho;
+}
+
+function obterValorJogadorMercado(jogador) {
+    if (!jogador) return 0;
+
+    return Number(
+        jogador.valor ??
+        jogador.value ??
+        jogador.preco ??
+        jogador.precoBase ??
+        jogador.valorMercado ??
+        0
+    ) || 0;
+}
+
+function obterPotencialJogadorMercado(jogador) {
+    if (!jogador) return 0;
+
+    return Number(
+        jogador.potencial ??
+        jogador.pot ??
+        jogador.potential ??
+        jogador.ovrPotencial ??
+        0
+    ) || 0;
+}
+
+function obterLigaDeUmClube(nomeClube) {
+    if (!nomeClube) return "";
+
+    if (nomeClube === save.clube) {
+        return save.liga || "";
+    }
+
+    if (typeof CLUBES_POR_LIGA !== "undefined" && CLUBES_POR_LIGA) {
+        for (const liga in CLUBES_POR_LIGA) {
+            const lista = CLUBES_POR_LIGA[liga];
+
+            if (Array.isArray(lista)) {
+                const achou = lista.some(function(item) {
+                    if (typeof item === "string") return item === nomeClube;
+                    if (item && typeof item === "object") return item.nome === nomeClube;
+                    return false;
+                });
+
+                if (achou) return liga;
+            }
+        }
+    }
+
+    if (typeof DADOS_LIGAS !== "undefined" && DADOS_LIGAS) {
+        for (const chave in DADOS_LIGAS) {
+            const dados = DADOS_LIGAS[chave];
+            const lista = dados?.clubes || dados?.times || [];
+
+            if (Array.isArray(lista)) {
+                const achou = lista.some(function(item) {
+                    if (typeof item === "string") return item === nomeClube;
+                    if (item && typeof item === "object") return item.nome === nomeClube;
+                    return false;
+                });
+
+                if (achou) return dados.nome || chave;
+            }
+        }
+    }
+
+    return "";
+}
+
+function ehJogadorPromessaScout(jogador) {
+    if (!jogador) return false;
+
+    const idade = Number(jogador.idade || 99);
+    const overall = Number(jogador.f || jogador.overall || 0);
+    const potencial = obterPotencialJogadorMercado(jogador);
+
+    if (jogador.promessa === true) return true;
+    if (String(jogador.status || "").toLowerCase() === "promessa") return true;
+
+    if (idade > 23) return false;
+
+    if (potencial > 0) {
+        return potencial >= overall + 3;
+    }
+
+    return overall >= 68 && overall <= 84;
+}
 
 const TEMPLATES_TWEETS = {
     tnt: [
@@ -15391,18 +15876,18 @@ const TEMPLATES_TWEETS = {
         ctx => "O resultado de " + ctx.placar + " passa por organização sem a bola e eficiência com ela. O " + ctx.clube + " foi mais funcional."
     ],
 
-    cifut: [
-        ctx => "🧩 " + ctx.jogador + " (" + ctx.idade + ") é um nome que encaixa no " + save.clube + ".\nAtua em " + ctx.posicao + ", tem overall " + ctx.overall + " e margem real de evolução.\n\nTem selo CIFUTBR! ✅",
-        ctx => "📈 Olho em " + ctx.jogador + " (" + ctx.idade + ").\nPromessa do " + ctx.clubeOrigem + ", pode crescer bastante no save e ajudaria o " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        ctx => "💎 " + ctx.jogador + " (" + ctx.idade + ") merece atenção.\nBoa relação entre idade e overall (" + ctx.overall + "), além de encaixe claro no " + save.clube + ".",
-        ctx => "🟢 Recomendação da vez: " + ctx.jogador + ".\nJovem, potencial interessante e perfil que pode elevar o nível do " + save.clube + " em " + ctx.posicao + ".",
-        ctx => "🔍 Nome para monitorar: " + ctx.jogador + " (" + ctx.clubeOrigem + ").\nÉ jovem, já entrega overall " + ctx.overall + " e pode render no projeto.",
-        ctx => "🚨 PROMESSA DA LIGA!\n" + ctx.jogador + " (" + ctx.idade + ") chama atenção pelo conjunto técnico e pode encaixar bem no " + save.clube + ".",
-        ctx => "📌 Se o " + save.clube + " quiser mercado inteligente, " + ctx.jogador + " é um nome interessante.\nIdade: " + ctx.idade + " | Overall: " + ctx.overall + " | Setor: " + ctx.posicao + ".",
-        ctx => "🧠 Scout da vez: " + ctx.jogador + ".\nJogador jovem do " + ctx.clubeOrigem + ", com potencial pra valorizar e ser útil ao " + save.clube + ".",
-        ctx => "⚙️ " + ctx.jogador + " pode ser solução de médio prazo pro " + save.clube + ".\nBoa idade, bom overall e espaço para desenvolvimento.",
-        ctx => "✅ Recomendado pelo CIFUTBR: " + ctx.jogador + ".\nPerfil de promessa, encaixe em " + ctx.posicao + " e boa perspectiva de evolução no save."
-    ],
+	cifut: [
+		ctx => "💎 " + ctx.jogador + " (" + ctx.idade + ") merece atenção.\nPromessa do " + ctx.clubeOrigem + ", atua em " + ctx.posicao + ", cabe no orçamento do " + save.clube + " e pode crescer muito.\n\nTem selo CIFUTBR! ✅",
+		ctx => "📈 Olho em " + ctx.jogador + " (" + ctx.idade + ").\nÉ uma promessa da liga, joga no " + ctx.clubeOrigem + " e se encaixa bem no " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
+		ctx => "🧩 " + ctx.jogador + " (" + ctx.idade + ") é nome interessante.\nJogador da própria liga, dentro do orçamento e com perfil de promessa pra fortalecer o " + save.clube + ".",
+		ctx => "🔍 Nome monitorado pelo CIFUTBR: " + ctx.jogador + ".\nPromessa do " + ctx.clubeOrigem + ", atua em " + ctx.posicao + " e é uma opção viável financeiramente para o " + save.clube + ".",
+		ctx => "🟢 Recomendação da vez: " + ctx.jogador + ".\nBoa idade, status de promessa e encaixe claro no elenco do " + save.clube + ".",
+		ctx => "🚨 PROMESSA DA LIGA!\n" + ctx.jogador + " (" + ctx.idade + ") chama atenção no " + ctx.clubeOrigem + " e cabe no orçamento do " + save.clube + ".",
+		ctx => "📌 Scout do dia: " + ctx.jogador + ".\nPromessa da própria liga, custo viável e boa perspectiva de evolução para o " + save.clube + ".",
+		ctx => "✅ Recomendado pelo CIFUTBR: " + ctx.jogador + ".\nÉ jovem, promissor, joga em " + ctx.posicao + " e pode ser boa oportunidade de mercado.",
+		ctx => "⚙️ " + ctx.jogador + " pode ser solução inteligente pro " + save.clube + ".\nPromessa da liga, financeiramente acessível e com potencial de crescimento.",
+		ctx => "💼 Mercado inteligente: " + ctx.jogador + ".\nJogador jovem do " + ctx.clubeOrigem + ", dentro do orçamento e com perfil claro de promessa."
+	],
 
     fabrizio_concluido: [
         ctx => "BREAKING: " + ctx.jogador + " transferred from " + ctx.origem + " to " + ctx.destino + ", here we go! Deal agreed between all parties. Fee: " + ctx.valor + ".",
@@ -15430,6 +15915,8 @@ const TEMPLATES_TWEETS = {
         ctx => "Approach made by " + ctx.destino + " for " + ctx.jogador + ", but no here we go. " + ctx.origem + " did not accept the offer."
     ]
 };
+
+
 
 function escolherItemAleatorio(lista) {
     return lista[Math.floor(Math.random() * lista.length)];
@@ -15460,9 +15947,9 @@ function adicionarTweetNoticia(perfilId, texto, chave) {
         {
             perfilSocialId: perfilId,
             perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: perfil.avatar,
+            perfilSocialAvatar: resolverAvatarPerfilSocial(perfil.avatar),
             perfilSocialVerificado: !!perfil.verificado,
-            perfilSocialRotulo: perfil.rotulo || "Social"
+            perfilSocialRotulo: perfil.rotulo || "SOCIAL"
         }
     );
 }
@@ -15574,18 +16061,52 @@ function obterCarenciaElencoParaTweet() {
 
 function obterPromessaParaTweetCifut() {
     const carencia = obterCarenciaElencoParaTweet();
+    const orcamentoAtual = Number(save.orcamentoTransferencias || 0);
+    const ligaDoUsuario = save.liga || "";
 
     const candidatos = obterTodosJogadoresMercado().filter(function(jogador) {
-        if ((jogador.idade || 99) > 23) return false;
-        if ((jogador.f || 0) < 70) return false;
-        return obterSetorJogadorParaTweet(jogador) === carencia;
+        if (!jogador) return false;
+        if (jogador.clube === save.clube) return false;
+
+        const idade = Number(jogador.idade || 99);
+        const valor = obterValorJogadorMercado(jogador);
+        const ligaJogador = jogador.liga || obterLigaDeUmClube(jogador.clube);
+        const setor = obterSetorJogadorParaTweet(jogador);
+
+        if (idade > 23) return false;
+        if (valor <= 0 || valor > orcamentoAtual) return false;
+        if (!ligaJogador || ligaJogador !== ligaDoUsuario) return false;
+        if (setor !== carencia) return false;
+        if (!ehJogadorPromessaScout(jogador)) return false;
+
+        return true;
     });
 
     if (candidatos.length === 0) return null;
 
     candidatos.sort(function(a, b) {
-        const scoreA = (a.f || 0) + Math.max(0, 24 - (a.idade || 24));
-        const scoreB = (b.f || 0) + Math.max(0, 24 - (b.idade || 24));
+        const idadeA = Number(a.idade || 99);
+        const idadeB = Number(b.idade || 99);
+
+        const potencialA = obterPotencialJogadorMercado(a);
+        const potencialB = obterPotencialJogadorMercado(b);
+
+        const overallA = Number(a.f || a.overall || 0);
+        const overallB = Number(b.f || b.overall || 0);
+
+        const valorA = obterValorJogadorMercado(a);
+        const valorB = obterValorJogadorMercado(b);
+
+        const scoreA =
+            ((potencialA || overallA) - overallA) * 4 +
+            (24 - idadeA) * 2 -
+            (valorA / 1000000);
+
+        const scoreB =
+            ((potencialB || overallB) - overallB) * 4 +
+            (24 - idadeB) * 2 -
+            (valorB / 1000000);
+
         return scoreB - scoreA;
     });
 
@@ -15594,9 +16115,9 @@ function obterPromessaParaTweetCifut() {
     return {
         jogador: escolhido.nome,
         idade: escolhido.idade || 20,
-        overall: escolhido.f || 70,
         clubeOrigem: escolhido.clube,
-        posicao: carencia
+        posicao: obterSetorJogadorParaTweet(escolhido),
+        valor: obterValorJogadorMercado(escolhido)
     };
 }
 
@@ -16036,20 +16557,30 @@ function criarCardNoticia(noticia) {
         const icone = document.createElement("div");
         icone.className = "noticia-icone tem-avatar";
 
+        const fallback = document.createElement("span");
+        fallback.textContent = "💬";
+        fallback.style.display = "none";
+
         if (noticia.perfilSocialAvatar) {
             const img = document.createElement("img");
-            img.src = noticia.perfilSocialAvatar;
             img.alt = noticia.titulo || "Perfil";
+            img.src = noticia.perfilSocialAvatar;
+
+            img.onload = function() {
+                img.style.display = "block";
+                fallback.style.display = "none";
+            };
 
             img.onerror = function() {
-                icone.classList.remove("tem-avatar");
-                icone.textContent = obterIconeNoticia("tweet");
+                img.style.display = "none";
+                fallback.style.display = "block";
             };
 
             icone.appendChild(img);
+            icone.appendChild(fallback);
         } else {
-            icone.classList.remove("tem-avatar");
-            icone.textContent = obterIconeNoticia("tweet");
+            fallback.style.display = "block";
+            icone.appendChild(fallback);
         }
 
         const conteudo = document.createElement("div");
@@ -16080,7 +16611,7 @@ function criarCardNoticia(noticia) {
 
         const tag = document.createElement("div");
         tag.className = "noticia-perfil-tag";
-        tag.textContent = noticia.perfilSocialRotulo || "Social";
+        tag.textContent = noticia.perfilSocialRotulo || "SOCIAL";
 
         linha.appendChild(esquerda);
         linha.appendChild(tag);
