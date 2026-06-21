@@ -1616,38 +1616,36 @@ th,
     width: 110px;
     min-width: 110px;
     height: 84px;
-    border-radius: 18px;
-    background: rgba(255,255,255,0.62);
-    display: flex;
+    border-radius: 0;
+    background: transparent;
+    display: none;
     align-items: center;
     justify-content: center;
-    padding: 10px;
-    overflow: hidden;
+    padding: 0;
+    overflow: visible;
 }
 
 .mini-logo-empresa {
-    max-width: 100%;
-    max-height: 56px;
+    max-width: 110px;
+    max-height: 64px;
     object-fit: contain;
     display: block;
 }
 
 .mini-logo-placeholder {
-    font-size: 14px;
-    font-weight: 700;
-    color: rgba(0,0,0,0.62);
-    text-transform: lowercase;
+    display: none !important;
 }
 
 @media (max-width: 560px) {
     .mini-logo-empresa-box {
         width: 96px;
         min-width: 96px;
-        height: 76px;
+        height: 70px;
     }
 
     .mini-logo-empresa {
-        max-height: 50px;
+        max-width: 96px;
+        max-height: 58px;
     }
 }
 
@@ -11595,7 +11593,7 @@ function finalizarPartida() {
     registrarResultado(evento, jogoUsuario);
     processarCartoesAmarelosAcumuladosAposPartida();
     aplicarSuspensoesGeradasAposPartida();
-    registrarNoticiasAposPartida(evento, jogoUsuario);
+
     atualizarCansacoJogadoresAposPartida();
     processarProgressaoJogadores(jogoUsuario);
     processarMercadoAposRodada();
@@ -11607,6 +11605,13 @@ function finalizarPartida() {
     aplicarBoostsSubstitutosAposPartida();
 
     ajustarConfianca();
+
+    try {
+        registrarNoticiasAposPartida(evento, jogoUsuario);
+    } catch (erro) {
+        console.warn("Erro ao registrar notícias/tweets após a partida:", erro);
+    }
+
     salvar();
 
     renderizarTelaFim(evento, jogoUsuario);
@@ -13374,23 +13379,38 @@ function atualizarLogoEmpresaNoCard(idImg, idPlaceholder, empresa) {
 
     if (!img || !placeholder) return;
 
+    const box = img.closest(".mini-logo-empresa-box");
     const caminho = resolverCaminhoLogoEmpresa(empresa);
 
     if (!caminho) {
         img.removeAttribute("src");
         img.style.display = "none";
-        placeholder.style.display = "block";
+        placeholder.style.display = "none";
+
+        if (box) {
+            box.style.display = "none";
+        }
+
         return;
     }
 
+    if (box) {
+        box.style.display = "flex";
+    }
+
+    placeholder.style.display = "none";
+
     img.src = caminho;
     img.style.display = "block";
-    placeholder.style.display = "none";
 
     img.onerror = function() {
         img.removeAttribute("src");
         img.style.display = "none";
-        placeholder.style.display = "block";
+        placeholder.style.display = "none";
+
+        if (box) {
+            box.style.display = "none";
+        }
     };
 }
 
@@ -16209,10 +16229,6 @@ function registrarTweetRumorTransferencia(jogador, origem, destino, valor) {
 }
 
 
-function escolherItemAleatorio(lista) {
-    return lista[Math.floor(Math.random() * lista.length)];
-}
-
 function escaparHtml(texto) {
     return String(texto || "")
         .replace(/&/g, "&amp;")
@@ -16409,24 +16425,51 @@ function gerarTextoTweet(perfilId, contexto) {
 }
 
 function registrarTweetsAposPartida(evento, jogo) {
-    const ctx = obterContextoTweetPosJogo(evento, jogo);
-    const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
+    try {
+        const ctx = obterContextoTweetPosJogo(evento, jogo);
+        const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
 
-    adicionarTweetNoticia("tnt", gerarTextoTweet("tnt", ctx), chaveBase + "-tnt");
-    adicionarTweetNoticia("edu", gerarTextoTweet("edu", ctx), chaveBase + "-edu");
-    adicionarTweetNoticia("caze", gerarTextoTweet("caze", ctx), chaveBase + "-caze");
-    adicionarTweetNoticia("rafael", gerarTextoTweet("rafael", ctx), chaveBase + "-rafael");
+        const perfisJogo = ["tnt", "edu", "caze", "rafael"];
+        const primeiroPerfil = escolherItemAleatorio(perfisJogo);
 
-    if ((save.progressao && save.progressao.jogosTemporada % 3 === 0) || Math.random() < 0.35) {
-        const promessa = obterPromessaParaTweetCifut();
+        adicionarTweetNoticia(
+            primeiroPerfil,
+            gerarTextoTweet(primeiroPerfil, ctx),
+            chaveBase + "-" + primeiroPerfil
+        );
 
-        if (promessa) {
+        if (Math.random() < 0.30) {
+            const restantes = perfisJogo.filter(function(perfil) {
+                return perfil !== primeiroPerfil;
+            });
+
+            const segundoPerfil = escolherItemAleatorio(restantes);
+
             adicionarTweetNoticia(
-                "cifut",
-                gerarTextoTweet("cifut", promessa),
-                chaveBase + "-cifut-" + promessa.jogador
+                segundoPerfil,
+                gerarTextoTweet(segundoPerfil, ctx),
+                chaveBase + "-" + segundoPerfil
             );
         }
+
+        const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+        const podePostarCifut =
+            (jogosTemporada > 0 && jogosTemporada % 3 === 0) ||
+            (typeof janelaTransferenciasAberta === "function" && janelaTransferenciasAberta());
+
+        if (podePostarCifut) {
+            const promessa = obterPromessaParaTweetCifut();
+
+            if (promessa) {
+                adicionarTweetNoticia(
+                    "cifut",
+                    gerarTextoTweet("cifut", promessa),
+                    chaveBase + "-cifut-" + promessa.jogador
+                );
+            }
+        }
+    } catch (erro) {
+        console.warn("Erro ao gerar tweets da partida:", erro);
     }
 }
 
