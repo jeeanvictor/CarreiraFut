@@ -16169,9 +16169,9 @@ function registrarTweetCifutSePossivel(chaveBase) {
 
     const textos = [
         "💎 Scout do dia: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", joga na própria liga e cabe no orçamento do " + save.clube + ".",
-        "📈 O " + save.clube + " poderia observar " + jogador.nome + ".\nÉ jovem, tem status de promessa e aparece como opção viável na liga.",
-        "🧩 Nome interessante: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", custo dentro do orçamento e perfil útil para o elenco do " + save.clube + "."|,
-        "✅ Recomendado pelo CIFUTBR: " + jogador.nome + ".\nJovem, financeiramente acessível e com perfil claro de promessa."
+        "📈 O " + save.clube + " poderia observar " + jogador.nome + ".\nÉ jovem, tem status de promessa e aparece como opção viável dentro da liga.",
+        "🧩 Nome interessante: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", custo dentro do orçamento e perfil útil para o elenco.",
+        "✅ Recomendado pelo CIFUTBR: " + jogador.nome + ".\nJovem, da própria liga, financeiramente possível e com perfil claro de promessa."
     ];
 
     return adicionarTweetNoticia(
@@ -16477,11 +16477,11 @@ function obterIconeNoticia(tipo) {
     if (tipo === "suspensao") return "🟨";
     if (tipo === "aposentadoria") return "👟";
     if (tipo === "continental") return "🌎";
-    if (tipo === "financeiro") return "💰";
+    if (tipo === "financeiro") 	return '<img class="noticia-icone-img" src="assets/perfis/espn.png" alt="ESPN" onerror="this.style.display=\'none\'">';;
     if (tipo === "inicio") return "📝";
     if (tipo === "tweet") return "";
 
-	return '<img class="noticia-icone-img" src="assets/perfis/ge.png" alt="GE" onerror="this.style.display=\'none\'">';;
+	return '<img class="noticia-icone-img" src="assets/perfis/ge.png" alt="GE" onerror="this.style.display=\'none\'">';
 }
 
 function obterRotuloTipoNoticia(tipo) {
