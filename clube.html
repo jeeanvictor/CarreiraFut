@@ -1949,6 +1949,14 @@ th,
     grid-template-columns: 1fr;
 }
 
+.noticia-icone-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 50%;
+}
+
 </style>
 </head>
 
@@ -2075,7 +2083,7 @@ th,
                     </div>
 
                     <div class="card">
-                        <h2>Últimos resultados</h2>
+                        <h2>Último resultado</h2>
                         <div id="ultimosResultados"></div>
                     </div>
 
@@ -9053,11 +9061,64 @@ function renderizarInfo() {
         save.patrocinio.masterAtual
     );
 
-    atualizarLogoEmpresaNoCard(
-        "materialEsportivoLogo",
-        "materialEsportivoLogoPlaceholder",
-        save.patrocinio.materialEsportivoAtual
-    );
+	atualizarLogoEmpresaNoCard(
+		"materialEsportivoLogo",
+		"materialEsportivoLogoPlaceholder",
+		save.patrocinio.materialEsportivoAtual
+	);
+
+renderizarUltimoResultadoPainel();
+}
+
+function renderizarUltimoResultadoPainel() {
+    const area = document.getElementById("ultimosResultados");
+
+    if (!area) return;
+
+    area.innerHTML = "";
+
+    if (!save || !Array.isArray(save.resultados) || save.resultados.length === 0) {
+        area.innerHTML = '<div class="resultado-item">Nenhum jogo disputado ainda.</div>';
+        return;
+    }
+
+    const resultado = save.resultados[0];
+
+    if (!resultado) {
+        area.innerHTML = '<div class="resultado-item">Nenhum jogo disputado ainda.</div>';
+        return;
+    }
+
+    let textoPlacar = "";
+
+    if (resultado.texto) {
+        textoPlacar = resultado.texto;
+    } else {
+        textoPlacar =
+            resultado.casa + " " +
+            resultado.golsCasa + " x " +
+            resultado.golsFora + " " +
+            resultado.fora;
+    }
+
+    if (resultado.decididoNosPenaltis) {
+        textoPlacar +=
+            " · Pênaltis: " +
+            resultado.penaltisCasa +
+            " x " +
+            resultado.penaltisFora;
+    }
+
+    const detalhe =
+        (resultado.data ? dataBR(resultado.data) + " · " : "") +
+        (resultado.competicao || "Jogo") +
+        (resultado.rodada ? " · " + resultado.rodada : "");
+
+    area.innerHTML =
+        '<div class="resultado-item">' +
+            '<span>' + escaparHtml(detalhe) + '</span>' +
+            escaparHtml(textoPlacar) +
+        '</div>';
 }
 
 function renderizarElenco() {
@@ -16408,8 +16469,10 @@ function criarCardNoticia(noticia) {
 }
 
 function obterIconeNoticia(tipo) {
-    if (tipo === "vitoria") return "✅";
-    if (tipo === "derrota") return "⚠️";
+    if (tipo === "vitoria" || tipo === "derrota" || tipo === "resultado") {
+        return '<img class="noticia-icone-img" src="assets/perfis/ge.png" alt="GE" onerror="this.style.display=\'none\'">';
+    }
+
     if (tipo === "titulo") return "🏆";
     if (tipo === "suspensao") return "🟨";
     if (tipo === "aposentadoria") return "👟";
@@ -16417,7 +16480,8 @@ function obterIconeNoticia(tipo) {
     if (tipo === "financeiro") return "💰";
     if (tipo === "inicio") return "📝";
     if (tipo === "tweet") return "";
-    return "🗞️";
+
+	return '<img class="noticia-icone-img" src="assets/perfis/ge.png" alt="GE" onerror="this.style.display=\'none\'">';;
 }
 
 function obterRotuloTipoNoticia(tipo) {
