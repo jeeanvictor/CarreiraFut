@@ -1944,6 +1944,11 @@ th,
     display: block;
 }
 
+
+.noticia-card.tweet.tweet-sem-avatar {
+    grid-template-columns: 1fr;
+}
+
 </style>
 </head>
 
@@ -16099,12 +16104,12 @@ function obterPerfilSocial(id) {
 
 function resolverAvatarTweetPorPerfil(perfilId, perfil) {
     const mapaAvatares = {
-        tnt: "assets/perfis/tntsportsbr.jpg",
+        tnt: "assets/perfis/TNTSportsBR.jpg",
         fabrizio: "assets/perfis/FabrizioRomano.jpg",
         edu: "assets/perfis/edufutirinhas.jpg",
-        cifut: "assets/perfis/cifutbr.jpg",
-        caze: "assets/perfis/cazetvoficial.jpg",
-        rafael: "assets/perfis/oliveirarafa.jpg"
+        cifut: "assets/perfis/CifutBR.jpg",
+        caze: "assets/perfis/CazeTVOficial.jpg",
+        rafael: "assets/perfis/OliveiraRafa.jpg"
     };
 
     if (mapaAvatares[perfilId]) {
@@ -16131,8 +16136,6 @@ function adicionarTweetNoticia(perfilId, texto, chave) {
 
     if (!perfil) return false;
 
-    const avatar = resolverAvatarTweetPorPerfil(perfilId, perfil);
-
     return adicionarNoticia(
         "tweet",
         perfil.nome,
@@ -16141,7 +16144,7 @@ function adicionarTweetNoticia(perfilId, texto, chave) {
         {
             perfilSocialId: perfilId,
             perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: avatar,
+            perfilSocialAvatar: resolverAvatarTweetPorPerfil(perfilId, perfil),
             perfilSocialVerificado: !!perfil.verificado,
             perfilSocialRotulo: perfil.rotulo || "SOCIAL"
         }
@@ -17173,7 +17176,18 @@ function renderizarNoticias() {
     if (!lista) return;
 
     garantirNoticiasNoSave();
-    corrigirTweetsFaltantesDoHistoricoNoticias();
+
+    try {
+        corrigirAvataresTweetsSalvos();
+    } catch (erro) {
+        console.warn("Erro ao corrigir avatares dos tweets:", erro);
+    }
+
+    try {
+        corrigirTweetsFaltantesDoHistoricoNoticias();
+    } catch (erro) {
+        console.warn("Erro ao criar tweets retroativos:", erro);
+    }
 
     lista.innerHTML = "";
 
@@ -17197,7 +17211,7 @@ function renderizarNoticias() {
 
 function criarCardNoticia(noticia) {
     const div = document.createElement("article");
-    const ehTweet = noticia.tipo === "tweet" && !!notiaTemPerfilSocial(noticia);
+    const ehTweet = noticia && noticia.tipo === "tweet";
 
     div.className = ehTweet ? "noticia-card tweet" : "noticia-card";
 
@@ -17222,10 +17236,12 @@ function criarCardNoticia(noticia) {
             icone.appendChild(img);
         } else {
             icone.style.display = "none";
+            div.classList.add("tweet-sem-avatar");
         }
 
         img.onerror = function() {
             icone.style.display = "none";
+            div.classList.add("tweet-sem-avatar");
         };
 
         const conteudo = document.createElement("div");
