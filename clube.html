@@ -13429,79 +13429,6 @@ function formatarDinheiro(valor, moeda) {
     return simbolo + " " + numero.toFixed(1).replace(".", ",") + " mi";
 }
 
-function obterArquivoLogoEmpresa(nome) {
-    const mapa = {
-        "Guaraná Poty": "poty.png",
-        "Grupo Mendes": "grupomendes.png",
-        "Havan": "havan.png",
-        "Banco BMG": "bmg.png",
-        "Neo Química": "neoqimica.png",
-        "Banco Inter": "bancointer.png",
-        "Nubank": "nubank.png",
-        "Crefisa": "crefisa.png",
-        "Sportingbet": "sportingbet.png",
-        "sportingbet": "sportingbet.png",
-
-        "REWE": "REWE.png",
-        "Paramount+": "paramount.png",
-        "Gazprom": "gazprom.png",
-        "Volkswagen": "volkswagen.png",
-        "Indeed": "indeed.png",
-        "indeed": "indeed.png",
-        "1+1": "1e1.png",
-        "T-Mobile": "tmobile.png",
-        "Barmenia": "barmenia.png",
-        "Evonik": "evonik.png",
-        "evonik": "evonik.png",
-
-        "Estrella Galicia": "estrellagalicia.png",
-        "Dafabet": "dafabet.png",
-        "Cazoo": "cazoo.png",
-        "Spotify": "spotify.png",
-        "Betway": "betway.png",
-        "Kutxabank": "kutxabank.png",
-        "Bwin": "bwin.png",
-        "Emirates": "emirates.png",
-
-        "American Express": "americanexpress.png",
-        "AIA": "aia.png",
-        "Snapdragon": "snapdragon.png",
-        "Standard Chartered": "standard.png",
-        "Etihad Airways": "etihad.png",
-
-        "Samsic": "samsic.png",
-        "CMA CGM": "cmacgm.png",
-        "Orange": "orange.png",
-        "Ineos": "ineos.png",
-        "Uber Eats": "ubereats.png",
-        "uber eats": "ubereats.png",
-        "Accor Live Limitless": "accor.png",
-
-        "Suzuki": "suzuki.png",
-        "MAPEI": "mapei.png",
-        "Mapei": "mapei.png",
-        "Uber": "uber.png",
-        "uber": "uber.png",
-        "Jeep": "jeep.png",
-        "MSC": "msc.png",
-        "Betsson": "betsson.png",
-        "betsson": "betsson.png",
-        "Lete": "lete.png",
-
-        "Macron": "macron.png",
-        "Joma": "joma.png",
-        "Kappa": "kappa.png",
-        "Umbro": "umbro.png",
-        "New Balance": "newbalance.png",
-        "Under Armour": "underarmour.png",
-        "Nike": "nike.png",
-        "Adidas": "adidas.png",
-        "Puma": "puma.png"
-    };
-
-    return mapa[nome] || "";
-}
-
 function obterPastaLogosPatrocinio() {
     if (typeof BASE_PASTA_PATROCINIOS !== "undefined") {
         return BASE_PASTA_PATROCINIOS;
@@ -15843,7 +15770,7 @@ function adicionarNoticia(tipo, titulo, texto, chave, extras) {
         titulo: titulo,
         texto: texto,
         data: new Date().toISOString(),
-        temporada: obterNumeroTemporadaAtual ? obterNumeroTemporadaAtual() : 1,
+        temporada: typeof obterNumeroTemporadaAtual === "function" ? obterNumeroTemporadaAtual() : 1,
         chave: chave || "noticia-" + Date.now() + "-" + Math.random()
     };
 
@@ -15859,12 +15786,13 @@ function adicionarNoticia(tipo, titulo, texto, chave, extras) {
 
     return true;
 }
+
 const PERFIS_NOTICIAS_SOCIAIS = {
     tnt: {
         id: "tnt",
         nome: "TNT Sports BR",
         handle: "@TNTSportsBR",
-        avatar: "TNTSportsBR.jpg",
+        avatar: "assets/perfis/TNTSportsBR.jpg",
         verificado: true,
         rotulo: "ESPORTE"
     },
@@ -15872,7 +15800,7 @@ const PERFIS_NOTICIAS_SOCIAIS = {
         id: "fabrizio",
         nome: "Fabrizio Romano",
         handle: "@FabrizioRomano",
-        avatar: "FabrizioRomano.jpg",
+        avatar: "assets/perfis/FabrizioRomano.jpg",
         verificado: true,
         rotulo: "MERCADO"
     },
@@ -15880,7 +15808,7 @@ const PERFIS_NOTICIAS_SOCIAIS = {
         id: "edu",
         nome: "Edu Futirinhas",
         handle: "@edufutirinhas",
-        avatar: "edufutirinhas.jpg",
+        avatar: "assets/perfis/edufutirinhas.jpg",
         verificado: true,
         rotulo: "HUMOR"
     },
@@ -15888,15 +15816,15 @@ const PERFIS_NOTICIAS_SOCIAIS = {
         id: "cifut",
         nome: "Cifut Brasil",
         handle: "@CifutBR",
-        avatar: "CifutBR.jpg",
+        avatar: "assets/perfis/CifutBR.jpg",
         verificado: true,
         rotulo: "SCOUT"
     },
     caze: {
         id: "caze",
-        nome: "CazeTV",
+        nome: "CazéTV",
         handle: "@CazeTVOficial",
-        avatar: "CazeTVOficial.jpg",
+        avatar: "assets/perfis/CazeTVOficial.jpg",
         verificado: true,
         rotulo: "ESPORTE"
     },
@@ -15904,208 +15832,12 @@ const PERFIS_NOTICIAS_SOCIAIS = {
         id: "rafael",
         nome: "Rafael Oliveira",
         handle: "@OliveiraRafa",
-        avatar: "OliveiraRafa.jpg",
+        avatar: "assets/perfis/OliveiraRafa.jpg",
         verificado: true,
         rotulo: "ANÁLISE"
     }
 };
 
-function resolverAvatarPerfilSocial(caminho) {
-    if (!caminho) return "";
-
-    if (caminho.indexOf("/") >= 0) {
-        return caminho;
-    }
-
-    return "assets/perfis/" + caminho;
-}
-
-function obterValorJogadorMercado(jogador) {
-    if (!jogador) return 0;
-
-    return Number(
-        jogador.valor ??
-        jogador.value ??
-        jogador.preco ??
-        jogador.precoBase ??
-        jogador.valorMercado ??
-        0
-    ) || 0;
-}
-
-function obterPotencialJogadorMercado(jogador) {
-    if (!jogador) return 0;
-
-    return Number(
-        jogador.potencial ??
-        jogador.pot ??
-        jogador.potential ??
-        jogador.ovrPotencial ??
-        0
-    ) || 0;
-}
-
-function obterLigaDeUmClube(nomeClube) {
-    if (!nomeClube) return "";
-
-    if (nomeClube === save.clube) {
-        return save.liga || "";
-    }
-
-    if (typeof CLUBES_POR_LIGA !== "undefined" && CLUBES_POR_LIGA) {
-        for (const liga in CLUBES_POR_LIGA) {
-            const lista = CLUBES_POR_LIGA[liga];
-
-            if (Array.isArray(lista)) {
-                const achou = lista.some(function(item) {
-                    if (typeof item === "string") return item === nomeClube;
-                    if (item && typeof item === "object") return item.nome === nomeClube;
-                    return false;
-                });
-
-                if (achou) return liga;
-            }
-        }
-    }
-
-    if (typeof DADOS_LIGAS !== "undefined" && DADOS_LIGAS) {
-        for (const chave in DADOS_LIGAS) {
-            const dados = DADOS_LIGAS[chave];
-            const lista = dados?.clubes || dados?.times || [];
-
-            if (Array.isArray(lista)) {
-                const achou = lista.some(function(item) {
-                    if (typeof item === "string") return item === nomeClube;
-                    if (item && typeof item === "object") return item.nome === nomeClube;
-                    return false;
-                });
-
-                if (achou) return dados.nome || chave;
-            }
-        }
-    }
-
-    return "";
-}
-
-function ehJogadorPromessaScout(jogador) {
-    if (!jogador) return false;
-
-    const idade = Number(jogador.idade || 99);
-    const overall = Number(jogador.f || jogador.overall || 0);
-    const potencial = obterPotencialJogadorMercado(jogador);
-
-    if (jogador.promessa === true) return true;
-    if (String(jogador.status || "").toLowerCase() === "promessa") return true;
-
-    if (idade > 23) return false;
-
-    if (potencial > 0) {
-        return potencial >= overall + 3;
-    }
-
-    return overall >= 68 && overall <= 84;
-}
-
-const TEMPLATES_TWEETS = {
-    tnt: [
-        ctx => "COMO VOCÊ AVALIA A ATUAÇÃO DO " + ctx.clube.toUpperCase() + " HOJE? 🤔🔥\n" + ctx.placar + " e " + ctx.destaque + " chamou atenção durante a partida! #" + ctx.hashtagClube,
-        ctx => "QUE JOGO! 🤯 " + ctx.clube + " x " + ctx.adversario + " entregou emoção. Placar final: " + ctx.placar + ". Destaque pra " + ctx.destaque + "!",
-        ctx => "ALÔ TORCIDA, deu bom pro " + ctx.clube + "? 👀\nResultado final: " + ctx.placar + ". O nome que mais apareceu foi " + ctx.destaque + ".",
-        ctx => "JOGO MOVIMENTADO, hein! ⚽\n" + ctx.clube + " saiu de campo com " + ctx.resultadoDescricao + " diante do " + ctx.adversario + ". Destaque: " + ctx.destaque + ".",
-        ctx => "TEMOS UM DESTAQUE! 🌟\n" + ctx.destaque + " apareceu muito no duelo entre " + ctx.clube + " e " + ctx.adversario + ". Placar: " + ctx.placar + ".",
-        ctx => "O " + ctx.clube + " ENTREGOU TUDO? 🫣\nContra o " + ctx.adversario + ", terminou " + ctx.placar + ". " + ctx.destaque + " foi bem observado.",
-        ctx => "FALA, TORCEDOR! 🗣️\n" + ctx.clube + " encerra a partida com " + ctx.placar + ". " + ctx.destaque + " foi personagem do confronto.",
-        ctx => "PARTIDA ENCERRADA! ✅\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + ". Curtiu o jogo de " + ctx.destaque + "?",
-        ctx => "NOITE DE FUTEBOL pra conta ⚽\n" + ctx.clube + " mediu forças com o " + ctx.adversario + " e o placar terminou " + ctx.placar + ".",
-        ctx => "RESULTADO DEFINIDO! 📣\n" + ctx.clube + " terminou o jogo contra o " + ctx.adversario + " com " + ctx.placar + ". Pra muita gente, " + ctx.destaque + " foi o cara do jogo!"
-    ],
-
-    edu: [
-        ctx => "ALÔ " + ctx.clube.toUpperCase() + ", BOA NOITE KKKKKK\nSe era pra " + ctx.resultadoVerbo + " assim, avisava antes. " + ctx.destaque + " jogou BOLA.",
-        ctx => "PRA QUE ZAGUEIRO se o " + ctx.clube + " resolveu me fazer sentir tudo isso? 😂\n" + ctx.placar + " e " + ctx.destaque + " no centro do caos.",
-        ctx => "O TIME DO HOMEM APRONTOU DE NOVO 😭\n" + ctx.clube + " x " + ctx.adversario + " acabou " + ctx.placar + " e " + ctx.destaque + " virou pauta.",
-        ctx => "SENHORAS E SENHORES, o entretenimento venceu.\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + " e " + ctx.destaque + " virou assunto do grupo.",
-        ctx => "EU TÔ RINDO MAS COM RESPEITO 😂\n" + ctx.clube + " terminou " + ctx.placar + ". O melhor foi ver " + ctx.destaque + " aprontando.",
-        ctx => "RESPEITA O PROFESSOR? OU NÃO? 👀\n" + ctx.clube + " saiu com " + ctx.resultadoDescricao + " e " + ctx.destaque + " foi o nome do rolê.",
-        ctx => "SE ISSO NÃO É FUTEBOL, EU NÃO SEI O QUE É KKKK\n" + ctx.placar + " no placar e " + ctx.destaque + " vivendo intensamente.",
-        ctx => "OLHA O NAIPE DESSE JOGO 😭\n" + ctx.clube + " contra " + ctx.adversario + ", placar de " + ctx.placar + " e " + ctx.destaque + " entregando tudo.",
-        ctx => "PAREM TUDO.\n" + ctx.destaque + " acabou de ganhar mais um capítulo na novela do " + ctx.clube + ". Resultado? " + ctx.placar + ".",
-        ctx => "ME EXPLICA COMO O " + ctx.clube + " CONSEGUE SEMPRE ME TIRAR UM SORRISO KKK\n" + ctx.resultadoDescricao + " contra o " + ctx.adversario + "."
-    ],
-
-    caze: [
-        ctx => "ABSURDO o que o " + ctx.clube + " aprontou hoje 😂💚\n" + ctx.placar + " no jogo e " + ctx.destaque + " roubando a cena.",
-        ctx => "FUTEBOL É BOM DEMAIS, tá maluco! 🤯\n" + ctx.clube + " x " + ctx.adversario + " terminou " + ctx.placar + " e eu ainda tô pensando em " + ctx.destaque + ".",
-        ctx => "SIMPLESMENTE " + ctx.destaque.toUpperCase() + ".\nPartidaça entre " + ctx.clube + " e " + ctx.adversario + ". Final: " + ctx.placar + ".",
-        ctx => "TÉCNICO, PODE SORRIR 😅\n" + ctx.clube + " saiu de campo com " + ctx.resultadoDescricao + " e " + ctx.destaque + " foi bem demais.",
-        ctx => "QUEM GOSTA DE FUTEBOL gostou disso aqui ⚽\n" + ctx.clube + " terminou com " + ctx.placar + ". Nome do jogo: " + ctx.destaque + ".",
-        ctx => "É DISSO QUE O POVO GOSTA! 😂\n" + ctx.placar + " entre " + ctx.clube + " e " + ctx.adversario + ", com " + ctx.destaque + " chamando atenção.",
-        ctx => "MEU AMIGO, O JOGO ENTREGOU 🎙️\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + ". " + ctx.destaque + " saiu fortalecido.",
-        ctx => "EU TÔ FECHADO COM ESSE JOGO 😂\n" + ctx.clube + " fez " + ctx.resultadoDescricao + " e " + ctx.destaque + " foi figura central.",
-        ctx => "SE O FUTEBOL BRIGA COM O TÉDIO, HOJE ELE VENCEU 😎\n" + ctx.placar + " no placar e " + ctx.destaque + " brilhando.",
-        ctx => "OLHA ISSO AQUI, FAMÍLIA! 👀\n" + ctx.clube + " x " + ctx.adversario + " acabou " + ctx.placar + ". E o " + ctx.destaque + "? Jogou MUITO."
-    ],
-
-    rafael: [
-        ctx => "O " + ctx.clube + " encontrou vantagens principalmente na ocupação dos espaços entre linhas. " + ctx.destaque + " foi importante no " + ctx.placar + ".",
-        ctx => "A partida passou pelo controle de ritmo do " + ctx.clube + ". Mesmo quando sofreu pressão, a equipe ajustou o posicionamento e terminou com " + ctx.placar + ".",
-        ctx => "O jogo foi decidido em detalhes de execução. O " + ctx.clube + " foi mais eficiente nas zonas de definição, e isso ajuda a explicar o " + ctx.placar + ".",
-        ctx => "O " + ctx.clube + " alternou momentos de pressão com bloco mais baixo e soube administrar a partida. " + ctx.destaque + " teve papel relevante.",
-        ctx => "No aspecto tático, o " + ctx.clube + " atacou bem os corredores e protegeu melhor a área em momentos decisivos. Resultado: " + ctx.placar + ".",
-        ctx => "Foi um jogo em que o " + ctx.clube + " soube interpretar os momentos. Nem sempre controlou a posse, mas controlou melhor os lances-chave.",
-        ctx => "A leitura da comissão foi importante. O " + ctx.clube + " manteve competitividade durante quase todo o jogo, e isso explica a " + ctx.resultadoNominal + ".",
-        ctx => "O " + ctx.clube + " teve boa resposta comportamental: acelerou quando precisava e compactou melhor sem a bola. O placar de " + ctx.placar + " conversa com isso.",
-        ctx => "Partida com nuances táticas claras. O " + ctx.clube + " atacou melhor os espaços vazios e impediu o " + ctx.adversario + " de crescer com continuidade.",
-        ctx => "O resultado de " + ctx.placar + " passa por organização sem a bola e eficiência com ela. O " + ctx.clube + " foi mais funcional."
-    ],
-
-	cifut: [
-		ctx => "💎 " + ctx.jogador + " (" + ctx.idade + ") merece atenção.\nPromessa do " + ctx.clubeOrigem + ", atua em " + ctx.posicao + ", cabe no orçamento do " + save.clube + " e pode crescer muito.\n\nTem selo CIFUTBR! ✅",
-		ctx => "📈 Olho em " + ctx.jogador + " (" + ctx.idade + ").\nÉ uma promessa da liga, joga no " + ctx.clubeOrigem + " e se encaixa bem no " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
-		ctx => "🧩 " + ctx.jogador + " (" + ctx.idade + ") é nome interessante.\nJogador da própria liga, dentro do orçamento e com perfil de promessa pra fortalecer o " + save.clube + ".",
-		ctx => "🔍 Nome monitorado pelo CIFUTBR: " + ctx.jogador + ".\nPromessa do " + ctx.clubeOrigem + ", atua em " + ctx.posicao + " e é uma opção viável financeiramente para o " + save.clube + ".",
-		ctx => "🟢 Recomendação da vez: " + ctx.jogador + ".\nBoa idade, status de promessa e encaixe claro no elenco do " + save.clube + ".",
-		ctx => "🚨 PROMESSA DA LIGA!\n" + ctx.jogador + " (" + ctx.idade + ") chama atenção no " + ctx.clubeOrigem + " e cabe no orçamento do " + save.clube + ".",
-		ctx => "📌 Scout do dia: " + ctx.jogador + ".\nPromessa da própria liga, custo viável e boa perspectiva de evolução para o " + save.clube + ".",
-		ctx => "✅ Recomendado pelo CIFUTBR: " + ctx.jogador + ".\nÉ jovem, promissor, joga em " + ctx.posicao + " e pode ser boa oportunidade de mercado.",
-		ctx => "⚙️ " + ctx.jogador + " pode ser solução inteligente pro " + save.clube + ".\nPromessa da liga, financeiramente acessível e com potencial de crescimento.",
-		ctx => "💼 Mercado inteligente: " + ctx.jogador + ".\nJogador jovem do " + ctx.clubeOrigem + ", dentro do orçamento e com perfil claro de promessa."
-	],
-
-    fabrizio_concluido: [
-        ctx => "BREAKING: " + ctx.jogador + " transferred from " + ctx.origem + " to " + ctx.destino + ", here we go! Deal agreed between all parties. Fee: " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " to " + ctx.destino + ", here we go! Agreement completed with " + ctx.origem + ". Fee worth " + ctx.valor + ".",
-        ctx => "BREAKING: " + ctx.jogador + " has joined " + ctx.destino + ", here we go! Package sealed, all documents approved.",
-        ctx => "BREAKING: " + ctx.jogador + " will play for " + ctx.destino + ", here we go! Full agreement in place after final round of talks.",
-        ctx => "BREAKING: " + ctx.jogador + " from " + ctx.origem + " to " + ctx.destino + ", here we go! Deal done and confirmed.",
-        ctx => "BREAKING: " + ctx.jogador + " becomes new " + ctx.destino + " player, here we go! Everything completed with " + ctx.origem + ".",
-        ctx => "BREAKING: " + ctx.jogador + " has been transferred to " + ctx.destino + ", here we go! Agreement reached on every detail.",
-        ctx => "BREAKING: " + ctx.jogador + " to " + ctx.destino + " — here we go! Clubs have signed off, player accepted the project.",
-        ctx => "BREAKING: " + ctx.jogador + " leaves " + ctx.origem + " and joins " + ctx.destino + ", here we go! Transfer now completed.",
-        ctx => "BREAKING: " + ctx.jogador + " is the new signing of " + ctx.destino + ", here we go! Move completed from " + ctx.origem + " for " + ctx.valor + "."
-    ],
-
-    fabrizio_rumor: [
-        ctx => ctx.destino + " remain interested in " + ctx.jogador + ". Contacts took place with " + ctx.origem + ", but no agreement so far.",
-        ctx => ctx.jogador + " is on " + ctx.destino + "'s shortlist. Talks explored, but deal not sealed at this stage.",
-        ctx => ctx.destino + " made an approach for " + ctx.jogador + ", but " + ctx.origem + " rejected the initial proposal of " + ctx.valor + ".",
-        ctx => "Negotiations for " + ctx.jogador + " are not advancing yet. " + ctx.destino + " asked for conditions; " + ctx.origem + " still waiting.",
-        ctx => ctx.jogador + " was discussed internally by " + ctx.destino + ". Nothing agreed with " + ctx.origem + " as of now.",
-        ctx => "No deal completed for " + ctx.jogador + " and " + ctx.destino + " at this stage. " + ctx.origem + " want better conditions.",
-        ctx => ctx.destino + " have genuine interest in " + ctx.jogador + ", but talks are currently off after first proposal.",
-        ctx => ctx.jogador + " remains a target for " + ctx.destino + ". Initial bid was turned down by " + ctx.origem + ".",
-        ctx => "Understand " + ctx.destino + " tried for " + ctx.jogador + ". Negotiations did not reach full agreement with " + ctx.origem + ".",
-        ctx => "Approach made by " + ctx.destino + " for " + ctx.jogador + ", but no here we go. " + ctx.origem + " did not accept the offer."
-    ]
-};
-
-
-
-function escolherItemAleatorio(lista) {
-    return lista[Math.floor(Math.random() * lista.length)];
-}
-
 function escaparHtml(texto) {
     return String(texto || "")
         .replace(/&/g, "&amp;")
@@ -16116,692 +15848,6 @@ function escaparHtml(texto) {
 
 function obterPerfilSocial(id) {
     return PERFIS_NOTICIAS_SOCIAIS[id] || null;
-}
-
-function resolverAvatarTweetPorPerfil(perfilId, perfil) {
-    const mapaAvatares = {
-        tnt: "assets/perfis/TNTSportsBR.jpg",
-        fabrizio: "assets/perfis/FabrizioRomano.jpg",
-        edu: "assets/perfis/edufutirinhas.jpg",
-        cifut: "assets/perfis/CifutBR.jpg",
-        caze: "assets/perfis/CazeTVOficial.jpg",
-        rafael: "assets/perfis/OliveiraRafa.jpg"
-    };
-
-    if (mapaAvatares[perfilId]) {
-        return mapaAvatares[perfilId];
-    }
-
-    if (perfil && perfil.avatar) {
-        if (perfil.avatar.indexOf("/") >= 0) {
-            return perfil.avatar;
-        }
-
-        return "assets/perfis/" + perfil.avatar;
-    }
-
-    return "";
-}
-
-function adicionarTweetNoticia(perfilId, texto, chave) {
-    if (!save || !texto) return false;
-
-    const perfil = typeof obterPerfilSocialSeguro === "function"
-        ? obterPerfilSocialSeguro(perfilId)
-        : obterPerfilSocial(perfilId);
-
-    if (!perfil) return false;
-
-    return adicionarNoticia(
-        "tweet",
-        perfil.nome,
-        texto,
-        chave,
-        {
-            perfilSocialId: perfilId,
-            perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: resolverAvatarTweetPorPerfil(perfilId, perfil),
-            perfilSocialVerificado: !!perfil.verificado,
-            perfilSocialRotulo: perfil.rotulo || "SOCIAL"
-        }
-    );
-}
-
-function obterNomeDestaquePartida() {
-    if (partida && Array.isArray(partida.golsDetalhados) && partida.golsDetalhados.length > 0) {
-        return partida.golsDetalhados[0].jogadorNome || partida.golsDetalhados[0].nome || "um jogador";
-    }
-
-    if (partida && partida.capitaoUsuarioNome) {
-        return partida.capitaoUsuarioNome;
-    }
-
-    const titular = obterElencoUsuario().slice().sort(function(a, b) {
-        return (b.f || 0) - (a.f || 0);
-    })[0];
-
-    return titular ? titular.nome : "um jogador";
-}
-
-function gerarHashtagClube(nome) {
-    return String(nome || "")
-        .replace(/[^a-zA-Z0-9À-ÿ ]/g, "")
-        .trim()
-        .split(/\s+/)
-        .join("");
-}
-
-function obterContextoTweetPosJogo(evento, jogo) {
-    const golsUsuario = jogo.casa === save.clube ? jogo.golsCasa : jogo.golsFora;
-    const golsAdversario = jogo.casa === save.clube ? jogo.golsFora : jogo.golsCasa;
-    const adversario = jogo.casa === save.clube ? jogo.fora : jogo.casa;
-
-    let resultadoCurto = "empatou com";
-    let resultadoDescricao = "empate";
-    let resultadoNominal = "igualdade";
-    let resultadoVerbo = "empatar";
-
-    if (golsUsuario > golsAdversario) {
-        resultadoCurto = "venceu";
-        resultadoDescricao = "vitória";
-        resultadoNominal = "vitória";
-        resultadoVerbo = "vencer";
-    } else if (golsUsuario < golsAdversario) {
-        resultadoCurto = "perdeu para";
-        resultadoDescricao = "derrota";
-        resultadoNominal = "derrota";
-        resultadoVerbo = "perder";
-    }
-
-    return {
-        clube: save.clube,
-        adversario: adversario,
-        golsUsuario: golsUsuario,
-        golsAdversario: golsAdversario,
-        placar: save.clube + " " + golsUsuario + " x " + golsAdversario + " " + adversario,
-        destaque: obterNomeDestaquePartida(),
-        competicao: evento.competicao,
-        rodada: evento.rodada || "",
-        resultadoCurto: resultadoCurto,
-        resultadoDescricao: resultadoDescricao,
-        resultadoNominal: resultadoNominal,
-        resultadoVerbo: resultadoVerbo,
-        hashtagClube: gerarHashtagClube(save.clube)
-    };
-}
-
-function obterSetorJogadorParaTweet(jogador) {
-    const pos = String(jogador.p || "").toUpperCase();
-
-    if (pos === "G") return "gol";
-    if (pos === "Z" || pos === "L") return "defesa";
-    if (pos === "M") return "meio-campo";
-    return "ataque";
-}
-
-function obterCarenciaElencoParaTweet() {
-    const setores = {
-        gol: [],
-        defesa: [],
-        "meio-campo": [],
-        ataque: []
-    };
-
-    obterElencoUsuario().forEach(function(jogador) {
-        const setor = obterSetorJogadorParaTweet(jogador);
-        setores[setor].push(jogador.f || 0);
-    });
-
-    let piorSetor = "meio-campo";
-    let piorMedia = 999;
-
-    Object.keys(setores).forEach(function(setor) {
-        const lista = setores[setor];
-        const media = lista.length
-            ? lista.reduce(function(total, valor) {
-                return total + valor;
-            }, 0) / lista.length
-            : 999;
-
-        if (media < piorMedia) {
-            piorMedia = media;
-            piorSetor = setor;
-        }
-    });
-
-    return piorSetor;
-}
-
-function obterPromessaParaTweetCifut() {
-    const carencia = obterCarenciaElencoParaTweet();
-    const orcamentoAtual = Number(save.orcamentoTransferencias || 0);
-    const ligaDoUsuario = save.liga || "";
-
-    const candidatos = obterTodosJogadoresMercado().filter(function(jogador) {
-        if (!jogador) return false;
-        if (jogador.clube === save.clube) return false;
-
-        const idade = Number(jogador.idade || 99);
-        const valor = obterValorJogadorMercado(jogador);
-        const ligaJogador = jogador.liga || obterLigaDeUmClube(jogador.clube);
-        const setor = obterSetorJogadorParaTweet(jogador);
-
-        if (idade > 23) return false;
-        if (valor <= 0 || valor > orcamentoAtual) return false;
-        if (!ligaJogador || ligaJogador !== ligaDoUsuario) return false;
-        if (setor !== carencia) return false;
-        if (!ehJogadorPromessaScout(jogador)) return false;
-
-        return true;
-    });
-
-    if (candidatos.length === 0) return null;
-
-    candidatos.sort(function(a, b) {
-        const idadeA = Number(a.idade || 99);
-        const idadeB = Number(b.idade || 99);
-
-        const potencialA = obterPotencialJogadorMercado(a);
-        const potencialB = obterPotencialJogadorMercado(b);
-
-        const overallA = Number(a.f || a.overall || 0);
-        const overallB = Number(b.f || b.overall || 0);
-
-        const valorA = obterValorJogadorMercado(a);
-        const valorB = obterValorJogadorMercado(b);
-
-        const scoreA =
-            ((potencialA || overallA) - overallA) * 4 +
-            (24 - idadeA) * 2 -
-            (valorA / 1000000);
-
-        const scoreB =
-            ((potencialB || overallB) - overallB) * 4 +
-            (24 - idadeB) * 2 -
-            (valorB / 1000000);
-
-        return scoreB - scoreA;
-    });
-
-    const escolhido = candidatos[0];
-
-    return {
-        jogador: escolhido.nome,
-        idade: escolhido.idade || 20,
-        clubeOrigem: escolhido.clube,
-        posicao: obterSetorJogadorParaTweet(escolhido),
-        valor: obterValorJogadorMercado(escolhido)
-    };
-}
-
-function gerarTextoTweet(perfilId, contexto) {
-    if (perfilId === "tnt") return escolherItemAleatorio(TEMPLATES_TWEETS.tnt)(contexto);
-    if (perfilId === "edu") return escolherItemAleatorio(TEMPLATES_TWEETS.edu)(contexto);
-    if (perfilId === "caze") return escolherItemAleatorio(TEMPLATES_TWEETS.caze)(contexto);
-    if (perfilId === "rafael") return escolherItemAleatorio(TEMPLATES_TWEETS.rafael)(contexto);
-    if (perfilId === "cifut") return escolherItemAleatorio(TEMPLATES_TWEETS.cifut)(contexto);
-    if (perfilId === "fabrizio_concluido") return escolherItemAleatorio(TEMPLATES_TWEETS.fabrizio_concluido)(contexto);
-    if (perfilId === "fabrizio_rumor") return escolherItemAleatorio(TEMPLATES_TWEETS.fabrizio_rumor)(contexto);
-
-    return "";
-}
-
-function registrarTweetsAposPartida(evento, jogo) {
-    const ctx = obterContextoTweetPosJogo(evento, jogo);
-    const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
-
-    const perfisJogo = ["tnt", "edu", "caze", "rafael"];
-    const primeiroPerfil = escolherItemAleatorio(perfisJogo);
-
-    adicionarTweetNoticia(
-        primeiroPerfil,
-        gerarTextoTweet(primeiroPerfil, ctx),
-        chaveBase + "-" + primeiroPerfil
-    );
-
-    if (Math.random() < 0.30) {
-        const restantes = perfisJogo.filter(function(perfil) {
-            return perfil !== primeiroPerfil;
-        });
-
-        const segundoPerfil = escolherItemAleatorio(restantes);
-
-        adicionarTweetNoticia(
-            segundoPerfil,
-            gerarTextoTweet(segundoPerfil, ctx),
-            chaveBase + "-" + segundoPerfil
-        );
-    }
-
-    const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
-    const podePostarCifut =
-        (jogosTemporada > 0 && jogosTemporada % 3 === 0) ||
-        (typeof janelaTransferenciasAberta === "function" && janelaTransferenciasAberta());
-
-    if (podePostarCifut) {
-        const promessa = obterPromessaParaTweetCifut();
-
-        if (promessa) {
-            adicionarTweetNoticia(
-                "cifut",
-                gerarTextoTweet("cifut", promessa),
-                chaveBase + "-cifut-" + promessa.jogador
-            );
-        }
-    }
-}
-
-function registrarTweetTransferenciaConcluida(jogador, origem, destino, valor) {
-    const ctx = {
-        jogador: jogador,
-        origem: origem,
-        destino: destino,
-        valor: formatarDinheiro(valor, save.moeda)
-    };
-
-    adicionarTweetNoticia(
-        "fabrizio",
-        gerarTextoTweet("fabrizio_concluido", ctx),
-        "fabrizio-concluido-" + jogador + "-" + destino + "-" + Date.now()
-    );
-}
-
-function registrarTweetRumorTransferencia(jogador, origem, destino, valor) {
-    const ctx = {
-        jogador: jogador,
-        origem: origem,
-        destino: destino,
-        valor: formatarDinheiro(valor, save.moeda)
-    };
-
-    adicionarTweetNoticia(
-        "fabrizio",
-        gerarTextoTweet("fabrizio_rumor", ctx),
-        "fabrizio-rumor-" + jogador + "-" + destino + "-" + Date.now()
-    );
-}
-
-
-function escaparHtml(texto) {
-    return String(texto || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
-
-function obterPerfilSocial(id) {
-    return PERFIS_NOTICIAS_SOCIAIS[id] || null;
-}
-
-function adicionarTweetNoticia(perfilId, texto, chave) {
-    const perfil = obterPerfilSocial(perfilId);
-
-    if (!perfil || !texto) return false;
-
-    return adicionarNoticia(
-        "tweet",
-        perfil.nome,
-        texto,
-        chave,
-        {
-            perfilSocialId: perfilId,
-            perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: perfil.avatar,
-            perfilSocialVerificado: !!perfil.verificado,
-            perfilSocialRotulo: perfil.rotulo || "Social"
-        }
-    );
-}
-
-function obterNomeDestaquePartida() {
-    if (partida && Array.isArray(partida.golsDetalhados) && partida.golsDetalhados.length > 0) {
-        return partida.golsDetalhados[0].jogadorNome || partida.golsDetalhados[0].nome || "um jogador";
-    }
-
-    if (partida && partida.capitaoUsuarioNome) {
-        return partida.capitaoUsuarioNome;
-    }
-
-    const titular = obterElencoUsuario().slice().sort(function(a, b) {
-        return (b.f || 0) - (a.f || 0);
-    })[0];
-
-    return titular ? titular.nome : "um jogador";
-}
-
-function gerarHashtagClube(nome) {
-    return String(nome || "")
-        .replace(/[^a-zA-Z0-9À-ÿ ]/g, "")
-        .trim()
-        .split(/\s+/)
-        .join("");
-}
-
-function obterContextoTweetPosJogo(evento, jogo) {
-    const golsUsuario = jogo.casa === save.clube ? jogo.golsCasa : jogo.golsFora;
-    const golsAdversario = jogo.casa === save.clube ? jogo.golsFora : jogo.golsCasa;
-    const adversario = jogo.casa === save.clube ? jogo.fora : jogo.casa;
-
-    let resultadoCurto = "empatou com";
-    let resultadoDescricao = "empate";
-    let resultadoNominal = "igualdade";
-    let resultadoVerbo = "empatar";
-
-    if (golsUsuario > golsAdversario) {
-        resultadoCurto = "venceu";
-        resultadoDescricao = "vitória";
-        resultadoNominal = "vitória";
-        resultadoVerbo = "vencer";
-    } else if (golsUsuario < golsAdversario) {
-        resultadoCurto = "perdeu para";
-        resultadoDescricao = "derrota";
-        resultadoNominal = "derrota";
-        resultadoVerbo = "perder";
-    }
-
-    return {
-        clube: save.clube,
-        adversario: adversario,
-        golsUsuario: golsUsuario,
-        golsAdversario: golsAdversario,
-        placar: save.clube + " " + golsUsuario + " x " + golsAdversario + " " + adversario,
-        destaque: obterNomeDestaquePartida(),
-        competicao: evento.competicao,
-        rodada: evento.rodada || "",
-        resultadoCurto: resultadoCurto,
-        resultadoDescricao: resultadoDescricao,
-        resultadoNominal: resultadoNominal,
-        resultadoVerbo: resultadoVerbo,
-        hashtagClube: gerarHashtagClube(save.clube)
-    };
-}
-
-function obterSetorJogadorParaTweet(jogador) {
-    const pos = String(jogador.p || "").toUpperCase();
-
-    if (pos.includes("GL")) return "gol";
-    if (pos.includes("ZAG") || pos.includes("LD") || pos.includes("LE")) return "defesa";
-    if (pos.includes("VOL") || pos.includes("MC") || pos.includes("MEI") || pos.includes("ME") || pos.includes("MD")) return "meio-campo";
-    return "ataque";
-}
-
-function obterCarenciaElencoParaTweet() {
-    const setores = {
-        gol: [],
-        defesa: [],
-        "meio-campo": [],
-        ataque: []
-    };
-
-    obterElencoUsuario().forEach(function(jogador) {
-        const setor = obterSetorJogadorParaTweet(jogador);
-        setores[setor].push(jogador.f || 0);
-    });
-
-    let piorSetor = "meio-campo";
-    let piorMedia = 999;
-
-    Object.keys(setores).forEach(function(setor) {
-        const lista = setores[setor];
-        const media = lista.length
-            ? lista.reduce((a, b) => a + b, 0) / lista.length
-            : 999;
-
-        if (media < piorMedia) {
-            piorMedia = media;
-            piorSetor = setor;
-        }
-    });
-
-    return piorSetor;
-}
-
-function obterPromessaParaTweetCifut() {
-    const carencia = obterCarenciaElencoParaTweet();
-
-    const candidatos = obterTodosJogadoresMercado().filter(function(jogador) {
-        if ((jogador.idade || 99) > 23) return false;
-        if ((jogador.f || 0) < 70) return false;
-        return obterSetorJogadorParaTweet(jogador) === carencia;
-    });
-
-    if (candidatos.length === 0) return null;
-
-    candidatos.sort(function(a, b) {
-        const scoreA = (a.f || 0) + Math.max(0, 24 - (a.idade || 24));
-        const scoreB = (b.f || 0) + Math.max(0, 24 - (b.idade || 24));
-        return scoreB - scoreA;
-    });
-
-    const escolhido = candidatos[0];
-
-    return {
-        jogador: escolhido.nome,
-        idade: escolhido.idade || 20,
-        overall: escolhido.f || 70,
-        clubeOrigem: escolhido.clube,
-        posicao: carencia
-    };
-}
-
-function gerarTextoTweet(perfilId, contexto) {
-    if (perfilId === "tnt") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.tnt)(contexto);
-    }
-
-    if (perfilId === "edu") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.edu)(contexto);
-    }
-
-    if (perfilId === "caze") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.caze)(contexto);
-    }
-
-    if (perfilId === "rafael") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.rafael)(contexto);
-    }
-
-    if (perfilId === "cifut") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.cifut)(contexto);
-    }
-
-    if (perfilId === "fabrizio_concluido") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.fabrizio_concluido)(contexto);
-    }
-
-    if (perfilId === "fabrizio_rumor") {
-        return escolherItemAleatorio(TEMPLATES_TWEETS.fabrizio_rumor)(contexto);
-    }
-
-    return "";
-}
-
-function registrarTweetsAposPartida(evento, jogo) {
-    try {
-        const ctx = obterContextoTweetPosJogo(evento, jogo);
-        const chaveBase = "tweets-pos-jogo-" + (partida ? partida.eventoIndex : Date.now());
-
-        const perfisJogo = ["tnt", "edu", "caze", "rafael"];
-        const primeiroPerfil = escolherItemAleatorio(perfisJogo);
-
-        adicionarTweetNoticia(
-            primeiroPerfil,
-            gerarTextoTweet(primeiroPerfil, ctx),
-            chaveBase + "-" + primeiroPerfil
-        );
-
-        if (Math.random() < 0.30) {
-            const restantes = perfisJogo.filter(function(perfil) {
-                return perfil !== primeiroPerfil;
-            });
-
-            const segundoPerfil = escolherItemAleatorio(restantes);
-
-            adicionarTweetNoticia(
-                segundoPerfil,
-                gerarTextoTweet(segundoPerfil, ctx),
-                chaveBase + "-" + segundoPerfil
-            );
-        }
-
-        const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
-        const podePostarCifut =
-            (jogosTemporada > 0 && jogosTemporada % 3 === 0) ||
-            (typeof janelaTransferenciasAberta === "function" && janelaTransferenciasAberta());
-
-        if (podePostarCifut) {
-            try {
-                const promessa = obterPromessaParaTweetCifut();
-
-                if (promessa) {
-                    adicionarTweetNoticia(
-                        "cifut",
-                        gerarTextoTweet("cifut", promessa),
-                        chaveBase + "-cifut-" + promessa.jogador
-                    );
-                }
-            } catch (erroCifut) {
-                console.warn("Erro ao gerar tweet do Cifut:", erroCifut);
-            }
-        }
-    } catch (erro) {
-        console.warn("Erro ao gerar tweets da partida:", erro);
-    }
-}
-
-function registrarTweetTransferenciaConcluida(jogador, origem, destino, valor) {
-    const ctx = {
-        jogador: jogador,
-        origem: origem,
-        destino: destino,
-        valor: formatarDinheiro(valor, save.moeda)
-    };
-
-    adicionarTweetNoticia(
-        "fabrizio",
-        gerarTextoTweet("fabrizio_concluido", ctx),
-        "fabrizio-concluido-" + jogador + "-" + destino + "-" + obterNumeroTemporadaAtual()
-    );
-}
-
-function registrarTweetRumorTransferencia(jogador, origem, destino, valor) {
-    const ctx = {
-        jogador: jogador,
-        origem: origem,
-        destino: destino,
-        valor: formatarDinheiro(valor, save.moeda)
-    };
-
-    adicionarTweetNoticia(
-        "fabrizio",
-        gerarTextoTweet("fabrizio_rumor", ctx),
-        "fabrizio-rumor-" + jogador + "-" + destino + "-" + Date.now()
-    );
-}
-
-function obterPerfilSocialSeguro(perfilId) {
-    if (
-        typeof PERFIS_NOTICIAS_SOCIAIS !== "undefined" &&
-        PERFIS_NOTICIAS_SOCIAIS &&
-        PERFIS_NOTICIAS_SOCIAIS[perfilId]
-    ) {
-        return PERFIS_NOTICIAS_SOCIAIS[perfilId];
-    }
-
-    const perfisPadrao = {
-        tnt: {
-            nome: "TNT Sports BR",
-            handle: "@TNTSportsBR",
-            avatar: "assets/perfis/TNTSportsBR.jpg",
-            verificado: true,
-            rotulo: "ESPORTE"
-        },
-        edu: {
-            nome: "Edu Futirinhas",
-            handle: "@edufutirinhas",
-            avatar: "assets/perfis/edufutirinhas.jpg",
-            verificado: true,
-            rotulo: "HUMOR"
-        },
-        caze: {
-            nome: "CazéTV",
-            handle: "@CazeTVOficial",
-            avatar: "assets/perfis/cazetvoficial.jpg",
-            verificado: true,
-            rotulo: "ESPORTE"
-        },
-        rafael: {
-            nome: "Rafael Oliveira",
-            handle: "@OliveiraRafa",
-            avatar: "assets/perfis/OliveiraRafa.jpg",
-            verificado: true,
-            rotulo: "ANÁLISE"
-        },
-        cifut: {
-            nome: "Cifut Brasil",
-            handle: "@CifutBR",
-            avatar: "assets/perfis/cifutbr.jpg",
-            verificado: true,
-            rotulo: "SCOUT"
-        },
-        fabrizio: {
-            nome: "Fabrizio Romano",
-            handle: "@FabrizioRomano",
-            avatar: "assets/perfis/FabrizioRomano.jpg",
-            verificado: true,
-            rotulo: "MERCADO"
-        }
-    };
-
-    return perfisPadrao[perfilId] || null;
-}
-
-function resolverAvatarPerfilTweet(perfil, perfilId) {
-    const mapaAvatares = {
-        tnt: "assets/perfis/TNTSportsBR.jpg",
-        fabrizio: "assets/perfis/FabrizioRomano.jpg",
-        edu: "assets/perfis/edufutirinhas.jpg",
-        cifut: "assets/perfis/CifutBR.jpg",
-        caze: "assets/perfis/CazeTVOficial.jpg",
-        rafael: "assets/perfis/OliveiraRafa.jpg"
-    };
-
-    if (perfilId && mapaAvatares[perfilId]) {
-        return mapaAvatares[perfilId];
-    }
-
-    if (!perfil || !perfil.avatar) return "";
-
-    if (perfil.avatar.indexOf("/") >= 0) {
-        return perfil.avatar;
-    }
-
-    return "assets/perfis/" + perfil.avatar;
-}
-
-function adicionarTweetNoticia(perfilId, texto, chave) {
-    if (!save || !texto) return false;
-
-    const perfil = typeof obterPerfilSocialSeguro === "function"
-        ? obterPerfilSocialSeguro(perfilId)
-        : obterPerfilSocial(perfilId);
-
-    if (!perfil) return false;
-
-    return adicionarNoticia(
-        "tweet",
-        perfil.nome,
-        texto,
-        chave,
-        {
-            perfilSocialId: perfilId,
-            perfilSocialHandle: perfil.handle,
-            perfilSocialAvatar: resolverAvatarPerfilTweet(perfil, perfilId),
-            perfilSocialVerificado: !!perfil.verificado,
-            perfilSocialRotulo: perfil.rotulo || "SOCIAL"
-        }
-    );
 }
 
 function escolherAleatorioSeguro(lista) {
@@ -16820,7 +15866,39 @@ function gerarHashtagTweet(nome) {
         .join("");
 }
 
-function obterDestaqueTweetSeguro() {
+function resolverAvatarPerfilTweet(perfil) {
+    if (!perfil || !perfil.avatar) return "";
+
+    if (perfil.avatar.indexOf("/") >= 0) {
+        return perfil.avatar;
+    }
+
+    return "assets/perfis/" + perfil.avatar;
+}
+
+function adicionarTweetNoticia(perfilId, texto, chave) {
+    if (!save || !texto) return false;
+
+    const perfil = obterPerfilSocial(perfilId);
+
+    if (!perfil) return false;
+
+    return adicionarNoticia(
+        "tweet",
+        perfil.nome,
+        texto,
+        chave,
+        {
+            perfilSocialId: perfilId,
+            perfilSocialHandle: perfil.handle,
+            perfilSocialAvatar: resolverAvatarPerfilTweet(perfil),
+            perfilSocialVerificado: !!perfil.verificado,
+            perfilSocialRotulo: perfil.rotulo || "SOCIAL"
+        }
+    );
+}
+
+function obterNomeDestaqueTweet() {
     if (
         partida &&
         Array.isArray(partida.golsDetalhados) &&
@@ -16830,7 +15908,9 @@ function obterDestaqueTweetSeguro() {
             return gol && gol.usuario && gol.jogadorNome;
         });
 
-        if (golUsuario) return golUsuario.jogadorNome;
+        if (golUsuario && golUsuario.jogadorNome) {
+            return golUsuario.jogadorNome;
+        }
 
         if (partida.golsDetalhados[0].jogadorNome) {
             return partida.golsDetalhados[0].jogadorNome;
@@ -16873,13 +15953,28 @@ function criarContextoTweetDeJogo(evento, jogo) {
         resultadoVerbo = "perder";
     }
 
+    if (jogo.decididoNosPenaltis) {
+        const penaltisUsuario = jogo.casa === save.clube ? jogo.penaltisCasa : jogo.penaltisFora;
+        const penaltisAdv = jogo.casa === save.clube ? jogo.penaltisFora : jogo.penaltisCasa;
+
+        if (penaltisUsuario > penaltisAdv) {
+            resultadoCurto = "venceu nos pênaltis contra";
+            resultadoDescricao = "vitória nos pênaltis";
+            resultadoVerbo = "vencer nos pênaltis";
+        } else {
+            resultadoCurto = "perdeu nos pênaltis para";
+            resultadoDescricao = "derrota nos pênaltis";
+            resultadoVerbo = "perder nos pênaltis";
+        }
+    }
+
     return {
         clube: save.clube,
         adversario: adversario,
         golsUsuario: golsUsuario,
         golsAdversario: golsAdversario,
         placar: save.clube + " " + golsUsuario + " x " + golsAdversario + " " + adversario,
-        destaque: obterDestaqueTweetSeguro(),
+        destaque: obterNomeDestaqueTweet(),
         competicao: evento ? evento.competicao : "",
         resultadoCurto: resultadoCurto,
         resultadoDescricao: resultadoDescricao,
@@ -16891,35 +15986,90 @@ function criarContextoTweetDeJogo(evento, jogo) {
 function gerarTextoTweetJogo(perfilId, ctx) {
     const textos = {
         tnt: [
-            "COMO VOCÊ AVALIA A ATUAÇÃO DO " + ctx.clube.toUpperCase() + " HOJE? 🤔🔥\n" + ctx.placar + " e " + ctx.destaque + " chamou atenção na partida! #" + ctx.hashtagClube,
-            "QUE JOGO! 🤯 " + ctx.clube + " x " + ctx.adversario + " entregou emoção. Placar final: " + ctx.placar + ". Destaque pra " + ctx.destaque + "!",
-            "PARTIDA ENCERRADA! ✅\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + ". Curtiu o jogo de " + ctx.destaque + "?",
-            "TEMOS UM DESTAQUE! 🌟\n" + ctx.destaque + " apareceu muito no duelo entre " + ctx.clube + " e " + ctx.adversario + ". Placar: " + ctx.placar + "."
+            "PARTIDA ENCERRADA! ✅\n" + ctx.placar + ". Destaque para " + ctx.destaque + ". #" + ctx.hashtagClube,
+            "QUE JOGO! 🔥\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + ". " + ctx.destaque + " chamou atenção.",
+            "FIM DE PAPO!\n" + ctx.placar + ". Como você avalia a atuação do " + ctx.clube + " hoje?",
+            "TEMOS UM DESTAQUE! 🌟\n" + ctx.destaque + " apareceu bem no duelo entre " + ctx.clube + " e " + ctx.adversario + "."
         ],
         edu: [
-            "ALÔ " + ctx.clube.toUpperCase() + ", BOA NOITE KKKKKK\nSe era pra " + ctx.resultadoVerbo + " assim, avisava antes. " + ctx.destaque + " apareceu demais.",
-            "SENHORAS E SENHORES, o entretenimento venceu.\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + " e " + ctx.destaque + " virou assunto do grupo.",
-            "EU TÔ RINDO MAS COM RESPEITO 😂\n" + ctx.clube + " terminou com " + ctx.resultadoDescricao + ". O melhor foi ver " + ctx.destaque + " aprontando.",
-            "SE ISSO NÃO É FUTEBOL, EU NÃO SEI O QUE É KKKK\n" + ctx.placar + " no placar e " + ctx.destaque + " vivendo intensamente."
+            "ALÔ " + ctx.clube.toUpperCase() + ", BOA NOITE KKKKKK\nSe era pra " + ctx.resultadoVerbo + " assim, avisava antes.",
+            "SENHORAS E SENHORES, o entretenimento venceu.\n" + ctx.placar + " e " + ctx.destaque + " virou assunto do grupo.",
+            "EU TÔ RINDO MAS COM RESPEITO 😂\n" + ctx.clube + " terminou com " + ctx.resultadoDescricao + " e segue o baile.",
+            "SE ISSO NÃO É FUTEBOL, EU NÃO SEI O QUE É KKKK\n" + ctx.placar + "."
         ],
         caze: [
-            "ABSURDO o que o " + ctx.clube + " aprontou hoje 😂\n" + ctx.placar + " no jogo e " + ctx.destaque + " roubando a cena.",
-            "FUTEBOL É BOM DEMAIS, tá maluco! 🤯\n" + ctx.clube + " x " + ctx.adversario + " terminou " + ctx.placar + " e eu ainda tô pensando em " + ctx.destaque + ".",
-            "SIMPLESMENTE " + ctx.destaque.toUpperCase() + ".\nPartidaça entre " + ctx.clube + " e " + ctx.adversario + ". Final: " + ctx.placar + ".",
-            "OLHA ISSO AQUI, FAMÍLIA! 👀\n" + ctx.clube + " x " + ctx.adversario + " acabou " + ctx.placar + ". E o " + ctx.destaque + "? Jogou MUITO."
+            "FUTEBOL É BOM DEMAIS, tá maluco! 🤯\n" + ctx.placar + ".",
+            "SIMPLESMENTE " + String(ctx.destaque).toUpperCase() + ".\nPartida entre " + ctx.clube + " e " + ctx.adversario + " terminou " + ctx.placar + ".",
+            "OLHA ISSO AQUI, FAMÍLIA! 👀\n" + ctx.clube + " " + ctx.resultadoCurto + " o " + ctx.adversario + ".",
+            "ABSURDO o que foi esse jogo 😂\n" + ctx.placar + " e muita coisa pra comentar."
         ],
         rafael: [
-            "O " + ctx.clube + " teve momentos interessantes de organização, especialmente quando conseguiu acelerar pelo setor de " + ctx.destaque + ". O placar de " + ctx.placar + " passa muito por essa leitura.",
-            "A partida foi decidida em detalhes de execução. O " + ctx.clube + " teve bons momentos, mas também precisou ajustar o posicionamento contra o " + ctx.adversario + ".",
-            "O jogo do " + ctx.clube + " teve alternância clara de ritmo. Quando conseguiu compactar melhor, controlou mais o confronto. Resultado: " + ctx.placar + ".",
-            "Do ponto de vista tático, o " + ctx.clube + " conseguiu criar situações importantes, mas o resultado também passa pela resposta defensiva nos momentos de pressão."
+            "O " + ctx.clube + " teve momentos interessantes de organização, especialmente quando conseguiu acelerar a partida. Resultado: " + ctx.placar + ".",
+            "A partida foi decidida em detalhes de execução. O " + ctx.clube + " teve bons momentos contra o " + ctx.adversario + ".",
+            "O jogo do " + ctx.clube + " teve alternância clara de ritmo. Quando compactou melhor, controlou mais o confronto.",
+            "Do ponto de vista tático, o " + ctx.clube + " criou situações importantes, mas o resultado também passa pela resposta defensiva nos momentos de pressão."
         ]
     };
 
     return escolherAleatorioSeguro(textos[perfilId]) || "";
 }
 
-function obterPromessaParaTweetCifutSeguro() {
+function obterSetorJogadorParaTweet(jogador) {
+    if (!jogador) return "campo";
+
+    const posicao = String(jogador.pos || jogador.posicao || "").toUpperCase();
+
+    if (posicao === "G") return "goleiro";
+    if (posicao === "Z") return "defesa";
+    if (posicao === "L") return "lateral";
+    if (posicao === "M") return "meio-campo";
+    if (posicao === "A") return "ataque";
+
+    return "campo";
+}
+
+function obterLigaDoJogadorMercado(jogador) {
+    if (!jogador) return "";
+
+    if (jogador.liga) return jogador.liga;
+
+    if (typeof obterLigaDeUmClube === "function") {
+        return obterLigaDeUmClube(jogador.clube);
+    }
+
+    if (typeof obterLigaDoClube === "function") {
+        return obterLigaDoClube(jogador.clube);
+    }
+
+    return "";
+}
+
+function obterValorJogadorParaTweet(jogador) {
+    if (!jogador) return 0;
+
+    return Number(
+        jogador.valor ||
+        jogador.value ||
+        jogador.preco ||
+        jogador.precoBase ||
+        jogador.valorMercado ||
+        0
+    ) || 0;
+}
+
+function jogadorEhPromessaParaTweet(jogador) {
+    if (!jogador) return false;
+
+    const idade = Number(jogador.idade || 99);
+    const status = String(jogador.status || jogador.funcao || jogador.caracteristica || "").toLowerCase();
+
+    if (jogador.promessa === true) return true;
+    if (status.indexOf("promessa") >= 0) return true;
+
+    return idade <= 23 && Number(jogador.f || jogador.overall || 0) <= 82;
+}
+
+function obterPromessaParaTweetCifut() {
     if (typeof obterTodosJogadoresMercado !== "function") return null;
 
     const orcamento = Number(save.orcamentoTransferencias || 0);
@@ -16929,15 +16079,12 @@ function obterPromessaParaTweetCifutSeguro() {
         if (!jogador) return false;
         if (jogador.clube === save.clube) return false;
 
-        const idade = Number(jogador.idade || 99);
-        const valor = Number(jogador.valor || 0);
-        const ligaJogador = jogador.liga || "";
-        const status = String(jogador.funcao || jogador.status || "").toLowerCase();
+        const valor = obterValorJogadorParaTweet(jogador);
+        const ligaJogador = obterLigaDoJogadorMercado(jogador);
 
-        if (idade > 23) return false;
         if (valor <= 0 || valor > orcamento) return false;
-        if (ligaJogador !== ligaUsuario) return false;
-        if (!status.includes("promessa")) return false;
+        if (!ligaJogador || ligaJogador !== ligaUsuario) return false;
+        if (!jogadorEhPromessaParaTweet(jogador)) return false;
 
         return true;
     });
@@ -16945,32 +16092,33 @@ function obterPromessaParaTweetCifutSeguro() {
     if (candidatos.length === 0) return null;
 
     candidatos.sort(function(a, b) {
-        if ((a.valor || 0) !== (b.valor || 0)) {
-            return (a.valor || 0) - (b.valor || 0);
-        }
+        const valorA = obterValorJogadorParaTweet(a);
+        const valorB = obterValorJogadorParaTweet(b);
 
-        return (a.idade || 99) - (b.idade || 99);
+        if (valorA !== valorB) return valorA - valorB;
+
+        return Number(a.idade || 99) - Number(b.idade || 99);
     });
 
     return candidatos[0];
 }
 
 function registrarTweetCifutSePossivel(chaveBase) {
-    const jogador = obterPromessaParaTweetCifutSeguro();
+    const jogador = obterPromessaParaTweetCifut();
 
     if (!jogador) return false;
 
     const textos = [
-        "💎 Nome para monitorar: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", joga na própria liga e cabe no orçamento do " + save.clube + ".\n\nTem selo CIFUTBR! ✅",
-        "📈 O " + save.clube + " poderia observar " + jogador.nome + ".\nÉ jovem, tem status de promessa e aparece como opção viável dentro da liga.\n\nTem selo CIFUTBR! ✅",
-        "🧩 Scout do dia: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", custo dentro do orçamento e perfil interessante para o elenco do " + save.clube + ".",
+        "💎 Scout do dia: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", joga na própria liga e cabe no orçamento do " + save.clube + ".",
+        "📈 O " + save.clube + " poderia observar " + jogador.nome + ".\nÉ jovem, tem status de promessa e aparece como opção viável dentro da liga.",
+        "🧩 Nome interessante: " + jogador.nome + ".\nPromessa do " + jogador.clube + ", custo dentro do orçamento e perfil útil para o elenco.",
         "✅ Recomendado pelo CIFUTBR: " + jogador.nome + ".\nJovem, da própria liga, financeiramente possível e com perfil claro de promessa."
     ];
 
     return adicionarTweetNoticia(
         "cifut",
         escolherAleatorioSeguro(textos),
-        chaveBase + "-cifut-" + jogador.mercadoId
+        chaveBase + "-cifut-" + (jogador.mercadoId || jogador.nome)
     );
 }
 
@@ -17008,7 +16156,7 @@ function registrarTweetsAposPartida(evento, jogo) {
             }
         }
 
-        const jogosTemporada = save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+        const jogosTemporada = save.progressao ? Number(save.progressao.jogosTemporada || 0) : 0;
 
         if (jogosTemporada > 0 && jogosTemporada % 3 === 0) {
             registrarTweetCifutSePossivel(chaveBase);
@@ -17018,95 +16166,29 @@ function registrarTweetsAposPartida(evento, jogo) {
     }
 }
 
-function criarContextoTweetPorResultadoSalvo(resultado) {
-    if (!resultado) return null;
+function registrarTweetTransferenciaConcluida(jogador, origem, destino, valor) {
+    const texto =
+        "Here we go! " + jogador + " deixa o " + origem + " e fecha com o " + destino +
+        ". Pacote na casa de " + formatarDinheiro(valor, save.moeda) + ".";
 
-    const golsUsuario = resultado.casa === save.clube ? resultado.golsCasa : resultado.golsFora;
-    const golsAdversario = resultado.casa === save.clube ? resultado.golsFora : resultado.golsCasa;
-    const adversario = resultado.casa === save.clube ? resultado.fora : resultado.casa;
-
-    let resultadoCurto = "empatou com";
-    let resultadoDescricao = "empate";
-    let resultadoVerbo = "empatar";
-
-    if (golsUsuario > golsAdversario) {
-        resultadoCurto = "venceu";
-        resultadoDescricao = "vitória";
-        resultadoVerbo = "vencer";
-    } else if (golsUsuario < golsAdversario) {
-        resultadoCurto = "perdeu para";
-        resultadoDescricao = "derrota";
-        resultadoVerbo = "perder";
-    }
-
-    return {
-        clube: save.clube,
-        adversario: adversario,
-        golsUsuario: golsUsuario,
-        golsAdversario: golsAdversario,
-        placar: save.clube + " " + golsUsuario + " x " + golsAdversario + " " + adversario,
-        destaque: obterDestaqueTweetSeguro(),
-        competicao: resultado.competicao || "",
-        resultadoCurto: resultadoCurto,
-        resultadoDescricao: resultadoDescricao,
-        resultadoVerbo: resultadoVerbo,
-        hashtagClube: gerarHashtagTweet(save.clube)
-    };
+    adicionarTweetNoticia(
+        "fabrizio",
+        texto,
+        "fabrizio-concluido-" + jogador + "-" + destino + "-" + Date.now()
+    );
 }
 
-function corrigirTweetsFaltantesDoHistoricoNoticias() {
-    if (!save || !Array.isArray(save.resultados) || save.resultados.length === 0) return;
+function registrarTweetRumorTransferencia(jogador, origem, destino, valor) {
+    const texto =
+        destino + " fez contato por " + jogador + ", do " + origem +
+        ". Proposta na casa de " + formatarDinheiro(valor, save.moeda) +
+        ". Negociação ainda sem acordo total.";
 
-    garantirNoticiasNoSave();
-
-    let alterou = false;
-
-    try {
-        save.resultados.slice(0, 5).forEach(function(resultado, index) {
-            const chaveBase =
-                "tweets-retro-" +
-                (resultado.data || "sem-data") +
-                "-" +
-                resultado.casa +
-                "-" +
-                resultado.fora +
-                "-" +
-                resultado.golsCasa +
-                "-" +
-                resultado.golsFora;
-
-            const jaTemTweet = save.noticias.some(function(noticia) {
-                return noticia.chave && noticia.chave.indexOf(chaveBase) === 0;
-            });
-
-            if (jaTemTweet) return;
-
-            const ctx = criarContextoTweetPorResultadoSalvo(resultado);
-
-            if (!ctx) return;
-
-            const perfisJogo = ["tnt", "edu", "caze", "rafael"];
-            const perfil = perfisJogo[index % perfisJogo.length];
-
-            const texto = gerarTextoTweetJogo(perfil, ctx);
-
-            if (!texto) return;
-
-            const criou = adicionarTweetNoticia(
-                perfil,
-                texto,
-                chaveBase + "-" + perfil
-            );
-
-            if (criou) alterou = true;
-        });
-    } catch (erro) {
-        console.warn("Erro ao corrigir tweets faltantes:", erro);
-    }
-
-    if (alterou && typeof salvar === "function") {
-        salvar();
-    }
+    adicionarTweetNoticia(
+        "fabrizio",
+        texto,
+        "fabrizio-rumor-" + jogador + "-" + destino + "-" + Date.now()
+    );
 }
 
 function registrarNoticiasAposPartida(evento, jogo) {
@@ -17158,25 +16240,23 @@ function registrarNoticiasAposPartida(evento, jogo) {
         tipo,
         titulo,
         texto,
-        "resultado-" + evento.tipo + "-" + partida.eventoIndex
+        "resultado-" + evento.tipo + "-" + (partida ? partida.eventoIndex : Date.now())
     );
 
-    const suspensos = obterSuspensosProximoJogo();
+    const suspensos = typeof obterSuspensosProximoJogo === "function"
+        ? obterSuspensosProximoJogo()
+        : [];
 
     suspensos.forEach(function(item) {
         adicionarNoticia(
             "suspensao",
             item.nome + " está suspenso",
             item.nome + " recebeu punição por " + item.motivo + " e fica fora do próximo jogo.",
-            "suspensao-" + partida.eventoIndex + "-" + item.id
+            "suspensao-" + (partida ? partida.eventoIndex : Date.now()) + "-" + item.id
         );
     });
 
-    try {
-        registrarTweetsAposPartida(evento, jogo);
-    } catch (erro) {
-        console.warn("Erro ao registrar tweets após partida:", erro);
-    }
+    registrarTweetsAposPartida(evento, jogo);
 }
 
 function registrarNoticiaTitulo(competicao, detalhe) {
@@ -17196,15 +16276,14 @@ function corrigirAvataresTweetsSalvos() {
     save.noticias.forEach(function(noticia) {
         if (!noticia || noticia.tipo !== "tweet") return;
 
-        const perfilId = noticia.perfilSocialId || "";
-        const perfil = typeof obterPerfilSocialSeguro === "function"
-            ? obterPerfilSocialSeguro(perfilId)
-            : obterPerfilSocial(perfilId);
+        const perfil = obterPerfilSocial(noticia.perfilSocialId);
 
-        const avatarCorrigido = resolverAvatarTweetPorPerfil(perfilId, perfil);
+        if (!perfil) return;
 
-        if (avatarCorrigido && noticia.perfilSocialAvatar !== avatarCorrigido) {
-            noticia.perfilSocialAvatar = avatarCorrigido;
+        const avatar = resolverAvatarPerfilTweet(perfil);
+
+        if (avatar && noticia.perfilSocialAvatar !== avatar) {
+            noticia.perfilSocialAvatar = avatar;
             alterou = true;
         }
     });
@@ -17221,18 +16300,7 @@ function renderizarNoticias() {
     if (!lista) return;
 
     garantirNoticiasNoSave();
-
-    try {
-        corrigirAvataresTweetsSalvos();
-    } catch (erro) {
-        console.warn("Erro ao corrigir avatares dos tweets:", erro);
-    }
-
-    try {
-        corrigirTweetsFaltantesDoHistoricoNoticias();
-    } catch (erro) {
-        console.warn("Erro ao criar tweets retroativos:", erro);
-    }
+    corrigirAvataresTweetsSalvos();
 
     lista.innerHTML = "";
 
@@ -17264,17 +16332,10 @@ function criarCardNoticia(noticia) {
         const icone = document.createElement("div");
         icone.className = "noticia-icone tem-avatar";
 
+        const avatar = noticia.perfilSocialAvatar || "";
         const img = document.createElement("img");
+
         img.alt = noticia.titulo || "Perfil";
-
-        const perfilId = noticia.perfilSocialId || "";
-        const perfil = typeof obterPerfilSocialSeguro === "function"
-            ? obterPerfilSocialSeguro(perfilId)
-            : obterPerfilSocial(perfilId);
-
-        const avatar =
-            noticia.perfilSocialAvatar ||
-            resolverAvatarTweetPorPerfil(perfilId, perfil);
 
         if (avatar) {
             img.src = avatar;
@@ -17348,16 +16409,6 @@ function criarCardNoticia(noticia) {
     return div;
 }
 
-function notiaTemPerfilSocial(noticia) {
-    return noticia &&
-        noticia.tipo === "tweet" &&
-        (
-            noticia.perfilSocialId ||
-            noticia.perfilSocialHandle ||
-            noticia.perfilSocialAvatar
-        );
-}
-
 function obterIconeNoticia(tipo) {
     if (tipo === "vitoria") return "✅";
     if (tipo === "derrota") return "⚠️";
@@ -17381,6 +16432,7 @@ function obterRotuloTipoNoticia(tipo) {
     if (tipo === "continental") return "Continental";
     if (tipo === "financeiro") return "Financeiro";
     if (tipo === "inicio") return "Carreira";
+    if (tipo === "tweet") return "Social";
     return "Notícia";
 }
 
