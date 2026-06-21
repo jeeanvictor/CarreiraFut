@@ -11804,7 +11804,9 @@ function obterMoedaPremioContinental() {
 }
 
 function obterNomePremioContinental() {
-    return obterTipoContinentalAtual() === "champions" ? "Champions League" : "Libertadores";
+    return obterTipoContinentalAtual() === "champions"
+        ? "Champions League"
+        : "Libertadores";
 }
 
 function obterValorPremioContinental(fase, resultado) {
@@ -11845,6 +11847,7 @@ function pagarPremioContinental(fase, resultado, complementoChave) {
     }
 
     const tipo = obterTipoContinentalAtual();
+
     const chave =
         tipo +
         "-" +
@@ -11912,7 +11915,6 @@ function pagarPremioContinentalPorNovaFase(fase) {
 
     return 0;
 }
-
 function atualizarContinental(evento, jogoUsuario) {
     garantirContinentalStats();
 
@@ -17402,7 +17404,6 @@ function pagarPremioLigaFimTemporada() {
 
     return valor;
 }
-
 function iniciarNovaTemporada() {
     if (typeof temporadaEncerrada === "function" && !temporadaEncerrada()) {
         alert("A temporada ainda não terminou.");
