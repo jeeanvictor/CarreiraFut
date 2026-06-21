@@ -17461,7 +17461,7 @@ function sortearAdversarioContinentalMataMata(fase, clubeUsuario) {
         return diffA - diffB;
     });
 
-    const limite = Math.min(6, candidatos.length);
+    const limite = Math.min(10, candidatos.length);
     const listaFinal = embaralhar(candidatos.slice(0, limite));
 
     return listaFinal[0] || candidatos[0] || "Adversário Continental";
