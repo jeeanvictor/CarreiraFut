@@ -11641,6 +11641,7 @@ function finalizarPartida() {
     aplicarSuspensoesGeradasAposPartida();
 
     atualizarCansacoJogadoresAposPartida();
+
     processarProgressaoJogadores(jogoUsuario);
     processarMercadoAposRodada();
 
@@ -16514,14 +16515,18 @@ function registrarTweetsAposPartida(evento, jogo) {
             (typeof janelaTransferenciasAberta === "function" && janelaTransferenciasAberta());
 
         if (podePostarCifut) {
-            const promessa = obterPromessaParaTweetCifut();
+            try {
+                const promessa = obterPromessaParaTweetCifut();
 
-            if (promessa) {
-                adicionarTweetNoticia(
-                    "cifut",
-                    gerarTextoTweet("cifut", promessa),
-                    chaveBase + "-cifut-" + promessa.jogador
-                );
+                if (promessa) {
+                    adicionarTweetNoticia(
+                        "cifut",
+                        gerarTextoTweet("cifut", promessa),
+                        chaveBase + "-cifut-" + promessa.jogador
+                    );
+                }
+            } catch (erroCifut) {
+                console.warn("Erro ao gerar tweet do Cifut:", erroCifut);
             }
         }
     } catch (erro) {
@@ -16622,11 +16627,7 @@ function registrarNoticiasAposPartida(evento, jogo) {
         );
     });
 
-    try {
-        registrarTweetsAposPartida(evento, jogo);
-    } catch (erro) {
-        console.warn("Erro ao registrar tweets:", erro);
-    }
+    registrarTweetsAposPartida(evento, jogo);
 }
 
 function registrarNoticiaTitulo(competicao, detalhe) {
