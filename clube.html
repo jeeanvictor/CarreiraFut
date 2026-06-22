@@ -11665,6 +11665,7 @@ function iniciarPagina() {
         salvar();
     }
 normalizarDuplicatasNoSaveAtual();
+    corrigirCalendarioContraProprioSeNecessario();
     corrigirEstruturaAbaEstatisticas();
 
     garantirDadosMercado();
@@ -12421,14 +12422,136 @@ function garantirContinentalSelecionadaNoSave() {
     salvar();
 }
 
+function nomesClubesIguaisParaCalendario(a, b) {
+    const nomeA = corrigirNomeClube(String(a || "").trim());
+    const nomeB = corrigirNomeClube(String(b || "").trim());
+
+    return nomeA !== "" && nomeA === nomeB;
+}
+
+function normalizarListaClubesParaCalendario(lista, clubeUsuario) {
+    const resultado = [];
+    const clubeCorrigido = corrigirNomeClube(clubeUsuario || "");
+
+    lista.forEach(function(clube) {
+        const nomeCorrigido = corrigirNomeClube(clube);
+
+        if (!nomeCorrigido) return;
+
+        const jaExiste = resultado.some(function(item) {
+            return nomesClubesIguaisParaCalendario(item, nomeCorrigido);
+        });
+
+        if (!jaExiste) {
+            resultado.push(nomeCorrigido);
+        }
+    });
+
+    if (clubeCorrigido) {
+        const indiceUsuario = resultado.findIndex(function(clube) {
+            return nomesClubesIguaisParaCalendario(clube, clubeCorrigido);
+        });
+
+        if (indiceUsuario >= 0) {
+            resultado[indiceUsuario] = clubeCorrigido;
+        } else if (resultado.length > 0) {
+            resultado[0] = clubeCorrigido;
+        } else {
+            resultado.push(clubeCorrigido);
+        }
+    }
+
+    const listaFinal = [];
+
+    resultado.forEach(function(clube) {
+        const jaExiste = listaFinal.some(function(item) {
+            return nomesClubesIguaisParaCalendario(item, clube);
+        });
+
+        if (!jaExiste) {
+            listaFinal.push(clube);
+        }
+    });
+
+    return listaFinal;
+}
+
+function jogoEhContraOMesmoClube(jogo) {
+    if (!jogo) return false;
+
+    return nomesClubesIguaisParaCalendario(jogo.casa, jogo.fora);
+}
+
+function calendarioTemConfrontoContraProprio(calendario) {
+    if (!Array.isArray(calendario)) return false;
+
+    return calendario.some(function(evento) {
+        if (!evento || !Array.isArray(evento.jogos)) return false;
+
+        return evento.jogos.some(function(jogo) {
+            return jogoEhContraOMesmoClube(jogo);
+        });
+    });
+}
+
+function corrigirCalendarioContraProprioSeNecessario() {
+    if (!save || !Array.isArray(save.calendario)) return;
+
+    if (!calendarioTemConfrontoContraProprio(save.calendario)) {
+        return;
+    }
+
+    const temJogoDisputado = save.calendario.some(function(evento) {
+        return evento && evento.jogado === true;
+    });
+
+    if (temJogoDisputado) {
+        save.calendario.forEach(function(evento) {
+            if (!evento || !Array.isArray(evento.jogos)) return;
+
+            evento.jogos = evento.jogos.filter(function(jogo) {
+                return !jogoEhContraOMesmoClube(jogo);
+            });
+
+            if (!evento.jogado && evento.jogos.length === 0) {
+                evento.cancelado = true;
+            }
+        });
+
+        salvar();
+        return;
+    }
+
+    save.clube = corrigirNomeClube(save.clube);
+    save.calendario = montarCalendario(save.liga, save.clube, save.disputaContinental);
+    save.tabela = criarTabelaInicial(obterClubesDaLiga(save.liga, save.clube));
+    save.proximoJogo = 0;
+    save.resultados = [];
+    save.historicoResultados = [];
+
+    salvar();
+}
+
 function obterClubesDaLiga(liga, clubeUsuario) {
     let clubes = MAPA_CLUBES_POR_LIGA[liga]
         ? MAPA_CLUBES_POR_LIGA[liga].slice()
         : CLUBES_PREMIER.slice();
 
-    if (clubeUsuario && !clubes.includes(clubeUsuario)) {
-        clubes[0] = clubeUsuario;
+    clubeUsuario = corrigirNomeClube(clubeUsuario || "");
+
+    clubes = normalizarListaClubesParaCalendario(clubes, clubeUsuario);
+
+    if (clubeUsuario) {
+        const existeUsuario = clubes.some(function(clube) {
+            return nomesClubesIguaisParaCalendario(clube, clubeUsuario);
+        });
+
+        if (!existeUsuario && clubes.length > 0) {
+            clubes[0] = clubeUsuario;
+        }
     }
+
+    clubes = normalizarListaClubesParaCalendario(clubes, clubeUsuario);
 
     return clubes;
 }
@@ -13174,7 +13297,14 @@ function criarOutroJogoGrupoLibertadores(times, clubeUsuario, adversarioUsuario)
 }
     
 function gerarRodadasLiga(clubesOriginais) {
-    let clubes = embaralhar(clubesOriginais);
+    let clubes = normalizarListaClubesParaCalendario(clubesOriginais || [], save ? save.clube : "");
+
+    if (clubes.length % 2 !== 0) {
+        clubes.push("Folga");
+    }
+
+    clubes = embaralhar(clubes);
+
     const totalClubes = clubes.length;
     const totalRodadasTurno = totalClubes - 1;
     const jogosPorRodada = totalClubes / 2;
@@ -13193,12 +13323,18 @@ function gerarRodadasLiga(clubesOriginais) {
                 fora = temporario;
             }
 
-            jogos.push({
-                casa: casa,
-                fora: fora,
-                golsCasa: null,
-                golsFora: null
-            });
+            if (
+                casa !== "Folga" &&
+                fora !== "Folga" &&
+                !nomesClubesIguaisParaCalendario(casa, fora)
+            ) {
+                jogos.push({
+                    casa: casa,
+                    fora: fora,
+                    golsCasa: null,
+                    golsFora: null
+                });
+            }
         }
 
         rodadasIda.push({
@@ -14674,8 +14810,14 @@ function renderizarProximoJogo() {
         return;
     }
 
-    const adversario = jogo.casa === save.clube ? jogo.fora : jogo.casa;
-    const mando = jogo.casa === save.clube ? "Casa" : "Fora";
+if (jogoEhContraOMesmoClube(jogo)) {
+    corrigirCalendarioContraProprioSeNecessario();
+    renderizarTudo();
+    return;
+}
+
+const adversario = jogo.casa === save.clube ? jogo.fora : jogo.casa;
+const mando = jogo.casa === save.clube ? "Casa" : "Fora";
 
     document.getElementById("seloProximo").textContent = evento.competicao;
     document.getElementById("proximoAdversario").textContent = adversario;
