@@ -2302,30 +2302,55 @@ th,
     filter: grayscale(1);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 700px) {
+    .conteudo {
+        max-width: 1280px;
+    }
+
     .layout-desktop {
-        grid-template-columns: 410px minmax(0, 1fr);
-        gap: 26px;
+        grid-template-columns: 430px minmax(0, 1fr);
+        gap: 28px;
     }
 
     .painel-clube {
         width: 100%;
     }
 
-    .proximo-jogo-layout {
-        grid-template-columns: minmax(0, 1fr) 115px;
-        gap: 18px;
+    .proximo-jogo {
+        padding: 18px;
     }
 
-    .proximo-jogo-info .proximo-adversario {
+    .proximo-jogo-layout {
+        grid-template-columns: minmax(0, 1fr) 125px;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .proximo-jogo-info {
+        min-width: 0;
+    }
+
+    .proximo-jogo-info .proximo-adversario,
+    .proximo-adversario {
         overflow-wrap: normal;
         word-break: normal;
+        hyphens: none;
+        font-size: 28px;
+        line-height: 1.02;
     }
 
     .proximo-escudo-adversario {
-        width: 110px;
-        height: 110px;
-        min-width: 110px;
+        width: 125px;
+        height: 125px;
+        min-width: 125px;
+    }
+
+    .proximo-escudo-adversario.com-imagem img {
+        width: 150%;
+        height: 150%;
+        object-fit: contain;
+        display: block;
+        transform: translateY(6px);
     }
 }
 
