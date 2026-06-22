@@ -17896,9 +17896,9 @@ function aplicarImpactoVermelho(lado) {
     const usuarioNoLado = lado === "casa" ? partida.usuarioCasa : !partida.usuarioCasa;
 
     if (usuarioNoLado) {
-        partida.ajusteUsuario -= 2;
+        partida.ajusteUsuario -= 5;
     } else {
-        partida.ajusteAdversario -= 2;
+        partida.ajusteAdversario -= 5;
     }
 }
 
