@@ -14754,7 +14754,7 @@ function renderizarEscalacao() {
     document.getElementById("contadorTitulares").textContent = titulares.length + "/11";
     document.getElementById("contadorReservas").textContent = reservas.length + "/8";
     document.getElementById("btnConfirmarEscalacao").disabled =
-        titulares.length !== 11 || reservas.length !== 8;
+        titulares.length !== 11 || reservas.length > 8;
 
     const elencoDisponivel = ordenarJogadoresVisual(obterElencoDisponivel());
     const setores = obterSetoresEscalacao();
