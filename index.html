@@ -282,6 +282,26 @@ document.addEventListener("DOMContentLoaded", function() {
     verificarSaveExistente();
 });
 
+function ativarTelaCheia() {
+    const elemento = document.documentElement;
+
+    try {
+        if (document.fullscreenElement) return;
+
+        if (elemento.requestFullscreen) {
+            elemento.requestFullscreen().catch(function() {});
+        } else if (elemento.webkitRequestFullscreen) {
+            elemento.webkitRequestFullscreen();
+        } else if (elemento.msRequestFullscreen) {
+            elemento.msRequestFullscreen();
+        }
+    } catch (erro) {}
+}
+
+function irParaPaginaDepoisDoFullscreen(pagina) {
+    window.location.href = pagina;
+}
+    
 function verificarSaveExistente() {
     const textoSave = localStorage.getItem("saveCarreiraFut");
     const btnContinuar = document.getElementById("btnContinuar");
