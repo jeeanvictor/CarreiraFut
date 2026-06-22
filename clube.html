@@ -14331,7 +14331,7 @@ function repetirEscalacaoAnterior() {
 
     renderizarEscalacao();
 
-    if (contextoEscalacao.titulares.length !== 11 || contextoEscalacao.reservas.length !== 8) {
+    if (contextoEscalacao.titulares.length !== 11 || contextoEscalacao.reservas.length > 8) {
         alert("A escalação anterior foi repetida só com os jogadores disponíveis. Complete manualmente os lesionados, vendidos ou suspensos.");
     }
 }
