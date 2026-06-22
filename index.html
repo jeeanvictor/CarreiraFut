@@ -319,7 +319,7 @@ function continuarCarreira() {
     window.location.href = "clube.html";
 }
 
-function iniciarJogo() {
+async function iniciarJogo() {
     const textoSave = localStorage.getItem("saveCarreiraFut");
 
     if (textoSave) {
@@ -330,7 +330,8 @@ function iniciarJogo() {
         if (!confirmar) return;
     }
 
-    window.location.href = "ligas.html";
+    await ativarTelaCheia();
+    irParaPaginaDepoisDoFullscreen("ligas.html");
 }
 </script>
 
