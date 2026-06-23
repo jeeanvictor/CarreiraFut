@@ -19314,14 +19314,15 @@ function verificarFimMataMataContinental(evento) {
         return;
     }
 
-    stats.eliminado = true;
-    stats.status =
-        "Eliminado na " +
-        evento.fase +
-        " · agregado: " +
-        golsClube +
-        " x " +
-        golsAdv;
+stats.eliminado = true;
+stats.faseAtual = evento.fase;
+stats.status =
+    "Eliminado na " +
+    evento.fase +
+    " · agregado: " +
+    golsClube +
+    " x " +
+    golsAdv;
 
     if (decididoNosPenaltis) {
         stats.status += " · perdeu nos pênaltis";
@@ -22409,53 +22410,48 @@ function obterStatusContinental() {
     }
 
     garantirContinentalStats();
+    garantirCamposMataMataContinental();
 
-    if (!save.continentalStats || save.continentalStats.jogos === 0) {
-        if (save.liga === LIGA_BRASILEIRAO && save.continentalStats && save.continentalStats.grupo) {
-            return save.continentalStats.grupo + " · ainda não estreou";
+    const stats = save.continentalStats;
+
+    if (!stats || stats.jogos === 0) {
+        if (save.liga === LIGA_BRASILEIRAO && stats && stats.grupo) {
+            return stats.grupo + " · ainda não estreou";
         }
 
         return "Fase de liga · ainda não estreou";
     }
 
-    const posicao = obterPosicaoContinentalUsuario();
-    const pontos = save.continentalStats.pontos;
+    if (stats.campeao) {
+        return stats.status || "Campeão continental";
+    }
+
+    if (stats.vice) {
+        return stats.status || "Vice-campeão continental";
+    }
+
+    if (stats.eliminado) {
+        return stats.status || ("Eliminado na " + (stats.faseAtual || "competição continental"));
+    }
+
+    if (stats.status && !/fase de grupos|fase de liga/i.test(stats.status)) {
+        return stats.status;
+    }
+
+    if (stats.faseAtual && stats.faseAtual !== "Fase de grupos" && stats.faseAtual !== "Fase de liga") {
+        return "Chegou até: " + stats.faseAtual;
+    }
 
     if (save.liga === LIGA_BRASILEIRAO) {
-        let texto =
-            save.continentalStats.grupo +
+        return (
+            (stats.grupo || "Grupo da Libertadores") +
             " · " +
-            posicao +
-            "º colocado · " +
-            pontos +
-            " pts · " +
-            save.continentalStats.jogos +
-            " jogo(s)";
-
-        if (temporadaEncerrada()) {
-            if (posicao === 1 || posicao === 2) {
-                texto += " · Classificado às oitavas";
-            } else {
-                texto += " · Eliminado na fase de grupos";
-            }
-        }
-
-        return texto;
+            obterPosicaoContinentalUsuario() +
+            "º no grupo"
+        );
     }
 
-    let zona = "Eliminado";
-
-    if (posicao >= 1 && posicao <= 8) {
-        zona = "Classificado direto às oitavas";
-    } else if (posicao >= 9 && posicao <= 24) {
-        zona = "Vai ao playoff";
-    }
-
-    if (!temporadaEncerrada()) {
-        return "Fase de liga · " + posicao + "º colocado · " + pontos + " pts · " + zona + " no momento";
-    }
-
-    return "Fase de liga encerrada · " + posicao + "º colocado · " + pontos + " pts · " + zona;
+    return obterPosicaoContinentalUsuario() + "º colocado na fase de liga";
 }
 
 function renderizarEstatisticasArtilharia() {
