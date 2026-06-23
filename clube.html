@@ -17187,14 +17187,36 @@ function calcularChanceGol(lado) {
     return limitar(chance, 0.08, 0.38);
 }
 
+function clubeTemAltitudeBoliviana(clube) {
+    clube = typeof corrigirNomeClube === "function" ? corrigirNomeClube(clube) : clube;
+
+    return (
+        clube === "Always Ready" ||
+        clube === "Bolívar" ||
+        clube === "Bolivar" ||
+        clube === "The Strongest"
+    );
+}
+
+function obterAjusteAltitudeBoliviana(lado) {
+    if (!partida) return 0;
+
+    const clube = lado === "casa" ? partida.casa : partida.fora;
+
+    if (!clubeTemAltitudeBoliviana(clube)) return 0;
+
+    return lado === "casa" ? 5 : -10;
+}
+
 function obterOverallLado(lado) {
     const usuarioNoLado = lado === "casa" ? partida.usuarioCasa : !partida.usuarioCasa;
+    const ajusteAltitude = obterAjusteAltitudeBoliviana(lado);
 
     if (usuarioNoLado) {
-        return mediaOverall(partida.titularesUsuario) + partida.ajusteUsuario;
+        return mediaOverall(partida.titularesUsuario) + partida.ajusteUsuario + ajusteAltitude;
     }
 
-    return mediaOverall(partida.titularesAdv) + partida.ajusteAdversario;
+    return mediaOverall(partida.titularesAdv) + partida.ajusteAdversario + ajusteAltitude;
 }
 
 function sortearJogadorDoLado(lado) {
@@ -18289,16 +18311,23 @@ function confirmarSubstituicao() {
 }
 
 function calcularImpactoSubstituicao(sai, entra) {
+    const sorteio = Math.random();
     const diferenca = obterOverallEmJogo(entra) - obterOverallEmJogo(sai);
 
-    if (diferenca >= 8) return 4;
-    if (diferenca >= 6) return 3;
-    if (diferenca >= 3) return 2;
-    if (diferenca >= 1) return 1;
-    if (diferenca === 0) return 0;
-    if (diferenca <= -8) return -4;
-    if (diferenca <= -6) return -3;
-    if (diferenca <= -3) return -2;
+    if (diferenca > 0) {
+        if (sorteio < 0.90) return 1;
+        if (sorteio < 0.95) return 0;
+        return -1;
+    }
+
+    if (diferenca === 0) {
+        if (sorteio < 0.30) return 1;
+        if (sorteio < 0.90) return 0;
+        return -1;
+    }
+
+    if (sorteio < 0.33) return 1;
+    if (sorteio < 0.66) return 0;
     return -1;
 }
 
@@ -19610,10 +19639,76 @@ function garantirCamposEvolucaoJogador(jogador) {
     if (typeof jogador.partidasNoPrimeiroPonto25a29 !== "number") {
         jogador.partidasNoPrimeiroPonto25a29 = 0;
     }
+
+    if (typeof jogador.jogoUltimaEvolucaoTemporada !== "number") {
+        jogador.jogoUltimaEvolucaoTemporada = -999;
+    }
 }
 
 function jogadorEhPromessa(jogador) {
     return (jogador.funcao || "").toLowerCase().includes("promessa");
+}
+
+function obterFuncaoNaturalPorPosicao(posicao) {
+    if (posicao === "G") return "Goleiro";
+    if (posicao === "Z") return "Zagueiro";
+    if (posicao === "L") return "Lateral";
+    if (posicao === "M") return "Meia";
+    if (posicao === "A") return "Atacante";
+
+    return "Jogador";
+}
+
+function obterLimiteEvolucaoTemporadaJogador(jogador) {
+    if (jogadorEhPromessa(jogador)) {
+        return 3;
+    }
+
+    if (jogador.idade >= 24 && jogador.idade <= 27) {
+        return jogador.f >= 78 ? 2 : 1;
+    }
+
+    if (jogador.idade >= 28 && jogador.idade <= 33) {
+        return 1;
+    }
+
+    return 0;
+}
+
+function jogadorPodeEvoluirAgora(jogador) {
+    garantirCamposEvolucaoJogador(jogador);
+
+    const jogoAtual = save && save.progressao ? save.progressao.jogosTemporada || 0 : 0;
+
+    if (jogador.evolucaoTemporada >= obterLimiteEvolucaoTemporadaJogador(jogador)) {
+        return false;
+    }
+
+    if (jogoAtual - jogador.jogoUltimaEvolucaoTemporada < 5) {
+        return false;
+    }
+
+    return true;
+}
+
+function aplicarEnvelhecimentoTecnicoFimTemporada() {
+    obterElencoUsuario().forEach(function(jogador) {
+        if (jogadorEhPromessa(jogador) && jogador.idade >= 23) {
+            jogador.funcao = obterFuncaoNaturalPorPosicao(jogador.p);
+        }
+
+        if (jogador.idade >= 34 && jogador.idade <= 37) {
+            jogador.f = limitar(jogador.f - 1, 1, 99);
+        }
+
+        if (jogador.idade >= 38 && jogador.idade <= 40) {
+            jogador.f = limitar(jogador.f - 3, 1, 99);
+        }
+
+        if (typeof atualizarValorESalarioJogador === "function") {
+            atualizarValorESalarioJogador(jogador);
+        }
+    });
 }
 
 function obterIdsJogadoresQueParticiparamDaPartida() {
@@ -19652,19 +19747,14 @@ function aplicarGanhoOverallControlado(jogador, ganho) {
     garantirCamposEvolucaoJogador(jogador);
 
     if (ganho <= 0) return 0;
+    if (!jogadorPodeEvoluirAgora(jogador)) return 0;
 
-    let ganhoPermitido = ganho;
+    const limiteTemporada = obterLimiteEvolucaoTemporadaJogador(jogador);
+    const restanteTemporada = limiteTemporada - jogador.evolucaoTemporada;
 
-    if (jogadorEhPromessa(jogador)) {
-        const restantePromessa = 4 - jogador.evolucaoTemporada;
+    if (restanteTemporada <= 0) return 0;
 
-        if (restantePromessa <= 0) {
-            return 0;
-        }
-
-        ganhoPermitido = Math.min(ganhoPermitido, restantePromessa);
-    }
-
+    const ganhoPermitido = Math.min(ganho, restanteTemporada);
     const overallAntes = jogador.f;
 
     jogador.f = limitar(jogador.f + ganhoPermitido, 1, 99);
@@ -19673,6 +19763,9 @@ function aplicarGanhoOverallControlado(jogador, ganho) {
 
     if (ganhoReal > 0) {
         jogador.evolucaoTemporada += ganhoReal;
+        jogador.jogoUltimaEvolucaoTemporada = save && save.progressao
+            ? save.progressao.jogosTemporada || 0
+            : 0;
 
         if (typeof atualizarValorESalarioJogador === "function") {
             atualizarValorESalarioJogador(jogador);
@@ -19683,52 +19776,7 @@ function aplicarGanhoOverallControlado(jogador, ganho) {
 }
 
 function evoluirJogadores25a29PorPartidas() {
-    const evolucoes = [];
-
-    obterElencoUsuario().forEach(function(jogador) {
-        garantirCamposEvolucaoJogador(jogador);
-
-        if (jogador.idade < 25 || jogador.idade > 29) return;
-        if (jogador.evolucao25a29Temporada >= 2) return;
-        if (jogador.partidasJogadasTemporada < 10) return;
-
-        let podeEvoluir = false;
-
-        if (jogador.evolucao25a29Temporada === 0) {
-            podeEvoluir = true;
-        } else if (
-            jogador.evolucao25a29Temporada === 1 &&
-            jogador.partidasJogadasTemporada - jogador.partidasNoPrimeiroPonto25a29 >= 3
-        ) {
-            podeEvoluir = true;
-        }
-
-        if (!podeEvoluir) return;
-
-        const overallAntes = jogador.f;
-        const ganhoReal = aplicarGanhoOverallControlado(jogador, 1);
-
-        if (ganhoReal <= 0) return;
-
-        jogador.evolucao25a29Temporada++;
-
-        if (jogador.evolucao25a29Temporada === 1) {
-            jogador.partidasNoPrimeiroPonto25a29 = jogador.partidasJogadasTemporada;
-        }
-
-        evolucoes.push({
-            motivo: jogador.evolucao25a29Temporada === 1
-                ? "10 partidas na temporada"
-                : "3 partidas após evolução anterior",
-            jogador: jogador.nome,
-            nome: jogador.nome,
-            antes: overallAntes,
-            depois: jogador.f,
-            ganho: ganhoReal
-        });
-    });
-
-    return evolucoes;
+    return [];
 }
 
 function processarProgressaoJogadores(jogo) {
@@ -23708,6 +23756,11 @@ function resetarDadosJogadoresNovaTemporada() {
         jogador.evolucaoTemporada = 0;
         jogador.evolucao25a29Temporada = 0;
         jogador.partidasNoPrimeiroPonto25a29 = 0;
+        jogador.jogoUltimaEvolucaoTemporada = -999;
+
+        if (jogadorEhPromessa(jogador) && jogador.idade >= 23) {
+            jogador.funcao = obterFuncaoNaturalPorPosicao(jogador.p);
+        }
 
         if (typeof atualizarValorESalarioJogador === "function") {
             atualizarValorESalarioJogador(jogador);
@@ -23857,6 +23910,7 @@ function iniciarNovaTemporada() {
     if (typeof envelhecerTodosJogadores === "function") {
         aposentados = envelhecerTodosJogadores() || [];
     }
+	aplicarEnvelhecimentoTecnicoFimTemporada();
 
     save.temporadaNumero = (save.temporadaNumero || 1) + 1;
 
