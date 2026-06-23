@@ -22872,10 +22872,22 @@ function jogadorEhPromessaParaTweet(jogador) {
 function obterPromessaParaTweetCifut() {
     if (typeof obterTodosJogadoresMercado !== "function") return null;
 
-    const orcamento = Number(save.orcamentoTransferencias || 0);
+    const orcamento = Number(save.orcamentoTransferencias || save.dinheiro || 0);
     const ligaUsuario = save.liga || "";
 
-    const candidatos = obterTodosJogadoresMercado().filter(function(jogador) {
+    let nomesJaIndicados = [];
+
+    if (Array.isArray(save.noticias)) {
+        nomesJaIndicados = save.noticias
+            .filter(function(noticia) {
+                return noticia && noticia.perfil === "cifut" && noticia.jogadorIndicado;
+            })
+            .map(function(noticia) {
+                return noticia.jogadorIndicado;
+            });
+    }
+
+    let candidatos = obterTodosJogadoresMercado().filter(function(jogador) {
         if (!jogador) return false;
         if (jogador.clube === save.clube) return false;
 
@@ -22891,16 +22903,27 @@ function obterPromessaParaTweetCifut() {
 
     if (candidatos.length === 0) return null;
 
-    candidatos.sort(function(a, b) {
-        const valorA = obterValorJogadorParaTweet(a);
-        const valorB = obterValorJogadorParaTweet(b);
-
-        if (valorA !== valorB) return valorA - valorB;
-
-        return Number(a.idade || 99) - Number(b.idade || 99);
+    const candidatosNaoRepetidos = candidatos.filter(function(jogador) {
+        return nomesJaIndicados.indexOf(jogador.nome) === -1;
     });
 
-    return candidatos[0];
+    if (candidatosNaoRepetidos.length > 0) {
+        candidatos = candidatosNaoRepetidos;
+    }
+
+    candidatos.sort(function(a, b) {
+        const overallA = Number(a.f || a.overall || 0);
+        const overallB = Number(b.f || b.overall || 0);
+
+        if (overallA !== overallB) return overallB - overallA;
+
+        return Math.random() - 0.5;
+    });
+
+    const limite = Math.min(candidatos.length, 8);
+    const melhoresOpcoes = candidatos.slice(0, limite);
+
+    return escolherAleatorioSeguro(melhoresOpcoes);
 }
 
 function registrarTweetCifutSePossivel(chaveBase) {
@@ -22918,7 +22941,11 @@ function registrarTweetCifutSePossivel(chaveBase) {
     return adicionarTweetNoticia(
         "cifut",
         escolherAleatorioSeguro(textos),
-        chaveBase + "-cifut-" + (jogador.mercadoId || jogador.nome)
+        chaveBase + "-cifut-" + Date.now() + "-" + Math.random(),
+        {
+            perfil: "cifut",
+            jogadorIndicado: jogador.nome
+        }
     );
 }
 
