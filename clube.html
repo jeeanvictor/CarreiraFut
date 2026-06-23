@@ -13986,15 +13986,15 @@ function atualizarCopaBrasil(evento, jogo) {
     } else if (fase.golsClube < fase.golsAdv) {
         passou = false;
     } else {
-        const penaltis = sortearDisputaPenaltisCopaBrasil(save.clube, adversario);
+const penaltis = simularDisputaPenaltisMataMata(adversario);
 
-        passou = penaltis.passou;
+passou = penaltis.passou;
 
-        fase.decididoNosPenaltis = true;
-        fase.penaltisClube = penaltis.golsClube;
-        fase.penaltisAdv = penaltis.golsAdv;
+fase.decididoNosPenaltis = true;
+fase.penaltisClube = penaltis.golsClube;
+fase.penaltisAdv = penaltis.golsAdv;
 
-        aplicarPenaltisNoJogoCopaBrasil(jogo, penaltis);
+aplicarPenaltisNoJogoCopaBrasil(jogo, penaltis);
     }
 
     fase.concluida = true;
@@ -19028,6 +19028,181 @@ function verificarFimFaseInicialContinental(evento) {
     stats.faseAtual = "Fase de liga";
 }
 
+function obterJogadoresEmCampoParaPenaltisUsuario() {
+    const ladoUsuario = obterLadoUsuarioPartida();
+
+    return partida.titularesUsuario.filter(function(jogador) {
+        return !jogadorEstaExpulsoNaPartida(ladoUsuario, jogador);
+    });
+}
+
+function obterJogadoresEmCampoParaPenaltisAdversario() {
+    const ladoAdv = obterLadoAdversarioPartida();
+
+    return partida.titularesAdv.filter(function(jogador) {
+        return !jogadorEstaExpulsoNaPartida(ladoAdv, jogador);
+    });
+}
+
+function ordenarBatedoresAutomaticosPenaltis(jogadores) {
+    const linha = jogadores.filter(function(jogador) {
+        return jogador.p !== "G";
+    });
+
+    const goleiros = jogadores.filter(function(jogador) {
+        return jogador.p === "G";
+    });
+
+    linha.sort(function() {
+        return Math.random() - 0.5;
+    });
+
+    return linha.concat(goleiros);
+}
+
+function escolherCincoBatedoresUsuarioPenaltis() {
+    const jogadores = obterJogadoresEmCampoParaPenaltisUsuario();
+
+    const opcoes = jogadores.map(function(jogador, index) {
+        return (index + 1) + " - " + jogador.nome + " (" + jogador.p + " · OVR " + jogador.f + ")";
+    }).join("\n");
+
+    let escolha = prompt(
+        "Disputa de pênaltis!\n\nEscolha os 5 primeiros batedores digitando os números separados por vírgula:\n\n" + opcoes
+    );
+
+    if (!escolha) {
+        return ordenarBatedoresAutomaticosPenaltis(jogadores);
+    }
+
+    let indices = escolha
+        .split(",")
+        .map(function(item) {
+            return Number(item.trim()) - 1;
+        })
+        .filter(function(indice, pos, array) {
+            return indice >= 0 && indice < jogadores.length && array.indexOf(indice) === pos;
+        });
+
+    if (indices.length < 5) {
+        return ordenarBatedoresAutomaticosPenaltis(jogadores);
+    }
+
+    const cinco = indices.slice(0, 5).map(function(indice) {
+        return jogadores[indice];
+    });
+
+    const restantes = jogadores.filter(function(jogador) {
+        return !cinco.some(function(escolhido) {
+            return escolhido.id === jogador.id;
+        });
+    });
+
+    return cinco.concat(ordenarBatedoresAutomaticosPenaltis(restantes));
+}
+
+function calcularChanceConverterPenaltiMataMata(jogador) {
+    let chance = 0.74;
+
+    if (jogador.p === "A") chance += 0.05;
+    if (jogador.p === "M") chance += 0.03;
+    if (jogador.p === "Z" || jogador.p === "L") chance -= 0.03;
+    if (jogador.p === "G") chance -= 0.18;
+
+    chance += (Number(jogador.f || 70) - 75) * 0.004;
+
+    return limitar(chance, 0.48, 0.91);
+}
+
+function cobrarPenaltiMataMata(jogador) {
+    return Math.random() < calcularChanceConverterPenaltiMataMata(jogador);
+}
+
+function simularDisputaPenaltisMataMata(adversario) {
+    const batedoresUsuario = escolherCincoBatedoresUsuarioPenaltis();
+    const batedoresAdv = ordenarBatedoresAutomaticosPenaltis(obterJogadoresEmCampoParaPenaltisAdversario());
+
+    let golsClube = 0;
+    let golsAdv = 0;
+    let historico = [];
+
+    for (let i = 0; i < 5; i++) {
+        const jogadorUsuario = batedoresUsuario[i % batedoresUsuario.length];
+        const converteuUsuario = cobrarPenaltiMataMata(jogadorUsuario);
+
+        if (converteuUsuario) golsClube++;
+
+        historico.push({
+            time: save.clube,
+            jogador: jogadorUsuario.nome,
+            gol: converteuUsuario
+        });
+
+        if (golsClube > golsAdv + (5 - (i + 1))) break;
+
+        const jogadorAdv = batedoresAdv[i % batedoresAdv.length];
+        const converteuAdv = cobrarPenaltiMataMata(jogadorAdv);
+
+        if (converteuAdv) golsAdv++;
+
+        historico.push({
+            time: adversario,
+            jogador: jogadorAdv.nome,
+            gol: converteuAdv
+        });
+
+        if (golsAdv > golsClube + (5 - (i + 1))) break;
+    }
+
+    let rodada = 5;
+
+    while (golsClube === golsAdv && rodada < 30) {
+        const jogadorUsuario = batedoresUsuario[rodada % batedoresUsuario.length];
+        const jogadorAdv = batedoresAdv[rodada % batedoresAdv.length];
+
+        const converteuUsuario = cobrarPenaltiMataMata(jogadorUsuario);
+        const converteuAdv = cobrarPenaltiMataMata(jogadorAdv);
+
+        if (converteuUsuario) golsClube++;
+        if (converteuAdv) golsAdv++;
+
+        historico.push({
+            time: save.clube,
+            jogador: jogadorUsuario.nome,
+            gol: converteuUsuario
+        });
+
+        historico.push({
+            time: adversario,
+            jogador: jogadorAdv.nome,
+            gol: converteuAdv
+        });
+
+        rodada++;
+    }
+
+    return {
+        passou: golsClube > golsAdv,
+        golsClube: golsClube,
+        golsAdv: golsAdv,
+        historico: historico
+    };
+}
+
+function aplicarPenaltisNoJogoMataMata(jogo, resultadoPenaltis) {
+    if (!jogo || !resultadoPenaltis) return;
+
+    jogo.decididoNosPenaltis = true;
+
+    if (jogo.casa === save.clube) {
+        jogo.penaltisCasa = resultadoPenaltis.golsClube;
+        jogo.penaltisFora = resultadoPenaltis.golsAdv;
+    } else {
+        jogo.penaltisCasa = resultadoPenaltis.golsAdv;
+        jogo.penaltisFora = resultadoPenaltis.golsClube;
+    }
+}
+
 function verificarFimMataMataContinental(evento) {
     const eventosFase = obterEventosMataMataContinentalDaFase(evento.fase);
 
@@ -19070,12 +19245,15 @@ function verificarFimMataMataContinental(evento) {
     let passou = false;
     let decididoNosPenaltis = false;
 
-    if (golsClube > golsAdv) {
-        passou = true;
-    } else if (golsClube === golsAdv) {
-        passou = Math.random() >= 0.5;
-        decididoNosPenaltis = true;
-    }
+} else if (golsClube === golsAdv) {
+    const jogoDecisivo = obterJogoDoClube(evento);
+    const penaltis = simularDisputaPenaltisMataMata(adversario);
+
+    passou = penaltis.passou;
+    decididoNosPenaltis = true;
+
+    aplicarPenaltisNoJogoMataMata(jogoDecisivo, penaltis);
+}
 
     const stats = save.continentalStats;
 
