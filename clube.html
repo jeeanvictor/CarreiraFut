@@ -24179,6 +24179,21 @@ function aplicarEvolucaoElencosOutrosClubesFimTemporada() {
     });
 }
 
+function resetarContratosComerciaisNovaTemporada() {
+    if (!save) return;
+
+    garantirDadosPatrocinio();
+
+    save.patrocinio.masterAtual = null;
+    save.patrocinio.materialEsportivoAtual = null;
+
+    save.patrocinio.ofertaPendente = null;
+    save.patrocinio.ofertaPendenteMaterialEsportivo = null;
+
+    save.patrocinio.temporadaUltimaOfertaMaster = 0;
+    save.patrocinio.temporadaUltimaOfertaMaterialEsportivo = 0;
+}
+	
 function iniciarNovaTemporada() {
     if (typeof temporadaEncerrada === "function" && !temporadaEncerrada()) {
         alert("A temporada ainda não terminou.");
@@ -24236,7 +24251,7 @@ if (typeof aplicarEvolucaoElencosOutrosClubesFimTemporada === "function") {
 }
 
     save.temporadaNumero = (save.temporadaNumero || 1) + 1;
-
+	resetarContratosComerciaisNovaTemporada();
     save.liga = liga;
     save.clube = clube;
     save.disputaContinental = disputaContinental;
