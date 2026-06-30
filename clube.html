@@ -14548,8 +14548,11 @@ function criarJogadorProfissionalDaBase(jogadorBase) {
         partidasJogadasTemporada: 0,
         evolucaoTemporada: 0,
         evolucao25a29Temporada: 0,
-        partidasNoPrimeiroPonto25a29: 0,
-        origemBaseId: jogadorBase.idBase
+partidasNoPrimeiroPonto25a29: 0,
+jogoUltimaEvolucaoTemporada: -999,
+origemBaseId: jogadorBase.idBase,
+veioDaBase: true,
+temporadaPrimeiroAnoProfissional: save.temporadaNumero || 1
     };
 
     if (typeof atualizarValorESalarioJogador === "function") {
@@ -19856,6 +19859,15 @@ function obterFuncaoNaturalPorPosicao(posicao) {
 }
 
 function obterLimiteEvolucaoTemporadaJogador(jogador) {
+    const temporadaAtual = save && save.temporadaNumero ? save.temporadaNumero : 1;
+
+    if (
+        jogador.veioDaBase === true &&
+        jogador.temporadaPrimeiroAnoProfissional === temporadaAtual
+    ) {
+        return 6;
+    }
+
     if (jogadorEhPromessa(jogador)) {
         return 3;
     }
@@ -21030,7 +21042,13 @@ ordemOriginal: 9000 + maiorId,
 perna: jogadorMercado.perna,
 jogosSemSubstituicao: 0,
 bonusTemporarioProximoJogo: 0,
-lesaoJogos: 0
+lesaoJogos: 0,
+partidasJogadasTemporada: 0,
+evolucaoTemporada: 0,
+evolucao25a29Temporada: 0,
+partidasNoPrimeiroPonto25a29: 0,
+jogoUltimaEvolucaoTemporada: -999,
+temporadaEntradaClube: save.temporadaNumero || 1
         
     };
 }
@@ -24079,6 +24097,88 @@ function pagarPremioLigaFimTemporada() {
 
     return valor;
 }
+
+function obterLimiteEvolucaoTemporadaJogadorGlobal(jogador, temporadaAtual) {
+    if (jogadorEhPromessa(jogador)) {
+        return 3;
+    }
+
+    if (jogador.idade >= 24 && jogador.idade <= 27) {
+        return jogador.f >= 78 ? 2 : 1;
+    }
+
+    if (jogador.idade >= 28 && jogador.idade <= 33) {
+        return 1;
+    }
+
+    return 0;
+}
+
+function calcularEvolucaoFimTemporadaJogadorGlobal(jogador) {
+    if (!jogador) return 0;
+
+    if (jogador.idade >= 34) {
+        return 0;
+    }
+
+    if (jogadorEhPromessa(jogador)) {
+        return Math.random() < 0.70 ? 2 : 1;
+    }
+
+    if (jogador.idade >= 24 && jogador.idade <= 27) {
+        if (jogador.f >= 78) {
+            return Math.random() < 0.55 ? 1 : 2;
+        }
+
+        return 1;
+    }
+
+    if (jogador.idade >= 28 && jogador.idade <= 33) {
+        return Math.random() < 0.35 ? 1 : 0;
+    }
+
+    return 0;
+}
+
+function aplicarEvolucaoFimTemporadaEmJogadorGlobal(jogador) {
+    if (!jogador) return;
+
+    garantirCamposEvolucaoJogador(jogador);
+
+    const limite = obterLimiteEvolucaoTemporadaJogadorGlobal(jogador, save.temporadaNumero || 1);
+    const ganho = Math.min(calcularEvolucaoFimTemporadaJogadorGlobal(jogador), limite);
+
+    if (ganho > 0) {
+        jogador.f = limitar(jogador.f + ganho, 1, 99);
+    }
+
+    if (jogadorEhPromessa(jogador) && jogador.idade >= 23) {
+        jogador.funcao = obterFuncaoNaturalPorPosicao(jogador.p);
+    }
+
+    if (typeof atualizarValorESalarioJogador === "function") {
+        atualizarValorESalarioJogador(jogador);
+    }
+}
+
+function aplicarEvolucaoElencosOutrosClubesFimTemporada() {
+    garantirDadosTransferencias();
+
+    Object.keys(ELENCOS_RAW).forEach(function(clube) {
+        clube = corrigirNomeClube(clube);
+
+        if (!clube || clube === save.clube) return;
+
+        const elenco = obterElencoMercadoDeClube(clube);
+
+        elenco.forEach(function(jogador) {
+            aplicarEvolucaoFimTemporadaEmJogadorGlobal(jogador);
+        });
+
+        save.elencosClubes[clube] = elenco;
+    });
+}
+
 function iniciarNovaTemporada() {
     if (typeof temporadaEncerrada === "function" && !temporadaEncerrada()) {
         alert("A temporada ainda não terminou.");
@@ -24125,10 +24225,15 @@ function iniciarNovaTemporada() {
 
     let aposentados = [];
 
-    if (typeof envelhecerTodosJogadores === "function") {
-        aposentados = envelhecerTodosJogadores() || [];
-    }
-	aplicarEnvelhecimentoTecnicoFimTemporada();
+if (typeof envelhecerTodosJogadores === "function") {
+    aposentados = envelhecerTodosJogadores() || [];
+}
+
+aplicarEnvelhecimentoTecnicoFimTemporada();
+
+if (typeof aplicarEvolucaoElencosOutrosClubesFimTemporada === "function") {
+    aplicarEvolucaoElencosOutrosClubesFimTemporada();
+}
 
     save.temporadaNumero = (save.temporadaNumero || 1) + 1;
 
